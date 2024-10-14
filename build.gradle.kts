@@ -7,7 +7,7 @@ plugins {
 }
 
 group = "io.github.T2PeNBiX99wcoxKv3A4g.ton-sign"
-version = "1.0-SNAPSHOT"
+version = "0.0.1"
 
 repositories {
     mavenCentral()
