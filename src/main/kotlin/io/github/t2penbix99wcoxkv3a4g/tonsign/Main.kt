@@ -78,8 +78,8 @@ fun textBox(text: String = "Item") {
 
 fun main() = application {
     Utils.logger.info { "Test ${Utils.logDirectory}" }
-    
-    LogReader.Default.monitorRoundType()
+
+//    LogReader.Default.monitorRoundType()
 
     Window(onCloseRequest = ::exitApplication, title = Utils.TITLE) {
         app()
