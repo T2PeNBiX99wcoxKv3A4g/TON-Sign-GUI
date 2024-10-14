@@ -1,3 +1,5 @@
+package io.github.t2penbix99wcoxkv3a4g.tonsign
+
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -39,14 +41,14 @@ fun app() {
             ) {
                 Button(
                     onClick = {
-                        OSCSender.VRChat.send(true)
+                        OSCSender.Companion.VRChat.send(true)
                     }
                 ) {
                     Text("Force send true")
                 }
                 Button(
                     onClick = {
-                        OSCSender.VRChat.send(false)
+                        OSCSender.Companion.VRChat.send(false)
                     }
                 ) {
                     Text("Force send false")

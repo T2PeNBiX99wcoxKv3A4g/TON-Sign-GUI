@@ -1,3 +1,5 @@
+package io.github.t2penbix99wcoxkv3a4g.tonsign
+
 import io.github.oshai.kotlinlogging.KotlinLogging
 import java.nio.file.Path
 import kotlin.io.path.Path
