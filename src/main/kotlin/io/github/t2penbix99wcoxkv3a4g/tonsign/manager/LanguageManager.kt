@@ -8,7 +8,7 @@ import io.github.t2penbix99wcoxkv3a4g.tonsign.Utils
 import kotlin.io.path.Path
 
 object LanguageManager {
-    private const val DIR = "Language"
+    private const val DIR = "language"
     private val dataBase = mutableMapOf<String, YamlMap>()
 
     init {
