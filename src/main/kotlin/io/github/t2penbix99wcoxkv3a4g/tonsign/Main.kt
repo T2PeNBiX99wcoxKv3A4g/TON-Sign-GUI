@@ -24,6 +24,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
+
+val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
 @Composable
 @Preview
@@ -57,7 +63,7 @@ fun app() {
                     Modifier.fillMaxSize()
                         .padding(end = 12.dp, bottom = 12.dp)
                 ) {
-                    textBox("Test")
+                    textBox(text)
                 }
             }
         }
@@ -77,9 +83,13 @@ fun textBox(text: String = "Item") {
     }
 }
 
+val reader = LogReader.Default
+
 
 fun main() = application {
-    Utils.logger.info { "Test ${Utils.logDirectory}" }
+    scope.launch {
+        reader.monitorRoundType()
+    }
 
     Window(onCloseRequest = ::exitApplication, title = Utils.TITLE) {
         app()
