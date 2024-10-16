@@ -74,11 +74,9 @@ object ConfigManage {
 
     private fun renameFile() {
         val fileBakFile = fileBakPath.toFile()
-        val current = LocalDateTime.now()
-        val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd-HH-mm-ss-SSS")
 
         if (fileBakFile.exists())
-            fileBakFile.renameTo(Path(Utils.currentWorkingDirectory, "$fileName.${current.format(formatter)}").toFile())
+            fileBakFile.renameTo(Path(Utils.currentWorkingDirectory, "$fileName.${Utils.timeNowForFile}").toFile())
 
         file.renameTo(fileBakFile)
     }
