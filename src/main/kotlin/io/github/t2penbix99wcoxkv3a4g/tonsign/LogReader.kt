@@ -65,8 +65,7 @@ class LogReader(val logFile: File) {
             return if (last[0] == GuessRoundType.Classic && last[1] == GuessRoundType.Classic) GuessRoundType.Special else GuessRoundType.Classic
         }
     }
-
-    // TODO: get_recent_rounds_log
+    
     fun getRecentRoundsLog(): String {
         return roundLog.joinToString {
             when (it) {
