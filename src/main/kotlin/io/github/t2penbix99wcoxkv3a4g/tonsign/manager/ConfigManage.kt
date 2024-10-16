@@ -3,6 +3,7 @@ package io.github.t2penbix99wcoxkv3a4g.tonsign.manager
 import com.charleskorn.kaml.MissingRequiredPropertyException
 import com.charleskorn.kaml.UnknownPropertyException
 import com.charleskorn.kaml.Yaml
+import io.github.t2penbix99wcoxkv3a4g.tonsign.Logger
 import io.github.t2penbix99wcoxkv3a4g.tonsign.Utils
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -11,11 +12,15 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.serialization.decodeFromString
 import java.io.File
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import kotlin.io.path.Path
 
 object ConfigManage {
     private const val fileName = "config.yml"
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+    private val filePath = Path(Utils.currentWorkingDirectory, fileName)
+    private val fileBakPath = Path(Utils.currentWorkingDirectory, "$fileName.bak")
 
     val Default = Config("en", 7, 30f)
 
@@ -31,7 +36,7 @@ object ConfigManage {
     val file: File
         get() {
             if (_file == null)
-                _file = Path(Utils.currentWorkingDirectory, fileName).toFile()
+                _file = filePath.toFile()
             return _file!!
         }
 
@@ -53,7 +58,8 @@ object ConfigManage {
             when (it) {
                 is UnknownPropertyException,
                 is MissingRequiredPropertyException -> {
-                    Utils.logger.error(it) { "Config Load Error: ${it.message}" }
+                    Logger.error(it, "Config Load Error: ${it.message}")
+                    renameFile()
                     return@getOrElse Default
                 }
 
@@ -64,6 +70,17 @@ object ConfigManage {
 
     fun save() {
         file.writeText(Yaml.default.encodeToString(Config.serializer(), config))
+    }
+
+    private fun renameFile() {
+        val fileBakFile = fileBakPath.toFile()
+        val current = LocalDateTime.now()
+        val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd-HH-mm-ss-SSS")
+
+        if (fileBakFile.exists())
+            fileBakFile.renameTo(Path(Utils.currentWorkingDirectory, "$fileName.${current.format(formatter)}").toFile())
+
+        file.renameTo(fileBakFile)
     }
 
     private suspend fun autoSave() {
