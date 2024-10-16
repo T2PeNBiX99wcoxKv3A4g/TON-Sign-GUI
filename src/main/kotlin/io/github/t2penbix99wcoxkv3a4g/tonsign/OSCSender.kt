@@ -17,6 +17,6 @@ object OSCSender {
     fun <T> send(addres: String, input: T) {
         val message = OSCMessage(addres, mutableListOf(input))
         oscClient.send(message)
-        Utils.logger.debug { "$addres $input" }
+        Logger.debug("${OSCSender::class.simpleName} $addres $input")
     }
 }
