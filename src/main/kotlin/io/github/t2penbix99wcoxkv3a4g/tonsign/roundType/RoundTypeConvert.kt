@@ -1,5 +1,6 @@
 package io.github.t2penbix99wcoxkv3a4g.tonsign.roundType
 
+import io.github.t2penbix99wcoxkv3a4g.tonsign.exception.UnknownRoundTypeException
 import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.LanguageManager
 
 object RoundTypeConvert {
@@ -96,7 +97,7 @@ object RoundTypeConvert {
         }
     }
 
-    fun getTextOfRound(round: RoundType, logRound: String): String {
+    fun getTextOfRound(round: RoundType): String {
         when (round) {
             RoundType.Classic -> return LanguageManager.get("log.round_classic")
             RoundType.Fog -> return LanguageManager.get("log.round_fog")
@@ -116,7 +117,7 @@ object RoundTypeConvert {
             RoundType.Unbound -> return LanguageManager.get("log.round_unbound")
             RoundType.DoubleTrouble -> return LanguageManager.get("log.round_double_trouble")
             RoundType.Ghost -> return LanguageManager.get("log.round_ghost")
-            else -> return "Unknown Type ($logRound)"
+            else -> throw UnknownRoundTypeException()
         }
     }
 

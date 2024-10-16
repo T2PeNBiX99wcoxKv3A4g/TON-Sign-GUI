@@ -1,5 +1,6 @@
 package io.github.t2penbix99wcoxkv3a4g.tonsign
 
+import io.github.t2penbix99wcoxkv3a4g.tonsign.exception.UnknownRoundTypeException
 import io.github.t2penbix99wcoxkv3a4g.tonsign.exception.WrongRecentRoundException
 import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.ConfigManage
 import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.LanguageManager
@@ -128,7 +129,16 @@ class LogReader(val logFile: File) {
                     updateRoundLog(roundType)
                     Logger.info(
                         "log.new_round_started",
-                        RoundTypeConvert.getTextOfRound(roundType, possibleRoundTypeForPrint)
+                        runCatching { RoundTypeConvert.getTextOfRound(roundType) }.getOrElse {
+                            when (it) {
+                                is UnknownRoundTypeException -> {
+                                    Logger.error(it, "Unknown Round Type ($possibleRoundTypeForPrint)")
+                                    return@getOrElse "Unknown Type ($possibleRoundTypeForPrint)"
+                                }
+
+                                else -> throw it
+                            }
+                        }
                     )
 
                     val classic = LanguageManager.get("log.predict_next_round_classic")
