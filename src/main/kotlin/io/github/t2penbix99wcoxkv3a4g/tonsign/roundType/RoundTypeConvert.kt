@@ -1,5 +1,7 @@
 package io.github.t2penbix99wcoxkv3a4g.tonsign.roundType
 
+import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.LanguageManager
+
 object RoundTypeConvert {
     val ENRoundTypes: List<String> = listOf(
         "Classic",
@@ -96,24 +98,24 @@ object RoundTypeConvert {
 
     fun getTextOfRound(round: RoundType, logRound: String): String {
         when (round) {
-            RoundType.Classic -> return "Classic"
-            RoundType.Fog -> return "Fog"
-            RoundType.Punished -> return "Punished"
-            RoundType.Sabotage -> return "Sabotage"
-            RoundType.Cracked -> return "Cracked"
-            RoundType.Alternate -> return "Alternate"
-            RoundType.Bloodbath -> return "Bloodbath"
-            RoundType.Midnight -> return "Midnight"
-            RoundType.MysticMoon -> return "Mystic Moon"
-            RoundType.Twilight -> return "Twilight"
-            RoundType.Solstice -> return "Solstice"
-            RoundType.EightPages -> return "8 Pages"
-            RoundType.BloodMoon -> return "Blood Moon"
-            RoundType.RUN -> return "RUN"
-            RoundType.ColdNight -> return "Cold Night"
-            RoundType.Unbound -> return "Unbound"
-            RoundType.DoubleTrouble -> return "Double Trouble"
-            RoundType.Ghost -> return "Ghost"
+            RoundType.Classic -> return LanguageManager.get("log.round_classic")
+            RoundType.Fog -> return LanguageManager.get("log.round_fog")
+            RoundType.Punished -> return LanguageManager.get("log.round_punished")
+            RoundType.Sabotage -> return LanguageManager.get("log.round_sabotage")
+            RoundType.Cracked -> return LanguageManager.get("log.round_cracked")
+            RoundType.Alternate -> return LanguageManager.get("log.round_alternate")
+            RoundType.Bloodbath -> return LanguageManager.get("log.round_bloodbath")
+            RoundType.Midnight -> return LanguageManager.get("log.round_midnight")
+            RoundType.MysticMoon -> return LanguageManager.get("log.round_mystic_moon")
+            RoundType.Twilight -> return LanguageManager.get("log.round_twilight")
+            RoundType.Solstice -> return LanguageManager.get("log.round_solstice")
+            RoundType.EightPages -> return LanguageManager.get("log.round_8_pages")
+            RoundType.BloodMoon -> return LanguageManager.get("log.round_blood_moon")
+            RoundType.RUN -> return LanguageManager.get("log.round_run")
+            RoundType.ColdNight -> return LanguageManager.get("log.round_cold_night")
+            RoundType.Unbound -> return LanguageManager.get("log.round_unbound")
+            RoundType.DoubleTrouble -> return LanguageManager.get("log.round_double_trouble")
+            RoundType.Ghost -> return LanguageManager.get("log.round_ghost")
             else -> return "Unknown Type ($logRound)"
         }
     }
