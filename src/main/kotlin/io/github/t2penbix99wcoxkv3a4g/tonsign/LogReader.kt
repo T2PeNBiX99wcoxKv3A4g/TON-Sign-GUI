@@ -18,14 +18,14 @@ class LogReader(val logFile: File) {
             get() = LogReader(findLatestLog())
 
         fun findLatestLog(): File {
-            val test = Utils.logDirectory.toFile().listFiles { file, filename ->
+            val files = Utils.logDirectory.toFile().listFiles { file, filename ->
                 return@listFiles filename.endsWith(".txt")
             }
 
-            if (test.size < 1)
+            if (files.size < 1)
                 throw FileNotFoundException(LanguageManager.get("exception.no_log_file"))
 
-            test.sortWith { f1, f2 ->
+            files.sortWith { f1, f2 ->
                 val compare = f1.lastModified() > f2.lastModified()
                 if (compare)
                     return@sortWith -1
@@ -34,7 +34,8 @@ class LogReader(val logFile: File) {
                 return@sortWith 0
             }
 
-            return test.first()
+            Logger.info("log.current_log_running", files.first().name)
+            return files.first()
         }
     }
 
@@ -65,7 +66,7 @@ class LogReader(val logFile: File) {
             return if (last[0] == GuessRoundType.Classic && last[1] == GuessRoundType.Classic) GuessRoundType.Special else GuessRoundType.Classic
         }
     }
-    
+
     fun getRecentRoundsLog(): String {
         return roundLog.joinToString {
             when (it) {
@@ -76,7 +77,7 @@ class LogReader(val logFile: File) {
         }
     }
 
-    fun updateRoundLog(round: RoundType) {
+    private fun updateRoundLog(round: RoundType) {
         var classification = RoundTypeConvert.classifyRound(round)
 
         if (classification == GuessRoundType.Exempt && roundLog.size >= 2) {
@@ -95,7 +96,7 @@ class LogReader(val logFile: File) {
             roundLog.removeAt(0)
     }
 
-    fun readLine(line: String) {
+    private fun readLine(line: String) {
         // TERROR NIGHTS STRING
         if ("BONUS ACTIVE!" in line) {
             bonusFlag = true
@@ -154,6 +155,24 @@ class LogReader(val logFile: File) {
         }
     }
 
+    fun read() {
+        val raf = RandomAccessFile(logFile, "r")
+        val length = raf.length()
+        raf.seek(lastPosition)
+        var charPosition = raf.filePointer
+
+        while (charPosition < length) {
+            val line = raf.readLine()
+            readLine(line)
+            charPosition = raf.filePointer
+
+            if (roundLog.size >= 6 && bonusFlag)
+                bonusFlag = false
+        }
+
+        lastPosition = charPosition
+    }
+
     suspend fun monitorRoundType() {
         while (true) {
             if (!VRChatWatcher.isVRChatRunning()) {
@@ -161,21 +180,7 @@ class LogReader(val logFile: File) {
                 break
             }
 
-            val raf = RandomAccessFile(logFile, "r")
-            val length = raf.length()
-            raf.seek(lastPosition)
-            var charPosition = raf.filePointer
-
-            while (charPosition < length) {
-                val line = raf.readLine()
-                readLine(line)
-                charPosition = raf.filePointer
-
-                if (roundLog.size >= 6 && bonusFlag)
-                    bonusFlag = false
-            }
-
-            lastPosition = charPosition
+            read()
             delay(2000)
         }
     }
