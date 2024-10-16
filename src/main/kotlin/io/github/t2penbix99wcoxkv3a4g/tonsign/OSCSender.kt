@@ -4,21 +4,11 @@ import com.illposed.osc.OSCMessage
 import com.illposed.osc.transport.OSCPortOut
 import java.net.InetSocketAddress
 
-class OSCSender(ip: String, port: Int) {
-    companion object {
-        private const val PORT = 9000
-        private const val IP = "127.0.0.1"
-        private var _instance: OSCSender? = null
+object OSCSender {
+    private const val PORT = 9000
+    private const val IP = "127.0.0.1"
 
-        val VRChat: OSCSender
-            get() {
-                if (_instance == null)
-                    _instance = OSCSender(IP, PORT)
-                return _instance!!
-            }
-    }
-
-    val oscClient = OSCPortOut(InetSocketAddress(ip, port))
+    val oscClient = OSCPortOut(InetSocketAddress(IP, PORT))
 
     fun send(bool: Boolean) {
         send("/avatar/parameters/TON_Sign", bool)

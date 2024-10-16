@@ -41,14 +41,14 @@ fun app() {
             ) {
                 Button(
                     onClick = {
-                        OSCSender.Companion.VRChat.send(true)
+                        OSCSender.send(true)
                     }
                 ) {
                     Text("Force send true")
                 }
                 Button(
                     onClick = {
-                        OSCSender.Companion.VRChat.send(false)
+                        OSCSender.send(false)
                     }
                 ) {
                     Text("Force send false")
@@ -80,8 +80,6 @@ fun textBox(text: String = "Item") {
 
 fun main() = application {
     Utils.logger.info { "Test ${Utils.logDirectory}" }
-
-//    LogReader.Default.monitorRoundType()
 
     Window(onCloseRequest = ::exitApplication, title = Utils.TITLE) {
         app()

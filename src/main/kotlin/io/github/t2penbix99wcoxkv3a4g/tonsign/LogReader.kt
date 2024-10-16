@@ -1,32 +1,29 @@
 package io.github.t2penbix99wcoxkv3a4g.tonsign
 
+import io.github.t2penbix99wcoxkv3a4g.tonsign.exception.WrongRecentRoundException
+import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.ConfigManage
+import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.LanguageManager
 import io.github.t2penbix99wcoxkv3a4g.tonsign.roundType.GuessRoundType
 import io.github.t2penbix99wcoxkv3a4g.tonsign.roundType.RoundType
 import io.github.t2penbix99wcoxkv3a4g.tonsign.roundType.RoundTypeConvert
+import io.github.t2penbix99wcoxkv3a4g.tonsign.watcher.VRChatWatcher
+import kotlinx.coroutines.delay
 import java.io.File
-import kotlin.io.path.pathString
+import java.io.FileNotFoundException
+import java.io.RandomAccessFile
 
-class LogReader(logFile: File) {
+class LogReader(val logFile: File) {
     companion object {
-        private var _instance: LogReader? = null
-
         val Default: LogReader
-            get() {
-                if (_instance == null)
-                    _instance = LogReader(findLatestLog())
-                return _instance!!
-            }
+            get() = LogReader(findLatestLog())
 
         fun findLatestLog(): File {
-            val test = File(Utils.logDirectory.pathString).listFiles { file, filename ->
+            val test = Utils.logDirectory.toFile().listFiles { file, filename ->
                 return@listFiles filename.endsWith(".txt")
             }
 
-            if (test.size < 1) {
-                // TODO: file not find
-//                lm.error("log.no_log_file")
-                throw Exception()
-            }
+            if (test.size < 1)
+                throw FileNotFoundException(LanguageManager.get("exception.no_log_file"))
 
             test.sortWith { f1, f2 ->
                 val compare = f1.lastModified() > f2.lastModified()
@@ -37,13 +34,12 @@ class LogReader(logFile: File) {
                 return@sortWith 0
             }
 
-            Utils.logger.info { "Latest File: ${test.first()}" }
             return test.first()
         }
     }
 
     val roundLog = mutableListOf<GuessRoundType>()
-    var lastPosition = 0
+    var lastPosition = 0L
     var lastPrediction = false
     var bonusFlag = false
 
@@ -58,7 +54,7 @@ class LogReader(logFile: File) {
         val last = roundLog.takeLast(2)
 
         if (last[0] == GuessRoundType.Special && last[0] == GuessRoundType.Special) {
-//            lm.info("log.host_left_before") TODO: log info
+            Logger.info("log.host_left_before")
             roundLog.removeLast()
         }
 
@@ -70,8 +66,15 @@ class LogReader(logFile: File) {
         }
     }
 
-    fun getRecentRoundsLog() {
-        
+    // TODO: get_recent_rounds_log
+    fun getRecentRoundsLog(): String {
+        return roundLog.joinToString {
+            when (it) {
+                GuessRoundType.Classic -> return@joinToString LanguageManager.get("log.recent_rounds_log_classic")
+                GuessRoundType.Special -> return@joinToString LanguageManager.get("log.recent_rounds_log_special")
+                else -> throw WrongRecentRoundException(LanguageManager.get("exception.wrong_recent_round", it))
+            }
+        }
     }
 
     fun updateRoundLog(round: RoundType) {
@@ -89,14 +92,92 @@ class LogReader(logFile: File) {
 
         roundLog.add(classification)
 
-        // TODO: Config max size
-        if (roundLog.size > 7)
+        if (roundLog.size > ConfigManage.config.maxRecentRounds)
             roundLog.removeAt(0)
     }
 
-    fun monitorRoundType() {
+    fun readLine(line: String) {
+        // TERROR NIGHTS STRING
+        if ("BONUS ACTIVE!" in line) {
+            bonusFlag = true
+            Logger.info("log.think_terror_nights")
+        } else if ("OnMasterClientSwitched" in line) {
+            Logger.info("log.host_just_left")
+            OSCSender.send(true)
+            lastPrediction = true
+        } else if ("Saving Avatar Data:" in line) {
+            Logger.info("log.saving_avatar_data")
+            OSCSender.send(lastPrediction)
+        } else if ("round type is" in line) {
+            val parts = line.split("round type is")
+
+            if (parts.size > 1) {
+                val path = parts[1]
+                var possibleRoundType = path.substring(1, path.length - 1) // TODO: Not sure
+                val possibleRoundTypeForPrint = possibleRoundType
+
+                Logger.debug("possible_round_type '${possibleRoundType}'")
+
+                if (possibleRoundType in RoundTypeConvert.JPRoundTypes)
+                    possibleRoundType =
+                        RoundTypeConvert.ENRoundTypes[RoundTypeConvert.JPRoundTypes.indexOf(possibleRoundType)]
+
+                if (possibleRoundType in RoundTypeConvert.ENRoundTypes) {
+                    val roundType = RoundTypeConvert.getTypeOfRound(possibleRoundType)
+
+                    updateRoundLog(roundType)
+                    Logger.info(
+                        "log.new_round_started",
+                        RoundTypeConvert.getTextOfRound(roundType, possibleRoundTypeForPrint)
+                    )
+
+                    val classic = LanguageManager.get("log.predict_next_round_classic")
+                    val special = LanguageManager.get("log.predict_next_round_special")
+                    val prediction = predictNextRound()
+                    val recentRoundsLog = getRecentRoundsLog()
+
+                    Logger.info(
+                        "log.next_round_should_be",
+                        recentRoundsLog,
+                        if (prediction == GuessRoundType.Special) special else classic
+                    )
+
+                    // Send OSC message
+                    if (prediction == GuessRoundType.Special) {
+                        OSCSender.send(true)
+                        lastPrediction = true
+                    } else {
+                        OSCSender.send(false)
+                        lastPrediction = false
+                    }
+                }
+            }
+        }
+    }
+
+    suspend fun monitorRoundType() {
         while (true) {
-            break
+            if (!VRChatWatcher.isVRChatRunning()) {
+                Logger.info("log.vrchat_not_found")
+                break
+            }
+
+            val raf = RandomAccessFile(logFile, "r")
+            val length = raf.length()
+            raf.seek(lastPosition)
+            var charPosition = raf.filePointer
+
+            while (charPosition < length) {
+                val line = raf.readLine()
+                readLine(line)
+                charPosition = raf.filePointer
+
+                if (roundLog.size >= 6 && bonusFlag)
+                    bonusFlag = false
+            }
+
+            lastPosition = charPosition
+            delay(2000)
         }
     }
 }
