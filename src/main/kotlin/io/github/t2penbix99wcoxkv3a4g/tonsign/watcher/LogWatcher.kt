@@ -1,5 +1,7 @@
-package io.github.t2penbix99wcoxkv3a4g.tonsign
+package io.github.t2penbix99wcoxkv3a4g.tonsign.watcher
 
+import io.github.t2penbix99wcoxkv3a4g.tonsign.OSCSender
+import io.github.t2penbix99wcoxkv3a4g.tonsign.Utils
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ex.readLineUTF8
 import io.github.t2penbix99wcoxkv3a4g.tonsign.exception.UnknownRoundTypeException
 import io.github.t2penbix99wcoxkv3a4g.tonsign.exception.WrongRecentRoundException
@@ -9,16 +11,15 @@ import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.LanguageManager
 import io.github.t2penbix99wcoxkv3a4g.tonsign.roundType.GuessRoundType
 import io.github.t2penbix99wcoxkv3a4g.tonsign.roundType.RoundType
 import io.github.t2penbix99wcoxkv3a4g.tonsign.roundType.RoundTypeConvert
-import io.github.t2penbix99wcoxkv3a4g.tonsign.watcher.VRChatWatcher
 import kotlinx.coroutines.delay
 import java.io.File
 import java.io.FileNotFoundException
 import java.io.RandomAccessFile
 
-class LogReader(val logFile: File) {
+class LogWatcher(val logFile: File) {
     companion object {
-        val Default: LogReader
-            get() = LogReader(findLatestLog())
+        val Default: LogWatcher
+            get() = LogWatcher(findLatestLog())
 
         fun findLatestLog(): File {
             val files = Utils.logDirectory.toFile().listFiles { file, filename ->
@@ -40,6 +41,11 @@ class LogReader(val logFile: File) {
             Logger.info("log.current_log_running", files.first().name)
             return files.first()
         }
+        
+        const val BONUS_ACTIVE_KEYWORD = "BONUS ACTIVE!"
+        const val MASTER_CLIENT_SWITCHED_KEYWORD = "OnMasterClientSwitched"
+        const val SAVING_AVATAR_DATA_KEYWORD = "Saving Avatar Data:"
+        const val ROUND_TYPE_IS_KEYWORD = "round type is"
     }
 
     val roundLog = mutableListOf<GuessRoundType>()
@@ -101,17 +107,17 @@ class LogReader(val logFile: File) {
 
     private fun readLine(line: String) {
         // TERROR NIGHTS STRING
-        if ("BONUS ACTIVE!" in line) {
+        if (BONUS_ACTIVE_KEYWORD in line) {
             bonusFlag = true
             Logger.info("log.think_terror_nights")
-        } else if ("OnMasterClientSwitched" in line) {
+        } else if (MASTER_CLIENT_SWITCHED_KEYWORD in line) {
             Logger.info("log.host_just_left")
             OSCSender.send(true)
             lastPrediction = true
-        } else if ("Saving Avatar Data:" in line) {
+        } else if (SAVING_AVATAR_DATA_KEYWORD in line) {
             Logger.info("log.saving_avatar_data")
             OSCSender.send(lastPrediction)
-        } else if ("round type is" in line) {
+        } else if (ROUND_TYPE_IS_KEYWORD in line) {
             val parts = line.split("round type is")
 
             if (parts.size > 1) {
