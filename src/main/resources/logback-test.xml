@@ -25,7 +25,6 @@
     <!-- TODO: Stop append file -->
     <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>${LOG_ROOT}/${LOG_FILE_NAME}.log</file>
-        <param name="Append" value="false" />
         <append>false</append>
 
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">

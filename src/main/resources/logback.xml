@@ -24,13 +24,13 @@
 
     <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>${LOG_ROOT}/${LOG_FILE_NAME}.log</file>
-        <param name="Append" value="false" />
+        <append>false</append>
         
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
             <FileNamePattern>${LOG_ROOT}/${LOG_FILE_NAME}-%d{yyyy-MM-dd}-%i.log.zip</FileNamePattern>
             <!-- each archived file's size will be max 10MB -->
             <maxFileSize>10MB</maxFileSize>
-            <!-- 30 days to keep -->
+            <!-- days to keep -->
             <maxHistory>7</maxHistory>
             <!-- total size of all archive files, if total size > 100GB, it will delete old archived file -->
             <totalSizeCap>10GB</totalSizeCap>
