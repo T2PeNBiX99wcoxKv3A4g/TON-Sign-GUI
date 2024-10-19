@@ -118,7 +118,7 @@ class LogWatcher(val logFile: File) {
             Logger.info("log.saving_avatar_data")
             OSCSender.send(lastPrediction)
         } else if (ROUND_TYPE_IS_KEYWORD in line) {
-            val parts = line.split("round type is")
+            val parts = line.split(ROUND_TYPE_IS_KEYWORD)
 
             if (parts.size > 1) {
                 val path = parts[1]
