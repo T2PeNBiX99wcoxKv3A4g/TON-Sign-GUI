@@ -166,13 +166,11 @@ class LogReader(val logFile: File) {
             }
         }
     }
-
-    @OptIn(ExperimentalStdlibApi::class)
+    
     fun read() {
         val raf = RandomAccessFile(logFile, "r")
         val length = raf.length()
         raf.seek(lastPosition)
-        logFile.readLines(charset = Charsets.UTF_8)
         var charPosition = raf.filePointer
         
         while (charPosition < length) {
