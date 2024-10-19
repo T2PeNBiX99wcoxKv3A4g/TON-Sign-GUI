@@ -60,6 +60,13 @@ fun app() {
                 ) {
                     Text("Force send false")
                 }
+                Button(
+                    onClick = {
+                        OSCSender.sendChat("Test 日本語")
+                    }
+                ) {
+                    Text("Send Chat Test")
+                }
                 Box(
                     Modifier.fillMaxSize()
                         .padding(end = 12.dp, bottom = 12.dp)

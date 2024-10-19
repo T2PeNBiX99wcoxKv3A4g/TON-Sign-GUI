@@ -9,12 +9,20 @@ import java.net.InetSocketAddress
 object OSCSender {
     private const val PORT = 9000
     private const val IP = "127.0.0.1"
+    private const val PARAM_TON_SIGN = "/avatar/parameters/TON_Sign"
+    private const val PARAM_CHAT_BOX = "/chatbox/input"
 
     val oscClient = OSCPortOut(InetSocketAddress(IP, PORT))
 
-    fun send(bool: Boolean) = send("/avatar/parameters/TON_Sign", bool)
+    fun send(bool: Boolean) = send(PARAM_TON_SIGN, bool)
 
     fun <T> sendParam(param: String, input: T) = send("/avatar/parameters/$param", input)
+
+    fun sendChat(msg: String, direct: Boolean = true, complete: Boolean = false) {
+        val message = OSCMessage(PARAM_CHAT_BOX, mutableListOf(msg, direct, complete))
+        oscClient.send(message)
+        Logger.debug({ this::class.simpleName!! }, "$PARAM_CHAT_BOX $msg $direct $complete")
+    }
 
     fun <T> send(addres: String, input: T) {
         val message = OSCMessage(addres, mutableListOf(input))
