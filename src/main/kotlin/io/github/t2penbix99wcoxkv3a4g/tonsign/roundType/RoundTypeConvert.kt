@@ -130,4 +130,32 @@ object RoundTypeConvert {
             return GuessRoundType.Classic
         return GuessRoundType.NIL
     }
+
+    fun isSpecialOrClassic(round: RoundType): GuessRoundType {
+        return when (round) {
+            RoundType.Classic -> return GuessRoundType.Classic
+            RoundType.Fog -> return GuessRoundType.Special
+            RoundType.Punished -> return GuessRoundType.Special
+            RoundType.Sabotage -> return GuessRoundType.Special
+            RoundType.Cracked -> return GuessRoundType.Special
+            RoundType.Alternate -> return GuessRoundType.Special
+            RoundType.Bloodbath -> return GuessRoundType.Special
+            RoundType.Midnight -> return GuessRoundType.Special
+            RoundType.MysticMoon -> return GuessRoundType.Special
+            RoundType.Twilight -> return GuessRoundType.Special
+            RoundType.Solstice -> return GuessRoundType.Special
+            RoundType.EightPages -> return GuessRoundType.Special
+            RoundType.BloodMoon -> return GuessRoundType.Classic
+            RoundType.RUN -> return GuessRoundType.Classic
+            RoundType.ColdNight -> return GuessRoundType.Special
+            RoundType.Unbound -> return GuessRoundType.Special
+            RoundType.DoubleTrouble -> return GuessRoundType.Special
+            RoundType.Ghost -> return GuessRoundType.Special
+            else -> throw UnknownRoundTypeException()
+        }
+    }
+
+    fun isCorrectGuess(lastGuess: GuessRoundType, round: RoundType): Boolean {
+        return lastGuess == isSpecialOrClassic(round)
+    }
 }
