@@ -2,6 +2,7 @@ package io.github.t2penbix99wcoxkv3a4g.tonsign
 
 import com.illposed.osc.OSCMessage
 import com.illposed.osc.transport.OSCPortOut
+import io.github.t2penbix99wcoxkv3a4g.tonsign.logger.Logger
 import java.net.InetSocketAddress
 
 object OSCSender {
@@ -17,6 +18,6 @@ object OSCSender {
     fun <T> send(addres: String, input: T) {
         val message = OSCMessage(addres, mutableListOf(input))
         oscClient.send(message)
-        Logger.debug("${OSCSender::class.simpleName} $addres $input")
+        Logger.debug({ this::class.simpleName!! }, "$addres $input")
     }
 }

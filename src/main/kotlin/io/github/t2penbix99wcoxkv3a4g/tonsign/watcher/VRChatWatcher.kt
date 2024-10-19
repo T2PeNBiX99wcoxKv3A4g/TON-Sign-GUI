@@ -1,6 +1,6 @@
 package io.github.t2penbix99wcoxkv3a4g.tonsign.watcher
 
-import io.github.t2penbix99wcoxkv3a4g.tonsign.Logger
+import io.github.t2penbix99wcoxkv3a4g.tonsign.logger.Logger
 import kotlinx.coroutines.delay
 
 object VRChatWatcher {
@@ -28,7 +28,7 @@ object VRChatWatcher {
                 Logger.info("log.waiting_vrchat")
 
             val check = isVRChatRunning()
-            Logger.debug("Check: $check")
+            Logger.debug({ this::class.simpleName!! }, "Check: $check")
 
             if (check) {
                 Logger.info("log.vrchat_found")

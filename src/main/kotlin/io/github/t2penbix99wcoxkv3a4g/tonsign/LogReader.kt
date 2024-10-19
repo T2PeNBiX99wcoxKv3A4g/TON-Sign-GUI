@@ -1,7 +1,9 @@
 package io.github.t2penbix99wcoxkv3a4g.tonsign
 
+import io.github.t2penbix99wcoxkv3a4g.tonsign.ex.readLineUTF8
 import io.github.t2penbix99wcoxkv3a4g.tonsign.exception.UnknownRoundTypeException
 import io.github.t2penbix99wcoxkv3a4g.tonsign.exception.WrongRecentRoundException
+import io.github.t2penbix99wcoxkv3a4g.tonsign.logger.Logger
 import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.ConfigManage
 import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.LanguageManager
 import io.github.t2penbix99wcoxkv3a4g.tonsign.roundType.GuessRoundType
@@ -114,10 +116,10 @@ class LogReader(val logFile: File) {
 
             if (parts.size > 1) {
                 val path = parts[1]
-                var possibleRoundType = path.substring(1, path.length - 1) // TODO: Not sure
+                var possibleRoundType = path.substring(1, path.length)
                 val possibleRoundTypeForPrint = possibleRoundType
 
-                Logger.debug("possible_round_type '${possibleRoundType}'")
+                Logger.debug({ this::class.simpleName!! }, "possibleRoundType: '${possibleRoundType}'")
 
                 if (possibleRoundType in RoundTypeConvert.JPRoundTypes)
                     possibleRoundType =
@@ -165,14 +167,16 @@ class LogReader(val logFile: File) {
         }
     }
 
+    @OptIn(ExperimentalStdlibApi::class)
     fun read() {
         val raf = RandomAccessFile(logFile, "r")
         val length = raf.length()
         raf.seek(lastPosition)
+        logFile.readLines(charset = Charsets.UTF_8)
         var charPosition = raf.filePointer
-
+        
         while (charPosition < length) {
-            val line = raf.readLine()
+            val line = raf.readLineUTF8()
             readLine(line)
             charPosition = raf.filePointer
 
