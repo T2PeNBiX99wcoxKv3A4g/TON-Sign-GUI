@@ -24,6 +24,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
+import io.github.t2penbix99wcoxkv3a4g.tonsign.watcher.LogWatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -83,7 +84,7 @@ fun textBox(text: String = "Item") {
     }
 }
 
-val reader = LogReader.Default
+val reader = LogWatcher.Companion.Default
 
 
 fun main() = application {
