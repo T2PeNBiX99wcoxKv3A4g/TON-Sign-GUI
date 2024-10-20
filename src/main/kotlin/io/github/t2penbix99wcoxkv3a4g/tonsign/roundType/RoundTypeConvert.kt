@@ -156,6 +156,8 @@ object RoundTypeConvert {
     }
 
     fun isCorrectGuess(lastGuess: GuessRoundType, round: RoundType): Boolean {
+        if (lastGuess == GuessRoundType.NIL)
+            return true
         return lastGuess == isSpecialOrClassic(round)
     }
 }
