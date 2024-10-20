@@ -3,20 +3,18 @@ package io.github.t2penbix99wcoxkv3a4g.tonsign.manager
 import com.charleskorn.kaml.MissingRequiredPropertyException
 import com.charleskorn.kaml.UnknownPropertyException
 import com.charleskorn.kaml.Yaml
-import io.github.t2penbix99wcoxkv3a4g.tonsign.logger.Logger
 import io.github.t2penbix99wcoxkv3a4g.tonsign.Utils
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
+import io.github.t2penbix99wcoxkv3a4g.tonsign.coroutineScope.ConfigScope
+import io.github.t2penbix99wcoxkv3a4g.tonsign.logger.Logger
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.serialization.decodeFromString
 import java.io.File
 import kotlin.io.path.Path
 
-object ConfigManage {
+object ConfigManager {
     private const val fileName = "config.yml"
-    private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+    private val scope = ConfigScope()
     private val filePath = Path(Utils.currentWorkingDirectory, fileName)
     private val fileBakPath = Path(Utils.currentWorkingDirectory, "$fileName.bak")
 
@@ -56,7 +54,7 @@ object ConfigManage {
             when (it) {
                 is UnknownPropertyException,
                 is MissingRequiredPropertyException -> {
-                    Logger.error(it, "Config Load Error: ${it.message}")
+                    Logger.error({ this::class.simpleName!! }, it, "exception.config_load_error", it.message)
                     renameFile()
                     return@getOrElse Default
                 }
@@ -83,6 +81,7 @@ object ConfigManage {
         while (true) {
             delay((config.autoSaveMinutes * 60 * 1000).toLong())
             save()
+            Logger.debug({ this::class.simpleName!! }, "Auto save")
         }
     }
 }
