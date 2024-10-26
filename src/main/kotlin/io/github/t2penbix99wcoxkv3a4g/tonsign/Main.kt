@@ -82,11 +82,8 @@ fun main() = application {
     val trayState = rememberTrayState()
     val notification = rememberNotification("Notification", "Message from MyApp!")
     var lastPrediction by remember { mutableStateOf(lastPrediction) }
-
-    isSystemInDarkTheme()
+    
     startReader()
-
-    Logger.debug("isSystemInDarkTheme(): ${isSystemInDarkTheme()}")
 
     if (isOpen) {
         Tray(
@@ -134,7 +131,7 @@ fun main() = application {
             if (isAskingToClose) {
                 DialogWindow(
                     onCloseRequest = { isAskingToClose = false },
-                    title = "Test"
+                    title = "Are you sure?"
                 ) {
                     MaterialEXTheme {
                         Box(
