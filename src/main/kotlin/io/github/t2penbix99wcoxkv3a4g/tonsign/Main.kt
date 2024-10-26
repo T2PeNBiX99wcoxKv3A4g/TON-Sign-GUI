@@ -1,18 +1,15 @@
 package io.github.t2penbix99wcoxkv3a4g.tonsign
 
-import androidx.compose.desktop.ui.tooling.preview.Preview
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Button
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.material.darkColors
+import androidx.compose.material.lightColors
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -26,108 +23,28 @@ import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogWindow
 import androidx.compose.ui.window.Tray
-import androidx.compose.ui.window.TrayState
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberNotification
 import androidx.compose.ui.window.rememberTrayState
-import io.github.t2penbix99wcoxkv3a4g.tonsign.coroutineScope.GUIScope
 import io.github.t2penbix99wcoxkv3a4g.tonsign.coroutineScope.LogicScope
 import io.github.t2penbix99wcoxkv3a4g.tonsign.logger.Logger
-import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.ConfigManager
 import io.github.t2penbix99wcoxkv3a4g.tonsign.roundType.GuessRoundType
+import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.app
+import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.lastPrediction
+import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.reader
+import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.theme.MaterialEXTheme
 import io.github.t2penbix99wcoxkv3a4g.tonsign.watcher.LogWatcher
 import io.github.t2penbix99wcoxkv3a4g.tonsign.watcher.VRChatWatcher
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-val logicScope = LogicScope()
-val guiScope = GUIScope()
 var readerIsStarted = false
-var tickIsStarted = false
 var runningTime = 0
+val logicScope = LogicScope()
 var needToWait = false
-var reader: LogWatcher? = null
-var lastPrediction = GuessRoundType.NIL
 
-@Composable
-@Preview
-fun app(trayState: TrayState) {
-    var lastPrediction by remember { mutableStateOf(lastPrediction) }
-    var isWaitingVRChat by remember { mutableStateOf(VRChatWatcher.isWaitingVRChat) }
-
-    MaterialTheme {
-        Box(
-            Modifier.fillMaxSize()
-                .background(Color.DarkGray)
-        ) {
-            Column(
-                Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.Center
-            ) {
-                Button(
-                    onClick = {
-                        OSCSender.send(true)
-                    }
-                ) {
-                    Text("Force send true")
-                }
-                Button(
-                    onClick = {
-                        OSCSender.send(false)
-                    }
-                ) {
-                    Text("Force send false")
-                }
-                Button(
-                    onClick = {
-                        OSCSender.sendChat("Test 日本語")
-                    }
-                ) {
-                    Text("Send Chat Test")
-                }
-
-                Box(
-                    Modifier.fillMaxSize()
-                        .padding(start = 12.dp, end = 12.dp, bottom = 12.dp)
-                ) {
-                    if (isWaitingVRChat) {
-                        textBox("VRChat is not running")
-                    }
-
-                    if (reader != null) {
-                        if (reader!!.nextRoundGuess != GuessRoundType.NIL) {
-                            val next = reader!!.nextRoundGuess
-
-                            if (next != lastPrediction) {
-                                lastPrediction = next
-
-                                textBox("Next Round is $next")
-                            }
-                        }
-
-                        textBox("Recent Rounds: ${reader!!.getRecentRoundsLog(ConfigManager.config.maxRecentRounds)}")
-                    }
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun textBox(text: String = "Item") {
-    Box(
-        Modifier.height(32.dp)
-            .fillMaxWidth()
-            .background(Color(0, 0, 0, 20))
-            .padding(start = 10.dp),
-        contentAlignment = Alignment.CenterStart
-    ) {
-        Text(text = text)
-    }
-}
-
-private fun startReader(trayState: TrayState) {
+private fun startReader() {
     if (readerIsStarted)
         return
 
@@ -166,7 +83,10 @@ fun main() = application {
     val notification = rememberNotification("Notification", "Message from MyApp!")
     var lastPrediction by remember { mutableStateOf(lastPrediction) }
 
-    startReader(trayState)
+    isSystemInDarkTheme()
+    startReader()
+
+    Logger.debug("isSystemInDarkTheme(): ${isSystemInDarkTheme()}")
 
     if (isOpen) {
         Tray(
@@ -178,7 +98,7 @@ fun main() = application {
                     isVisible = true
             },
             menu = {
-                MaterialTheme {
+                MaterialTheme(colors = if (isSystemInDarkTheme()) darkColors() else lightColors()) {
                     Item(
                         "Send notification",
                         onClick = {
@@ -216,16 +136,27 @@ fun main() = application {
                     onCloseRequest = { isAskingToClose = false },
                     title = "Test"
                 ) {
-                    Button(
-                        onClick = { isOpen = false }
-                    ) {
-                        Text("Yes")
+                    MaterialEXTheme {
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            Column(
+                                modifier = Modifier.padding(50.dp)
+                            ) {
+                                Button(
+                                    onClick = { isOpen = false }
+                                ) {
+                                    Text("Yes")
+                                }
+                                Button(
+                                    onClick = { isAskingToClose = false }
+                                ) {
+                                    Text("No")
+                                }
+                            }
+                        }
                     }
-//                    Button(
-//                        onClick = { isAskingToClose = false }
-//                    ) {
-//                        Text("No")
-//                    }
                 }
             }
         }
