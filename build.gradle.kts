@@ -34,6 +34,7 @@ dependencies {
     implementation("org.codehaus.janino:janino:${property("janino.version")}")
     implementation("org.fusesource.jansi:jansi:${property("jansi.version")}")
     implementation("io.github.oshai:kotlin-logging-jvm:${property("kotlin-logging.version")}")
+//    implementation("org.jetbrains.androidx.navigation:navigation-compose:${property("navigation-compose.version")}")
 }
 
 compose.desktop {
