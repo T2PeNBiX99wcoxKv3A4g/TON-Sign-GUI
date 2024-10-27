@@ -45,3 +45,8 @@ bin/
 .DS_Store
 
 /logs/
+
+### Custom ###
+
+*.bak
+/config.yml
