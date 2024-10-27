@@ -43,6 +43,7 @@ compose.desktop {
 
         nativeDistributions {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
+            modules("java.naming")
             packageName = "TON-Sign"
             packageVersion = "1.0.0"
         }
