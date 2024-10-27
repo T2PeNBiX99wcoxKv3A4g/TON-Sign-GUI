@@ -6,5 +6,6 @@ import kotlinx.serialization.Serializable
 data class Config(
     var language: String,
     var maxRecentRounds: Int,
-    var autoSaveMinutes: Float
+    var autoSaveMinutes: Float,
+    var onlySpecial: Boolean
 )
