@@ -1,12 +1,14 @@
 package io.github.t2penbix99wcoxkv3a4g.tonsign.watcher
 
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
 import io.github.t2penbix99wcoxkv3a4g.tonsign.logger.Logger
 import kotlinx.coroutines.delay
 
 object VRChatWatcher {
-    private var _isWaitingVRChat = false
+    private var _isWaitingVRChat = mutableStateOf(false)
 
-    val isWaitingVRChat: Boolean
+    val isWaitingVRChat: MutableState<Boolean>
         get() = _isWaitingVRChat
 
     fun isVRChatRunning(): Boolean {
@@ -28,7 +30,7 @@ object VRChatWatcher {
 
     suspend fun checkVRChatLoop() {
         var count = 0
-        _isWaitingVRChat = true
+        _isWaitingVRChat.value = true
 
         while (true) {
             if (count < 1)
@@ -39,7 +41,7 @@ object VRChatWatcher {
 
             if (check) {
                 Logger.info("log.vrchat_found")
-                _isWaitingVRChat = false
+                _isWaitingVRChat.value = false
                 break
             }
 
