@@ -1,11 +1,6 @@
 package io.github.t2penbix99wcoxkv3a4g.tonsign
 
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material.Button
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.darkColors
@@ -15,24 +10,30 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.DialogWindow
+import androidx.compose.ui.window.Notification
 import androidx.compose.ui.window.Tray
+import androidx.compose.ui.window.TrayState
 import androidx.compose.ui.window.Window
+import androidx.compose.ui.window.WindowPosition.Aligned
 import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberNotification
-import androidx.compose.ui.window.rememberTrayState
+import androidx.compose.ui.window.rememberWindowState
 import io.github.t2penbix99wcoxkv3a4g.tonsign.coroutineScope.LogicScope
 import io.github.t2penbix99wcoxkv3a4g.tonsign.logger.Logger
+import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.ConfigManager
+import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.LanguageManager
 import io.github.t2penbix99wcoxkv3a4g.tonsign.roundType.GuessRoundType
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.app
-import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.lastPrediction
+import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.nextPrediction
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.reader
+import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.showConfirmExitWindow
+import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.showNeedRestartWindows
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.theme.MaterialEXTheme
 import io.github.t2penbix99wcoxkv3a4g.tonsign.watcher.LogWatcher
 import io.github.t2penbix99wcoxkv3a4g.tonsign.watcher.VRChatWatcher
@@ -43,6 +44,7 @@ var readerIsStarted = false
 var runningTime = 0
 val logicScope = LogicScope()
 var needToWait = false
+val trayState = TrayState()
 
 private fun startReader() {
     if (readerIsStarted)
@@ -64,6 +66,9 @@ private fun startReader() {
 
                 runningTime++
                 reader = LogWatcher.Default
+                reader!!.onNextPredictionEvent += ::onNextPrediction
+                reader!!.onRoundOverEvent += ::onRoundOver
+                reader!!.onLeftTONEvent += ::onLeftTON
                 reader!!.monitorRoundType()
             }.getOrElse {
                 Logger.error(it, "exception.something_is_not_right", it.message!!)
@@ -75,17 +80,57 @@ private fun startReader() {
     readerIsStarted = true
 }
 
+private fun onNextPrediction(guessRound: GuessRoundType) {
+    nextPrediction.value = guessRound
+}
+
+private fun onLeftTON() {
+    nextPrediction.value = GuessRoundType.NIL
+}
+
+private fun onRoundOver(guessRound: GuessRoundType) {
+    if (guessRound == GuessRoundType.NIL || guessRound == GuessRoundType.Exempt) return
+    if (ConfigManager.config.onlySpecial && guessRound == GuessRoundType.Classic) return
+
+    val special = LanguageManager.get("gui.text.round_special")
+    val classic = LanguageManager.get("gui.text.round_classic")
+
+    val nextPredictionNotification = Notification(
+        LanguageManager.get("gui.notification.next_prediction_title"),
+        LanguageManager.get(
+            "gui.notification.next_prediction_message",
+            if (guessRound == GuessRoundType.Special) special else classic
+        )
+    )
+
+    trayState.sendNotification(nextPredictionNotification)
+}
+
 fun main() = application {
-    var isOpen by remember { mutableStateOf(true) }
-    var isAskingToClose by remember { mutableStateOf(false) }
+    var isOpen = remember { mutableStateOf(true) }
+    var isOpenSet by isOpen
+    val isAskingToClose = remember { mutableStateOf(false) }
+    var isAskingToCloseSet by isAskingToClose
     var isVisible by remember { mutableStateOf(true) }
-    val trayState = rememberTrayState()
+    val needRefresh = remember { mutableStateOf(false) }
+    val needRestart = remember { mutableStateOf(false) }
     val notification = rememberNotification("Notification", "Message from MyApp!")
-    var lastPrediction by remember { mutableStateOf(lastPrediction) }
-    
+    val windowState =
+        rememberWindowState(position = Aligned(alignment = Alignment.Center), size = DpSize(800.dp, 600.dp))
+    val windowState2 =
+        rememberWindowState(position = Aligned(alignment = Alignment.Center), size = DpSize(300.dp, 260.dp))
+    var needRestartSet by needRestart
+    var needRefreshSet by needRefresh
+
     startReader()
 
-    if (isOpen) {
+    if (isAskingToCloseSet && !isVisible)
+        isVisible = true
+
+    if (needRestartSet && !isVisible)
+        isVisible = true
+
+    if (isOpenSet) {
         Tray(
             state = trayState,
             icon = TrayIcon,
@@ -105,55 +150,39 @@ fun main() = application {
                     Item(
                         "Exit",
                         onClick = {
-                            if (!isVisible)
-                                isVisible = true
-                            isAskingToClose = true
+                            isAskingToCloseSet = true
                         }
                     )
-
-                    if (reader != null && reader!!.nextRoundGuess != GuessRoundType.NIL) {
-                        val next = reader!!.nextRoundGuess
-
-                        if (next != lastPrediction) {
-                            lastPrediction = next
-
-                            val nextNotification = rememberNotification("Next Round", "Next round is $next")
-                            trayState.sendNotification(nextNotification)
-                        }
-                    }
                 }
             }
         )
 
-        Window(onCloseRequest = { isVisible = false }, visible = isVisible, title = Utils.TITLE) {
-            app(trayState)
+        if (!needRefreshSet) {
+            Window(
+                onCloseRequest = { isVisible = false },
+                visible = isVisible,
+                title = Utils.TITLE,
+                state = windowState
+            ) {
+                app(trayState, needRestart, needRefresh)
 
-            if (isAskingToClose) {
-                DialogWindow(
-                    onCloseRequest = { isAskingToClose = false },
-                    title = "Are you sure?"
-                ) {
-                    MaterialEXTheme {
-                        Box(
-                            modifier = Modifier.fillMaxSize(),
-                            contentAlignment = Alignment.Center,
-                        ) {
-                            Column(
-                                modifier = Modifier.padding(50.dp)
-                            ) {
-                                Button(
-                                    onClick = { isOpen = false }
-                                ) {
-                                    Text("Yes")
-                                }
-                                Button(
-                                    onClick = { isAskingToClose = false }
-                                ) {
-                                    Text("No")
-                                }
-                            }
-                        }
-                    }
+                if (isAskingToCloseSet)
+                    showConfirmExitWindow(isAskingToClose, isOpen)
+
+                if (needRestartSet)
+                    showNeedRestartWindows(needRestart, isOpen)
+            }
+        } else {
+            Window(
+                onCloseRequest = { needRefreshSet = false },
+                visible = true,
+                title = "Refreshing...",
+                state = windowState2
+            ) {
+                MaterialEXTheme {
+                    Text("Refreshing...")
+                    ConfigManager.save()
+                    needRefreshSet = false
                 }
             }
         }

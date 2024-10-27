@@ -1,5 +1,11 @@
 package io.github.t2penbix99wcoxkv3a4g.tonsign.ui
 
+//import androidx.lifecycle.viewmodel.compose.viewModel
+//import androidx.navigation.NavHostController
+//import androidx.navigation.compose.NavHost
+//import androidx.navigation.compose.composable
+//import androidx.navigation.compose.currentBackStackEntryAsState
+//import androidx.navigation.compose.rememberNavController
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -8,41 +14,33 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.selection.SelectionContainer
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Button
 import androidx.compose.material.Text
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.DialogWindow
 import androidx.compose.ui.window.TrayState
-//import androidx.lifecycle.viewmodel.compose.viewModel
-//import androidx.navigation.NavHostController
-//import androidx.navigation.compose.NavHost
-//import androidx.navigation.compose.composable
-//import androidx.navigation.compose.currentBackStackEntryAsState
-//import androidx.navigation.compose.rememberNavController
+import androidx.compose.ui.window.WindowPosition.Aligned
+import androidx.compose.ui.window.rememberDialogState
 import io.github.t2penbix99wcoxkv3a4g.tonsign.OSCSender
-import io.github.t2penbix99wcoxkv3a4g.tonsign.Utils
 import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.ConfigManager
+import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.LanguageManager
 import io.github.t2penbix99wcoxkv3a4g.tonsign.roundType.GuessRoundType
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.theme.MaterialEXTheme
 import io.github.t2penbix99wcoxkv3a4g.tonsign.watcher.LogWatcher
 import io.github.t2penbix99wcoxkv3a4g.tonsign.watcher.VRChatWatcher
 
 var reader: LogWatcher? = null
-var lastPrediction = GuessRoundType.NIL
+val nextPrediction = mutableStateOf(GuessRoundType.NIL)
 
 /**
  * enum values that represent the screens in the app
@@ -118,9 +116,10 @@ var lastPrediction = GuessRoundType.NIL
 
 @Composable
 @Preview
-fun app(trayState: TrayState) {
-    var lastPrediction by remember { mutableStateOf(lastPrediction) }
-    var isWaitingVRChat by remember { mutableStateOf(VRChatWatcher.isWaitingVRChat) }
+fun app(trayState: TrayState, needRestart: MutableState<Boolean>, needRefresh: MutableState<Boolean>) {
+    var isWaitingVRChat by VRChatWatcher.isWaitingVRChat
+    var needRefreshSet by needRefresh
+    var nextPredictionSet by nextPrediction
 
     MaterialEXTheme {
         Box(
@@ -135,42 +134,147 @@ fun app(trayState: TrayState) {
                         OSCSender.send(true)
                     }
                 ) {
-                    Text("Force send true")
+                    Text(LanguageManager.getState("gui.button.force_send_true").value)
                 }
                 Button(
                     onClick = {
                         OSCSender.send(false)
                     }
                 ) {
-                    Text("Force send false")
+                    Text(LanguageManager.getState("gui.button.force_send_false").value)
                 }
                 Button(
                     onClick = {
-                        OSCSender.sendChat("Test 日本語")
+                        LanguageManager.setLang("jp")
+                        needRefreshSet = true
                     }
                 ) {
-                    Text("Send Chat Test")
+                    Text("日本語")
+                }
+                Button(
+                    onClick = {
+                        LanguageManager.setLang("en")
+                        needRefreshSet = true
+                    }
+                ) {
+                    Text("English")
+                }
+                Button(
+                    onClick = {
+                        needRefreshSet = true
+                    }
+                ) {
+                    Text(LanguageManager.getState("gui.button.refresh").value)
                 }
                 Box(
                     Modifier.fillMaxSize()
                         .padding(start = 12.dp, end = 12.dp, bottom = 12.dp)
                 ) {
-                    if (isWaitingVRChat) {
-                        textBox("VRChat is not running")
-                    }
+                    Column(
+                        modifier = Modifier.padding(10.dp)
+                    ) {
+                        if (isWaitingVRChat)
+                            textBox(LanguageManager.getState("gui.text.vrchat_is_not_running").value)
+                        
+                        if (reader != null && reader!!.isInTON.value) {
+                            val special = LanguageManager.getState("gui.text.round_special").value
+                            val classic = LanguageManager.getState("gui.text.round_classic").value
 
-                    if (reader != null) {
-                        if (reader!!.nextRoundGuess != GuessRoundType.NIL) {
-                            val next = reader!!.nextRoundGuess
+                            if (nextPredictionSet == GuessRoundType.Special || nextPredictionSet == GuessRoundType.Classic)
+                                textBox(
+                                    LanguageManager.getState(
+                                        "gui.text.next_prediction",
+                                        if (nextPredictionSet == GuessRoundType.Special) special else classic
+                                    ).value
+                                )
 
-                            if (next != lastPrediction) {
-                                lastPrediction = next
+                            val recentRounds = reader!!.getRecentRoundsLogState.value
 
-                                textBox("Next Round is $next")
-                            }
+                            if (!recentRounds.isBlank())
+                                textBox(LanguageManager.getState("gui.text.recent_rounds", recentRounds).value)
                         }
+                    }
+                }
+            }
+        }
+    }
+}
 
-                        textBox("Recent Rounds: ${reader!!.getRecentRoundsLog(ConfigManager.config.maxRecentRounds)}")
+private fun onExit() {
+    ConfigManager.save()
+}
+
+val dialogSize = DpSize(350.dp, 280.dp)
+
+@Composable
+fun showConfirmExitWindow(isAskingToClose: MutableState<Boolean>, isOpen: MutableState<Boolean>) {
+    var isAskingToCloseSet by isAskingToClose
+    var isOpenSet by isOpen
+    val state = rememberDialogState(position = Aligned(alignment = Alignment.Center), size = dialogSize)
+    DialogWindow(
+        onCloseRequest = { isAskingToCloseSet = false },
+        title = LanguageManager.getState("gui.title.confirm_exit").value,
+        state = state
+    ) {
+        MaterialEXTheme {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center,
+            ) {
+                Column(
+                    modifier = Modifier.padding(50.dp)
+                ) {
+                    Text(LanguageManager.getState("gui.text.confirm_exit").value)
+                    Button(
+                        onClick = {
+                            onExit()
+                            isOpenSet = false
+                        }
+                    ) {
+                        Text(LanguageManager.getState("gui.button.yes").value)
+                    }
+                    Button(
+                        onClick = { isAskingToCloseSet = false }
+                    ) {
+                        Text(LanguageManager.getState("gui.button.no").value)
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun showNeedRestartWindows(needRestart: MutableState<Boolean>, isOpen: MutableState<Boolean>) {
+    var needRestartSet by needRestart
+    var isOpenSet by isOpen
+    val state = rememberDialogState(position = Aligned(alignment = Alignment.Center), size = dialogSize)
+    DialogWindow(
+        onCloseRequest = { needRestartSet = false },
+        title = LanguageManager.getState("gui.title.need_restart").value,
+        state = state
+    ) {
+        MaterialEXTheme {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center,
+            ) {
+                Column(
+                    modifier = Modifier.padding(50.dp)
+                ) {
+                    Text(LanguageManager.getState("gui.text.need_restart").value)
+                    Button(
+                        onClick = {
+                            onExit()
+                            isOpenSet = false
+                        }
+                    ) {
+                        Text(LanguageManager.getState("gui.button.yes").value)
+                    }
+                    Button(
+                        onClick = { needRestartSet = false }
+                    ) {
+                        Text(LanguageManager.getState("gui.button.no").value)
                     }
                 }
             }
