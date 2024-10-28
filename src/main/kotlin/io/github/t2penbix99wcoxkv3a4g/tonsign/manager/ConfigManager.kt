@@ -70,22 +70,26 @@ object ConfigManager {
                     val classifier = returnType.classifier!!
                     val kClass = classifier as KClass<*>
 
-                    prop.setter.call(
-                        config, when (kClass.qualifiedName) {
-                            "kotlin.String" -> value.content
-                            "kotlin.Int" -> value.toInt()
-                            "kotlin.Float" -> value.toFloat()
-                            "kotlin.Boolean" -> value.toBoolean()
-                            "kotlin.Long" -> value.toLong()
-                            "kotlin.Double" -> value.toDouble()
-                            "kotlin.Byte" -> value.toByte()
-                            "kotlin.Char" -> value.toChar()
-                            "kotlin.Short" -> value.toShort()
-                            else -> value.content
-                        }
-                    )
-                    
-                    Utils.logger.debug { "Yaml Value Type Qualified Name: ${kClass.qualifiedName}" }
+                    runCatching {
+                        prop.setter.call(
+                            config, when (kClass.qualifiedName) {
+                                "kotlin.String" -> value.content
+                                "kotlin.Int" -> value.toInt()
+                                "kotlin.Float" -> value.toFloat()
+                                "kotlin.Boolean" -> value.toBoolean()
+                                "kotlin.Long" -> value.toLong()
+                                "kotlin.Double" -> value.toDouble()
+                                "kotlin.Byte" -> value.toByte()
+                                "kotlin.Char" -> value.toChar()
+                                "kotlin.Short" -> value.toShort()
+                                else -> value.content
+                            }
+                        )
+                    }.getOrElse {
+                        Utils.logger.debug(it) { "Yaml set failed: ${yaml.key.content}" }
+                    }
+
+                    Utils.logger.debug { "Yaml Value Type Qualified Name: ${yaml.key.content} | ${kClass.qualifiedName}" }
                 }
 
                 config
