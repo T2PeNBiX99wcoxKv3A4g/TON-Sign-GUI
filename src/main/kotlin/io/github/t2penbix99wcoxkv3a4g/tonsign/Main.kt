@@ -169,6 +169,7 @@ fun main() = application {
         rememberWindowState(position = Aligned(alignment = Alignment.Center), size = DpSize(300.dp, 260.dp))
     var needRestartSet by needRestart
     var needRefreshSet by needRefresh
+    val trayState by remember { mutableStateOf(trayState) }
 
     startReader()
 
