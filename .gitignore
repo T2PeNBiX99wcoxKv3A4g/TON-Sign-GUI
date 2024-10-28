@@ -50,3 +50,4 @@ bin/
 
 *.bak
 /config.yml
+/save.yml
