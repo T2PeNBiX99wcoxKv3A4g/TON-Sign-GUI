@@ -6,6 +6,7 @@ enum class RoundType {
     Fog,
     Punished,
     Sabotage,
+    AmongUs,
     Cracked,
     Alternate,
     Bloodbath,
@@ -19,5 +20,6 @@ enum class RoundType {
     ColdNight,
     Unbound,
     DoubleTrouble,
-    Ghost
+    Ghost,
+    Custom
 }

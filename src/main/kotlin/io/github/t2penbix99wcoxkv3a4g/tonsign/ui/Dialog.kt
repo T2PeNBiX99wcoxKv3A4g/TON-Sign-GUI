@@ -3,6 +3,7 @@ package io.github.t2penbix99wcoxkv3a4g.tonsign.ui
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -11,6 +12,7 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -26,17 +28,17 @@ private val dialogSize = DpSize(280.dp, 180.dp)
 
 @Composable
 fun openDialogWindow(
-    title: () -> String,
-    msg: () -> String,
-    yesText: () -> String,
-    noText: () -> String,
+    title: String,
+    msg: String,
+    yesText: String,
+    noText: String,
     yesDo: () -> Unit,
     noDo: () -> Unit
 ) {
     val state = rememberDialogState(position = Aligned(alignment = Alignment.Center), size = dialogSize)
     DialogWindow(
         onCloseRequest = { noDo() },
-        title = title(),
+        title = title,
         state = state
     ) {
         MaterialEXTheme {
@@ -46,7 +48,7 @@ fun openDialogWindow(
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Text(msg())
+                Text(msg)
                 Row(
                     modifier = Modifier.padding(20.dp)
                         .fillMaxSize()
@@ -57,12 +59,13 @@ fun openDialogWindow(
                     Button(
                         onClick = { yesDo() }
                     ) {
-                        Text(yesText())
+                        Text(yesText)
                     }
+                    Spacer(Modifier.weight(1f))
                     Button(
                         onClick = { noDo() }
                     ) {
-                        Text(noText())
+                        Text(noText)
                     }
                 }
             }
@@ -71,12 +74,15 @@ fun openDialogWindow(
 }
 
 @Composable
-fun openDialogWindow(title: () -> String, msg: () -> String, yesDo: () -> Unit, noDo: () -> Unit) {
+fun openDialogWindow(title: String, msg: String, yesDo: () -> Unit, noDo: () -> Unit) {
+    val yes by remember { LanguageManager.getState("gui.button.yes") }
+    val no by remember { LanguageManager.getState("gui.button.no") }
+
     openDialogWindow(
         title,
         msg,
-        { LanguageManager.getState("gui.button.yes").value },
-        { LanguageManager.getState("gui.button.no").value },
+        yes,
+        no,
         yesDo,
         noDo
     )
@@ -86,10 +92,12 @@ fun openDialogWindow(title: () -> String, msg: () -> String, yesDo: () -> Unit, 
 fun showConfirmExitWindow(isAskingToClose: MutableState<Boolean>, isOpen: MutableState<Boolean>) {
     var isAskingToCloseSet by isAskingToClose
     var isOpenSet by isOpen
+    val confirmExitTitle by remember { LanguageManager.getState("gui.title.confirm_exit") }
+    val confirmExitText by remember { LanguageManager.getState("gui.text.confirm_exit") }
 
     openDialogWindow(
-        title = { LanguageManager.getState("gui.title.confirm_exit").value },
-        msg = { LanguageManager.getState("gui.text.confirm_exit").value },
+        title = confirmExitTitle,
+        msg = confirmExitText,
         yesDo = {
             onExit()
             isOpenSet = false
@@ -104,10 +112,12 @@ fun showConfirmExitWindow(isAskingToClose: MutableState<Boolean>, isOpen: Mutabl
 fun showNeedRestartWindows(needRestart: MutableState<Boolean>, isOpen: MutableState<Boolean>) {
     var needRestartSet by needRestart
     var isOpenSet by isOpen
+    val needRestartTitle by remember { LanguageManager.getState("gui.title.need_restart") }
+    val needRestartText by remember { LanguageManager.getState("gui.text.need_restart") }
 
     openDialogWindow(
-        title = { LanguageManager.getState("gui.title.need_restart").value },
-        msg = { LanguageManager.getState("gui.text.need_restart").value },
+        title = needRestartTitle,
+        msg = needRestartText,
         yesDo = {
             onExit()
             isOpenSet = false

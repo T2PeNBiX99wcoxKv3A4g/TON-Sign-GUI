@@ -9,6 +9,7 @@ object RoundTypeConvert {
         "Fog",
         "Punished",
         "Sabotage",
+        "Among Us",
         "Cracked",
         "Alternate",
         "Bloodbath",
@@ -21,8 +22,9 @@ object RoundTypeConvert {
         "RUN",
         "Cold Night",
         "Unbound",
-        "Double Trouble",  // TODO: not sure
-        "Ghost"
+        "Double Trouble",
+        "Ghost",
+        "Custom"
     )
 
     val JPRoundTypes: List<String> = listOf(
@@ -30,6 +32,7 @@ object RoundTypeConvert {
         "霧",
         "パニッシュ",
         "サボタージュ",
+        "アモングアス",
         "狂気",
         "オルタネイト",
         "ブラッドバス",
@@ -40,10 +43,11 @@ object RoundTypeConvert {
         "8ページ",
         "ブラッドバス",
         "走れ！",
-        "寒い夜",
+        "冷たい夜",
         "アンバウンド",
         "ダブル・トラブル",
-        "ゴースト"
+        "ゴースト",
+        "カスタム"
     )
 
     val ExemptRounds: List<RoundType> = listOf(
@@ -74,51 +78,38 @@ object RoundTypeConvert {
     )
 
     fun getTypeOfRound(round: String): RoundType {
-        when (round) {
-            "Classic" -> return RoundType.Classic
-            "Fog" -> return RoundType.Fog
-            "Punished" -> return RoundType.Punished
-            "Sabotage" -> return RoundType.Sabotage
-            "Cracked" -> return RoundType.Cracked
-            "Alternate" -> return RoundType.Alternate
-            "Bloodbath" -> return RoundType.Bloodbath
-            "Midnight" -> return RoundType.Midnight
-            "Mystic Moon" -> return RoundType.MysticMoon
-            "Twilight" -> return RoundType.Twilight
-            "Solstice" -> return RoundType.Solstice
-            "8 Pages" -> return RoundType.EightPages
-            "Blood Moon" -> return RoundType.BloodMoon
-            "RUN" -> return RoundType.RUN
-            "Cold Night" -> return RoundType.ColdNight
-            "Unbound" -> return RoundType.Unbound
-            "Double Trouble" -> return RoundType.DoubleTrouble
-            "Ghost" -> return RoundType.Ghost
-            else -> return RoundType.Unknown
-        }
+        val id = round.replace("8", "Eight").replace(" ", "")
+        return runCatching { RoundType.valueOf(id) }.getOrElse { RoundType.Unknown }
     }
 
     fun getTextOfRound(round: RoundType): String {
-        when (round) {
-            RoundType.Classic -> return LanguageManager.get("log.round_classic")
-            RoundType.Fog -> return LanguageManager.get("log.round_fog")
-            RoundType.Punished -> return LanguageManager.get("log.round_punished")
-            RoundType.Sabotage -> return LanguageManager.get("log.round_sabotage")
-            RoundType.Cracked -> return LanguageManager.get("log.round_cracked")
-            RoundType.Alternate -> return LanguageManager.get("log.round_alternate")
-            RoundType.Bloodbath -> return LanguageManager.get("log.round_bloodbath")
-            RoundType.Midnight -> return LanguageManager.get("log.round_midnight")
-            RoundType.MysticMoon -> return LanguageManager.get("log.round_mystic_moon")
-            RoundType.Twilight -> return LanguageManager.get("log.round_twilight")
-            RoundType.Solstice -> return LanguageManager.get("log.round_solstice")
-            RoundType.EightPages -> return LanguageManager.get("log.round_8_pages")
-            RoundType.BloodMoon -> return LanguageManager.get("log.round_blood_moon")
-            RoundType.RUN -> return LanguageManager.get("log.round_run")
-            RoundType.ColdNight -> return LanguageManager.get("log.round_cold_night")
-            RoundType.Unbound -> return LanguageManager.get("log.round_unbound")
-            RoundType.DoubleTrouble -> return LanguageManager.get("log.round_double_trouble")
-            RoundType.Ghost -> return LanguageManager.get("log.round_ghost")
-            else -> throw UnknownRoundTypeException()
+        if (round == RoundType.Unknown)
+            throw UnknownRoundTypeException()
+
+        var langText = ""
+        var index = 0
+
+        round.name.forEach {
+            var newChar: Char? = null
+
+            if (it.isUpperCase()) {
+                if (index > 1) {
+                    langText += '_'
+                }
+                newChar = it.lowercaseChar()
+            }
+
+            langText += newChar ?: it
+            index++
         }
+
+        if (langText == "eight_pages")
+            langText = "8_pages"
+
+        if (langText == "r_u_n")
+            langText = "run"
+
+        return LanguageManager.get("log.round_$langText")
     }
 
     fun classifyRound(round: RoundType): GuessRoundType {
@@ -132,24 +123,8 @@ object RoundTypeConvert {
 
     fun isSpecialOrClassic(round: RoundType): GuessRoundType {
         return when (round) {
-            RoundType.Classic -> return GuessRoundType.Classic
-            RoundType.Fog -> return GuessRoundType.Special
-            RoundType.Punished -> return GuessRoundType.Special
-            RoundType.Sabotage -> return GuessRoundType.Special
-            RoundType.Cracked -> return GuessRoundType.Special
-            RoundType.Alternate -> return GuessRoundType.Special
-            RoundType.Bloodbath -> return GuessRoundType.Special
-            RoundType.Midnight -> return GuessRoundType.Special
-            RoundType.MysticMoon -> return GuessRoundType.Special
-            RoundType.Twilight -> return GuessRoundType.Special
-            RoundType.Solstice -> return GuessRoundType.Special
-            RoundType.EightPages -> return GuessRoundType.Special
-            RoundType.BloodMoon -> return GuessRoundType.Classic
-            RoundType.RUN -> return GuessRoundType.Classic
-            RoundType.ColdNight -> return GuessRoundType.Special
-            RoundType.Unbound -> return GuessRoundType.Special
-            RoundType.DoubleTrouble -> return GuessRoundType.Special
-            RoundType.Ghost -> return GuessRoundType.Special
+            in ClassicRounds -> GuessRoundType.Classic
+            in SpecialRounds, in ExemptRounds -> GuessRoundType.Special
             else -> throw UnknownRoundTypeException()
         }
     }

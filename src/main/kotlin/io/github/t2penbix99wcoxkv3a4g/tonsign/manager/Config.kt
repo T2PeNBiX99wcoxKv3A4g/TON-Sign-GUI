@@ -7,5 +7,6 @@ data class Config(
     var language: String,
     var maxRecentRounds: Int,
     var autoSaveMinutes: Float,
-    var onlySpecial: Boolean
+    var onlySpecial: Boolean,
+    var autoScrollToDown: Boolean
 )

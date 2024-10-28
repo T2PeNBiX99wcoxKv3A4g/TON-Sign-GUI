@@ -2,10 +2,14 @@ package io.github.t2penbix99wcoxkv3a4g.tonsign.ui.view
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.text.selection.SelectionContainer
+import androidx.compose.foundation.layout.width
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Switch
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
@@ -18,6 +22,7 @@ import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.view.tab.TabBodyBase
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.view.tab.TabBodyLogDatas
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.view.tab.TabBodyLogs
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.view.tab.TabBodyMain
+import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.view.tab.TabBodyRoundDatas
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.view.tab.TabBodySetting
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.view.tab.TabBodyVRChatLogs
 
@@ -26,6 +31,7 @@ enum class SelectionState(val gui: TabBodyBase) {
     Logs(TabBodyLogs()),
     LogDatas(TabBodyLogDatas()),
     VRChatLogs(TabBodyVRChatLogs()),
+    RoundDatas(TabBodyRoundDatas()),
     Setting(TabBodySetting())
 }
 
@@ -36,15 +42,12 @@ enum class SortingState {
 @Composable
 fun textBox(text: String = "Item") {
     Box(
-        Modifier.height(32.dp)
-            .fillMaxWidth()
-            .background(Color(0, 0, 0, 20))
-            .padding(start = 10.dp),
+        Modifier.fillMaxWidth()
+            .background(Color(0, 0, 0, 40))
+            .padding(start = 10.dp, top = 5.dp, end = 10.dp, bottom = 5.dp),
         contentAlignment = Alignment.CenterStart
     ) {
-        SelectionContainer {
-            Text(text = text)
-        }
+        Text(text = text)
     }
 }
 
@@ -58,9 +61,30 @@ fun textBox(text: AnnotatedString) {
             .padding(start = 10.dp, end = 10.dp),
         contentAlignment = Alignment.CenterStart
     ) {
-        SelectionContainer {
-            Text(text = text)
-        }
+        Text(text = text)
+    }
+}
+
+@Composable
+fun switchWithText(text: String, checked: Boolean, onCheckedChange: ((Boolean) -> Unit)?) {
+    Row(
+        Modifier
+            .width(320.dp)
+            .padding(horizontal = 16.dp)
+    ) {
+        Text(
+            text = text,
+            modifier = Modifier
+                .align(Alignment.CenterVertically)
+                .padding(16.dp),
+            style = MaterialTheme.typography.subtitle1
+        )
+        Spacer(Modifier.weight(1f))
+        Switch(
+            checked = checked,
+            onCheckedChange = onCheckedChange,
+            modifier = Modifier.align(Alignment.CenterVertically)
+        )
     }
 }
 

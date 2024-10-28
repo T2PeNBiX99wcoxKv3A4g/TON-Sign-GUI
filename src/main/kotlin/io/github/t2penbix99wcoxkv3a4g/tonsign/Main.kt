@@ -7,6 +7,7 @@ import androidx.compose.material.darkColors
 import androidx.compose.material.lightColors
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -34,9 +35,13 @@ import io.github.t2penbix99wcoxkv3a4g.tonsign.event.EventArg
 import io.github.t2penbix99wcoxkv3a4g.tonsign.logger.Logger
 import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.ConfigManager
 import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.LanguageManager
+import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.Save
+import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.SaveManager
 import io.github.t2penbix99wcoxkv3a4g.tonsign.roundType.GuessRoundType
+import io.github.t2penbix99wcoxkv3a4g.tonsign.roundType.RoundType
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.app
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.logWatcher
+import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.logic.model.RoundData
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.nextPrediction
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.showConfirmExitWindow
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.showNeedRestartWindows
@@ -52,13 +57,17 @@ private val logicScope = LogicScope()
 private var needToWait = false
 private val trayState = TrayState()
 internal val logs = mutableStateListOf<AnnotatedString>()
+internal val roundDatas = mutableStateMapOf<String, RoundData>()
 val readerInitEvent = EventArg<LogWatcher>()
 
-private fun startReader() {
+private fun startWatcher() {
     if (logWatcherIsStarted)
         return
 
     logicScope.launch {
+        SaveManager.onLoadedSaveEvent += ::onLoadedSave
+        SaveManager.onStartSaveEvent += ::onStartSave
+
         while (true) {
             runCatching {
                 if (!VRChatWatcher.isVRChatRunning()) {
@@ -75,6 +84,7 @@ private fun startReader() {
                 runningTime++
                 logWatcher = LogWatcher.Default
                 logWatcher!!.onNextPredictionEvent += ::onNextPrediction
+                logWatcher!!.onRoundStartEvent += ::onRoundStart
                 logWatcher!!.onRoundOverEvent += ::onRoundOver
                 logWatcher!!.onLeftTONEvent += ::onLeftTON
                 logWatcher!!.onReadLineEvent += ::onReadLine
@@ -98,6 +108,10 @@ private fun onLeftTON() {
     nextPrediction.value = GuessRoundType.NIL
 }
 
+private fun onRoundStart(time: String, round: RoundType) {
+    roundDatas[time] = RoundData(time, round)
+}
+
 private fun onRoundOver(guessRound: GuessRoundType) {
     if (guessRound == GuessRoundType.NIL || guessRound == GuessRoundType.Exempt) return
     if (ConfigManager.config.onlySpecial && guessRound == GuessRoundType.Classic) return
@@ -114,6 +128,20 @@ private fun onRoundOver(guessRound: GuessRoundType) {
     )
 
     trayState.sendNotification(nextPredictionNotification)
+}
+
+private fun onLoadedSave(save: Save) {
+    val saveList = save.roundHistories
+    if (saveList.isEmpty()) return
+
+    saveList.forEach {
+        val time = it.time
+        roundDatas[time] = it
+    }
+}
+
+private fun onStartSave(save: Save) {
+    save.roundHistories = roundDatas.values.toList()
 }
 
 private const val WARNING_KEY_WORD = " Warning"
@@ -169,13 +197,13 @@ fun main() = application {
     val notification = rememberNotification("Notification", "Message from MyApp!")
     val windowState =
         rememberWindowState(position = Aligned(alignment = Alignment.Center), size = DpSize(800.dp, 600.dp))
-    val windowState2 =
+    val refreshWindowState =
         rememberWindowState(position = Aligned(alignment = Alignment.Center), size = DpSize(300.dp, 260.dp))
     var needRestartSet by needRestart
     var needRefreshSet by needRefresh
     val trayState by remember { mutableStateOf(trayState) }
 
-    startReader()
+    startWatcher()
 
     if (isAskingToCloseSet && !isVisible)
         isVisible = true
@@ -194,19 +222,14 @@ fun main() = application {
             },
             menu = {
                 MaterialTheme(colors = if (isSystemInDarkTheme()) darkColors() else lightColors()) {
-                    Item(
-                        "Send notification",
+                    Item("Send notification",
                         onClick = {
                             trayState.sendNotification(notification)
-                        }
-                    )
-                    Item(
-//                        LanguageManager.getState("gui.tray.exit").value,
-                        "Exit",
+                        })
+                    Item("Exit",
                         onClick = {
                             isAskingToCloseSet = true
-                        }
-                    )
+                        })
                 }
             }
         )
@@ -231,7 +254,7 @@ fun main() = application {
                 onCloseRequest = { needRefreshSet = false },
                 visible = true,
                 title = "Refreshing...",
-                state = windowState2
+                state = refreshWindowState
             ) {
                 MaterialEXTheme {
                     Text("Refreshing...")

@@ -8,14 +8,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.window.TrayState
 import ch.qos.logback.classic.spi.ILoggingEvent
 import io.github.t2penbix99wcoxkv3a4g.tonsign.logger.EventAppender
-import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.LanguageManager
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.logic.model.LogData
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.view.tableView
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 class TabBodyLogDatas : TabBodyBase() {
-    override val title = { LanguageManager.get("gui.tab.title.log_datas") }
+    override val title = { "gui.tab.title.log_datas" }
     private val logDatas = mutableStateListOf<LogData>()
 
     init {

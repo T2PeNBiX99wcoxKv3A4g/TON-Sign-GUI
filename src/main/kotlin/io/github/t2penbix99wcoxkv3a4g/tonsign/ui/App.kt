@@ -6,6 +6,7 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.window.TrayState
 import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.ConfigManager
+import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.SaveManager
 import io.github.t2penbix99wcoxkv3a4g.tonsign.roundType.GuessRoundType
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.theme.MaterialEXTheme
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.view.tableSelection
@@ -24,4 +25,5 @@ internal fun app(trayState: TrayState, needRestart: MutableState<Boolean>, needR
 
 internal fun onExit() {
     ConfigManager.save()
+    SaveManager.save()
 }

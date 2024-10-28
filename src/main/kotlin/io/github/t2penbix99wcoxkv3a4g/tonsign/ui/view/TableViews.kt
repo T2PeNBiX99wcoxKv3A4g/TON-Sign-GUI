@@ -23,10 +23,12 @@ import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshots.SnapshotStateList
+import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -75,7 +77,7 @@ inline fun <reified T : Any> tableView(
         header.columnIndex
     }
 
-    var search = remember { mutableStateOf("") }
+    val search = remember { mutableStateOf("") }
     val tableContent = remember { content }
     val tabContent = remember { mutableStateListOf<T>() }
 
@@ -131,23 +133,132 @@ inline fun <reified T : Any> tableView(
 }
 
 @Composable
+inline fun <reified T : Any> tableView(
+    currentItem: MutableState<T?>,
+    content: SnapshotStateMap<*, T>,
+    indexColumn: Boolean = false,
+    indexColWidth: Dp = 30.dp,
+    noinline onRowSelection: (T) -> Unit
+) {
+    val fields = T::class.members.filter {
+        it.annotations.any { a -> a is TableHeader }
+    }.sortedBy {
+        val header = getTableHeader(it.annotations)
+        header.columnIndex
+    }
+
+    val search = remember { mutableStateOf("") }
+    val tableContent = remember { content }
+    val tabContent = remember { mutableStateListOf<T>() }
+
+    tabContent.clear()
+    tableContent.forEach { tabContent.add(it.value) }
+
+    if (search.value.isNotEmpty())
+        searchFilter(tabContent, fields, search)
+
+    val onContentUpdate: (String) -> Unit = {
+        search.value = it
+        searchFilter(tabContent, fields, search)
+    }
+
+    Column(
+        Modifier.fillMaxWidth()
+    ) {
+        searchField(search.value, onContentUpdate)
+
+        val headerList = fields
+            .flatMap { it.annotations }
+            .filter { it is TableHeader && it.columnIndex >= 0 }
+            .map { it as TableHeader }
+
+        val stateMap = headerList.associateWith { mutableStateOf(SortingState.NONE) }
+        val sortingStates = remember { mutableStateOf(stateMap) }
+
+        val onSortingUpdate: (TableHeader, SortingState) -> Unit = { tableHeader, sortingState ->
+            val sortedList: List<T> = when (sortingState) {
+                SortingState.ASC -> {
+                    tabContent.sortedBy { t ->
+                        sort(t, tableHeader)
+                    }
+                }
+
+                SortingState.DESC -> {
+                    tabContent.sortedByDescending { t ->
+                        sort(t, tableHeader)
+                    }
+                }
+
+                else -> {
+                    tabContent
+                }
+            }
+
+            tabContent.swapList(sortedList)
+        }
+
+        tableHeader(indexColumn, indexColWidth, headerList, sortingStates, onSortingUpdate)
+        tableContent(currentItem, tabContent, indexColumn, indexColWidth, onRowSelection)
+    }
+}
+
+@Composable
 fun searchField(
     search: String,
     onContentUpdate: (String) -> Unit
 ) {
+    val searchText by remember { LanguageManager.getState("gui.text.search") }
+
     OutlinedTextField(
         value = search,
         onValueChange = {
             onContentUpdate(it)
         },
-        label = { Text(LanguageManager.getState("gui.text.search").value) },
+        label = { Text(searchText) },
         modifier = Modifier.padding(10.dp).fillMaxWidth(),
         singleLine = true,
         trailingIcon = {
-            IconButton(onClick = {
-                onContentUpdate("")
-            }) {
-                Icon(imageVector = Icons.Filled.Clear, contentDescription = "Clear")
+            if (search.isNotEmpty()) {
+                IconButton(onClick = {
+                    onContentUpdate("")
+                }) {
+                    Icon(imageVector = Icons.Filled.Clear, contentDescription = "Clear")
+                }
+            }
+        }
+    )
+}
+
+@Composable
+fun searchField(
+    search: String,
+    onContentUpdate: (String) -> Unit,
+    onBottomDo: () -> Unit
+) {
+    val searchText by remember { LanguageManager.getState("gui.text.search") }
+
+    OutlinedTextField(
+        value = search,
+        onValueChange = {
+            onContentUpdate(it)
+        },
+        label = { Text(searchText) },
+        modifier = Modifier.padding(10.dp).fillMaxWidth(),
+        singleLine = true,
+        trailingIcon = {
+            Row {
+                if (search.isNotEmpty()) {
+                    IconButton(onClick = {
+                        onContentUpdate("")
+                    }) {
+                        Icon(imageVector = Icons.Filled.Clear, contentDescription = "Clear")
+                    }
+                }
+                IconButton(onClick = {
+                    onBottomDo()
+                }) {
+                    Icon(imageVector = Icons.Filled.KeyboardArrowDown, contentDescription = "Bottom")
+                }
             }
         }
     )
@@ -189,8 +300,10 @@ fun tableHeader(
                     horizontalArrangement = Arrangement.SpaceEvenly,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
+                    val headerText by remember { LanguageManager.getState(it.headerText) }
+
                     Text(
-                        text = LanguageManager.getState(it.headerText).value,
+                        text = headerText,
                         style = MaterialTheme.typography.body1,
                         fontWeight = FontWeight.Bold
                     )

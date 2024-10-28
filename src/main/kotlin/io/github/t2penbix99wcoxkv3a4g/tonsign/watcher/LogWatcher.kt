@@ -6,6 +6,7 @@ import io.github.t2penbix99wcoxkv3a4g.tonsign.OSCSender
 import io.github.t2penbix99wcoxkv3a4g.tonsign.Utils
 import io.github.t2penbix99wcoxkv3a4g.tonsign.event.Event
 import io.github.t2penbix99wcoxkv3a4g.tonsign.event.EventArg
+import io.github.t2penbix99wcoxkv3a4g.tonsign.event.EventArg2
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ex.readLineUTF8
 import io.github.t2penbix99wcoxkv3a4g.tonsign.exception.UnknownRoundTypeException
 import io.github.t2penbix99wcoxkv3a4g.tonsign.exception.WrongRecentRoundException
@@ -73,6 +74,7 @@ class LogWatcher(val logFile: File) {
     private var isTONLoaded = false
 
     val onNextPredictionEvent = EventArg<GuessRoundType>()
+    val onRoundStartEvent = EventArg2<String, RoundType>()
     val onRoundOverEvent = EventArg<GuessRoundType>()
     val onReadLineEvent = EventArg<String>()
     val onJoinTONEvent = Event()
@@ -282,6 +284,9 @@ class LogWatcher(val logFile: File) {
                         "Guess is wrong, Last Guess: $lastPrediction, Actually is: $isSpecialOrNot, Wrong Count: $wrongCount"
                     )
                 }
+
+                val time = line.split(" - ")[0].substring(0, 19)
+                onRoundStartEvent(time, roundType)
 
                 updateRoundLog(roundType)
                 Logger.info(

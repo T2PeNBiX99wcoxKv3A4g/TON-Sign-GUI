@@ -7,26 +7,31 @@ import io.github.t2penbix99wcoxkv3a4g.tonsign.event.EventArg
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ex.safeDecodeFromFile
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ex.safeFormat
 import io.github.t2penbix99wcoxkv3a4g.tonsign.logger.Logger
+import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.logic.model.RoundData
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.io.File
 import kotlin.io.path.Path
 
-object ConfigManager {
-    private const val fileName = "config.yml"
+object SaveManager {
+    private const val fileName = "save.yml"
     private val scope = ConfigScope()
     private val filePath = Path(Utils.currentWorkingDirectory, fileName)
     private val fileBakPath = Path(Utils.currentWorkingDirectory, "$fileName.bak")
 
-    val Default = Config("en", 7, 30f, true, true)
-    val onConfigLoaded = EventArg<Config>()
+    val Default = Save(listOf<RoundData>())
+    val onLoadedSaveEvent = EventArg<Save>()
+    val onStartSaveEvent = EventArg<Save>()
 
-    private var _config: Config? = null
-    val config: Config
+    private var _save: Save? = null
+    var save: Save
         get() {
-            if (_config == null)
+            if (_save == null)
                 load()
-            return _config!!
+            return _save!!
+        }
+        set(value) {
+            _save = value
         }
 
     private var _file: File? = null
@@ -46,20 +51,21 @@ object ConfigManager {
     }
 
     fun load() {
-        _config = Yaml.default.safeDecodeFromFile<Config>(file, Default.copy(), {
+        _save = Yaml.default.safeDecodeFromFile<Save>(file, Default.copy(), {
             val text =
                 LanguageManager.getByLang("en", "exception.config_load_error").safeFormat(it.message ?: "Unknown")
             Utils.logger.error(it) { "[${this::class.simpleName!!}] $text" }
         }) {
-            Utils.logger.error(it) { "[${this::class.simpleName!!}] Config auto fix failed: ${(it.message)}" }
+            Utils.logger.error(it) { "[${this::class.simpleName!!}] Config auto fix failed: ${it.message}" }
             renameFile()
         }
         save()
-        onConfigLoaded(config)
+        onLoadedSaveEvent(save)
     }
 
     fun save() {
-        file.writeText(Yaml.default.encodeToString(Config.serializer(), config))
+        onStartSaveEvent(save)
+        file.writeText(Yaml.default.encodeToString(Save.serializer(), save))
     }
 
     private fun renameFile() {
@@ -67,14 +73,19 @@ object ConfigManager {
         val fileBakFile = fileBakPath.toFile()
 
         if (fileBakFile.exists())
-            fileBakFile.renameTo(Path(Utils.currentWorkingDirectory, "$fileName.${Utils.timeNowForFile}.bak").toFile())
+            fileBakFile.renameTo(
+                Path(
+                    Utils.currentWorkingDirectory,
+                    "${fileName}.${Utils.timeNowForFile}.bak"
+                ).toFile()
+            )
 
         file.renameTo(fileBakFile)
     }
 
     private suspend fun autoSave() {
         while (true) {
-            delay((config.autoSaveMinutes * 60 * 1000).toLong())
+            delay((ConfigManager.config.autoSaveMinutes * 60 * 1000).toLong())
             save()
             Logger.debug({ this::class.simpleName!! }, "Auto save")
         }

@@ -10,11 +10,13 @@ import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.window.TrayState
 import io.github.t2penbix99wcoxkv3a4g.tonsign.Utils
+import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.LanguageManager
 
 // https://github.com/olk90/compose-tableView/blob/main/src/main/kotlin/de/olk90/tableview/view/TabView.kt
 
@@ -50,7 +52,8 @@ fun tabs(tableState: MutableState<SelectionState>) {
     TabRow(selectedTabIndex = tableState.value.ordinal) {
         SelectionState.entries.forEach {
 //            LeadingIconTab()
-            Tab(text = { Text(it.gui.title()) }, selected = tableState.value == it, onClick = {
+            val title by remember { LanguageManager.getState(it.gui.title()) }
+            Tab(text = { Text(title) }, selected = tableState.value == it, onClick = {
                 tableState.value = it
             })
         }

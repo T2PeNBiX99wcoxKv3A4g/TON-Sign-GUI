@@ -35,6 +35,8 @@ dependencies {
     implementation("org.fusesource.jansi:jansi:${property("jansi.version")}")
     implementation("io.github.oshai:kotlin-logging-jvm:${property("kotlin-logging.version")}")
 //    implementation("org.jetbrains.androidx.navigation:navigation-compose:${property("navigation-compose.version")}")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:${property("kotlinx-serialization-json.version")}")
+//    implementation("io.github.kdroidfilter:composenativetray:${property("composenativetray.version")}")
 }
 
 compose.desktop {
