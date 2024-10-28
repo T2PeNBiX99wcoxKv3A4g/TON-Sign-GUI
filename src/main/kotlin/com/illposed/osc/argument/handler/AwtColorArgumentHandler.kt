@@ -32,8 +32,9 @@ import kotlin.jvm.Throws
  * in javaosc-core.
  */
 
-class AwtColorArgumentHandler : ArgumentHandler<Color>, Cloneable {
+open class AwtColorArgumentHandler : ArgumentHandler<Color>, Cloneable {
     companion object {
+        @Suppress("unused")
         @JvmField
         val INSTANCE: ArgumentHandler<Color> = AwtColorArgumentHandler()
 
@@ -60,7 +61,7 @@ class AwtColorArgumentHandler : ArgumentHandler<Color>, Cloneable {
 
     // Public API
     /** Allow overriding, but somewhat enforce the ugly singleton. */
-    private constructor() {
+    protected constructor() {
         // declared only for setting the access level
     }
 

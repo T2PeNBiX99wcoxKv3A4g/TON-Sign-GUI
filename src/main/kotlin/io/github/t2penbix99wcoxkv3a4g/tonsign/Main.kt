@@ -6,6 +6,7 @@ import androidx.compose.material.Text
 import androidx.compose.material.darkColors
 import androidx.compose.material.lightColors
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -14,6 +15,10 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Notification
@@ -25,13 +30,14 @@ import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberNotification
 import androidx.compose.ui.window.rememberWindowState
 import io.github.t2penbix99wcoxkv3a4g.tonsign.coroutineScope.LogicScope
+import io.github.t2penbix99wcoxkv3a4g.tonsign.event.EventArg
 import io.github.t2penbix99wcoxkv3a4g.tonsign.logger.Logger
 import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.ConfigManager
 import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.LanguageManager
 import io.github.t2penbix99wcoxkv3a4g.tonsign.roundType.GuessRoundType
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.app
+import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.logWatcher
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.nextPrediction
-import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.reader
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.showConfirmExitWindow
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.showNeedRestartWindows
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.theme.MaterialEXTheme
@@ -40,14 +46,16 @@ import io.github.t2penbix99wcoxkv3a4g.tonsign.watcher.VRChatWatcher
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-var readerIsStarted = false
-var runningTime = 0
-val logicScope = LogicScope()
-var needToWait = false
-val trayState = TrayState()
+private var logWatcherIsStarted = false
+private var runningTime = 0
+private val logicScope = LogicScope()
+private var needToWait = false
+private val trayState = TrayState()
+internal val logs = mutableStateListOf<AnnotatedString>()
+val readerInitEvent = EventArg<LogWatcher>()
 
 private fun startReader() {
-    if (readerIsStarted)
+    if (logWatcherIsStarted)
         return
 
     logicScope.launch {
@@ -65,11 +73,13 @@ private fun startReader() {
                 }
 
                 runningTime++
-                reader = LogWatcher.Default
-                reader!!.onNextPredictionEvent += ::onNextPrediction
-                reader!!.onRoundOverEvent += ::onRoundOver
-                reader!!.onLeftTONEvent += ::onLeftTON
-                reader!!.monitorRoundType()
+                logWatcher = LogWatcher.Default
+                logWatcher!!.onNextPredictionEvent += ::onNextPrediction
+                logWatcher!!.onRoundOverEvent += ::onRoundOver
+                logWatcher!!.onLeftTONEvent += ::onLeftTON
+                logWatcher!!.onReadLineEvent += ::onReadLine
+                readerInitEvent(logWatcher!!)
+                logWatcher!!.monitorRoundType()
             }.getOrElse {
                 Logger.error(it, "exception.something_is_not_right", it.message!!)
                 needToWait = false
@@ -77,7 +87,7 @@ private fun startReader() {
         }
     }
 
-    readerIsStarted = true
+    logWatcherIsStarted = true
 }
 
 private fun onNextPrediction(guessRound: GuessRoundType) {
@@ -104,6 +114,44 @@ private fun onRoundOver(guessRound: GuessRoundType) {
     )
 
     trayState.sendNotification(nextPredictionNotification)
+}
+
+private const val WARNING_KEY_WORD = " Warning"
+private const val ERROR_KEY_WORD = " Error"
+private const val EXCEPTION_KEY_WORD = " Exception"
+private var textColor = Color.White
+
+private fun onReadLine(line: String) {
+    logs.add(buildAnnotatedString {
+        if (" - " in line) {
+            if (textColor != Color.White)
+                textColor = Color.White
+
+            when {
+                WARNING_KEY_WORD in line -> {
+                    textColor = Color.Yellow
+                    withStyle(style = SpanStyle(color = textColor)) {
+                        append(line)
+                    }
+                }
+
+                ERROR_KEY_WORD in line || EXCEPTION_KEY_WORD in line -> {
+                    textColor = Color.Red
+                    withStyle(style = SpanStyle(color = textColor)) {
+                        append(line)
+                    }
+                }
+
+                else -> append(line)
+            }
+        } else {
+            withStyle(style = SpanStyle(color = textColor)) {
+                append(line)
+            }
+        }
+
+        append('\n')
+    })
 }
 
 fun main() = application {
@@ -148,6 +196,7 @@ fun main() = application {
                         }
                     )
                     Item(
+//                        LanguageManager.getState("gui.tray.exit").value,
                         "Exit",
                         onClick = {
                             isAskingToCloseSet = true

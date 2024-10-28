@@ -22,6 +22,9 @@
         </encoder>
     </appender>
 
+    <appender name="GUI" class="io.github.t2penbix99wcoxkv3a4g.tonsign.logger.EventAppender">
+    </appender>
+
     <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>${LOG_ROOT}/${LOG_FILE_NAME}.log</file>
         <append>false</append>
@@ -69,6 +72,7 @@
     -->
     <root level="INFO">
         <appender-ref ref="ASYNC"/>
+        <appender-ref ref="GUI"/>
         <appender-ref ref="FILE"/>
     </root>
 

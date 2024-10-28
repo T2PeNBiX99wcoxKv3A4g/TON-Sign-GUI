@@ -28,7 +28,7 @@ class LogWatcher(val logFile: File) {
 
         fun findLatestLog(): File {
             val files = Utils.logDirectory.toFile().listFiles { file, filename ->
-                return@listFiles filename.endsWith(".txt")
+                filename.endsWith(".txt")
             }
 
             if (files.size < 1)
@@ -37,10 +37,10 @@ class LogWatcher(val logFile: File) {
             files.sortWith { f1, f2 ->
                 val compare = f1.lastModified() > f2.lastModified()
                 if (compare)
-                    return@sortWith -1
+                    -1
                 else
-                    return@sortWith 1
-                return@sortWith 0
+                    1
+                0
             }
 
             Logger.info("log.current_log_running", files.first().name)
@@ -74,6 +74,7 @@ class LogWatcher(val logFile: File) {
 
     val onNextPredictionEvent = EventArg<GuessRoundType>()
     val onRoundOverEvent = EventArg<GuessRoundType>()
+    val onReadLineEvent = EventArg<String>()
     val onJoinTONEvent = Event()
     val onLeftTONEvent = Event()
     val isInTON = mutableStateOf(false)
@@ -86,9 +87,6 @@ class LogWatcher(val logFile: File) {
                 else -> ROUND_NORMAL_CHANGE
             }
         }
-
-    val nextRoundGuess: GuessRoundType
-        get() = lastPrediction
 
     fun isAlternatePattern(): Boolean {
         if (roundLog.size < 3) {
@@ -122,23 +120,25 @@ class LogWatcher(val logFile: File) {
 
         randomCount++
 
-        if (randomRound == RandomRoundType.Unknown) {
-            randomRound = if (isAlternate) RandomRoundType.FAST else RandomRoundType.NORMAL
-            randomCount = RANDOM_COUNT_RESET
-        }
+        when {
+            randomRound == RandomRoundType.Unknown -> {
+                randomRound = if (isAlternate) RandomRoundType.FAST else RandomRoundType.NORMAL
+                randomCount = RANDOM_COUNT_RESET
+            }
 
-        if (randomRound == RandomRoundType.NORMAL && isAlternate) {
-            randomRound = RandomRoundType.FAST
-            randomCount = RANDOM_COUNT_RESET
-            Logger.debug({ this::class.simpleName!! }, "Random type seem is wrong, change to $randomRound")
-        }
-
-        if (randomRound == RandomRoundType.FAST && randomCount > 2) {
-            val last = roundLog.takeLast(3)
-            if (last.size > 2 && last[0] == last[1] || last[1] == last[2]) {
-                randomRound = RandomRoundType.NORMAL
+            randomRound == RandomRoundType.NORMAL && isAlternate -> {
+                randomRound = RandomRoundType.FAST
                 randomCount = RANDOM_COUNT_RESET
                 Logger.debug({ this::class.simpleName!! }, "Random type seem is wrong, change to $randomRound")
+            }
+
+            randomRound == RandomRoundType.FAST && randomCount > 2 -> {
+                val last = roundLog.takeLast(3)
+                if (last.size > 2 && last[0] == last[1] || last[1] == last[2]) {
+                    randomRound = RandomRoundType.NORMAL
+                    randomCount = RANDOM_COUNT_RESET
+                    Logger.debug({ this::class.simpleName!! }, "Random type seem is wrong, change to $randomRound")
+                }
             }
         }
 
@@ -165,8 +165,8 @@ class LogWatcher(val logFile: File) {
     fun getRecentRoundsLog(maxRecent: Int): String {
         return roundLog.takeLast(maxRecent).joinToString {
             when (it) {
-                GuessRoundType.Classic -> return@joinToString LanguageManager.get("log.recent_rounds_log_classic")
-                GuessRoundType.Special -> return@joinToString LanguageManager.get("log.recent_rounds_log_special")
+                GuessRoundType.Classic -> LanguageManager.get("log.recent_rounds_log_classic")
+                GuessRoundType.Special -> LanguageManager.get("log.recent_rounds_log_special")
                 else -> throw WrongRecentRoundException(LanguageManager.get("exception.wrong_recent_round", it))
             }
         }
@@ -195,18 +195,23 @@ class LogWatcher(val logFile: File) {
 
         if (classification == GuessRoundType.Exempt && roundLog.size >= 2) {
             val last = roundLog.takeLast(2)
-            if (last[0] == GuessRoundType.Classic && last[1] == GuessRoundType.Classic)
-                classification = GuessRoundType.Special
-            else if (last[0] == GuessRoundType.Classic && last[1] == GuessRoundType.Special)
-                classification = GuessRoundType.Classic
-            else if (last[0] == GuessRoundType.Special && last[1] == GuessRoundType.Classic)
-                classification = if (isAlternatePattern()) GuessRoundType.Special else GuessRoundType.Classic
+            when {
+                last[0] == GuessRoundType.Classic && last[1] == GuessRoundType.Classic -> classification =
+                    GuessRoundType.Special
+
+                last[0] == GuessRoundType.Classic && last[1] == GuessRoundType.Special -> classification =
+                    GuessRoundType.Classic
+
+                last[0] == GuessRoundType.Special && last[1] == GuessRoundType.Classic -> classification =
+                    if (isAlternatePattern()) GuessRoundType.Special else GuessRoundType.Classic
+            }
         }
 
         roundLog.add(classification)
     }
 
     private fun readLine(line: String) {
+        onReadLineEvent(line)
         when {
             // TERROR NIGHTS STRING
             BONUS_ACTIVE_KEYWORD in line -> {
@@ -264,7 +269,7 @@ class LogWatcher(val logFile: File) {
 
                 if (possibleRoundType !in RoundTypeConvert.ENRoundTypes)
                     return
-                
+
                 val roundType = RoundTypeConvert.getTypeOfRound(possibleRoundType)
 
                 if (!RoundTypeConvert.isCorrectGuess(lastPrediction, roundType)) {
@@ -290,7 +295,7 @@ class LogWatcher(val logFile: File) {
                                     "exception.unknown_round_type",
                                     possibleRoundTypeForPrint
                                 )
-                                return@getOrElse LanguageManager.get(
+                                LanguageManager.get(
                                     "exception.unknown_round_type_simple",
                                     possibleRoundTypeForPrint
                                 )

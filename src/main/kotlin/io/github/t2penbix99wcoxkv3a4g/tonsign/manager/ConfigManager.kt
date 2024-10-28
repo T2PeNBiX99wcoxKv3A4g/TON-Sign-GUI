@@ -55,16 +55,16 @@ object ConfigManager {
                 LanguageManager.getByLang("en", "exception.config_load_error").safeFormat(it.message ?: "Unknown")
             Utils.logger.error(it) { "[${this::class.simpleName!!}] $text" }
 
-            return@getOrElse runCatching {
+            runCatching {
                 val data = Yaml.default.parseToYamlNode(file.readText())
                 val config = Default
 
                 data.yamlMap.entries.filter { yaml ->
-                    val prop = Config::class.memberProperties.find { return@find it.name == yaml.key.content }
-                    return@filter prop != null
+                    val prop = Config::class.memberProperties.find { it.name == yaml.key.content }
+                    prop != null
                 }.forEach { yaml ->
                     val prop =
-                        config::class.memberProperties.find { return@find it.name == yaml.key.content } as KMutableProperty1<Config, *>
+                        config::class.memberProperties.find { it.name == yaml.key.content } as KMutableProperty1<Config, *>
                     val value = yaml.value.yamlScalar
                     val returnType = prop.returnType
                     val classifier = returnType.classifier!!
@@ -88,18 +88,14 @@ object ConfigManager {
                     Utils.logger.debug { "Yaml Value Type Qualified Name: ${kClass.qualifiedName}" }
                 }
 
-                return@getOrElse config
+                config
             }.getOrElse {
                 Utils.logger.error(it) { "[${this::class.simpleName!!}] Config auto fix failed: ${it.message}" }
                 renameFile()
-                return@getOrElse Default
+                Default
             }
         }
         save()
-    }
-
-    fun writeDefault() {
-        file.writeText(Yaml.default.encodeToString(Config.serializer(), Default))
     }
 
     fun save() {

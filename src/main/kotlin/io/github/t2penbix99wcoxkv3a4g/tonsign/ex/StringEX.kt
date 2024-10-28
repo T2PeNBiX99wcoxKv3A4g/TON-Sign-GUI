@@ -9,6 +9,6 @@ fun String.toUTF8(): String {
 fun String.safeFormat(vararg args: Any?): String {
     return runCatching { this.format(*args) }.getOrElse {
         Logger.error(it, "exception.string_format_error", it.message!!)
-        return@getOrElse this
+        this
     }
 }

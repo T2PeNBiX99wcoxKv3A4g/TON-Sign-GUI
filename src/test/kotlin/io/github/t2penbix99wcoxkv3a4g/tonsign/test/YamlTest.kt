@@ -10,7 +10,7 @@ const val DIR = "Language"
 
 fun main() {
     Path(Utils.currentWorkingDirectory, DIR).toFile().listFiles { file, filename ->
-        return@listFiles filename.endsWith(".yml")
+        filename.endsWith(".yml")
     }.forEach {
         val data = Yaml.default.parseToYamlNode(it.readText())
         val test = data.yamlMap.get<YamlScalar>("log.no_log_file")

@@ -122,13 +122,12 @@ object RoundTypeConvert {
     }
 
     fun classifyRound(round: RoundType): GuessRoundType {
-        if (round in ExemptRounds)
-            return GuessRoundType.Exempt
-        else if (round in SpecialRounds)
-            return GuessRoundType.Special
-        else if (round in ClassicRounds)
-            return GuessRoundType.Classic
-        return GuessRoundType.NIL
+        return when (round) {
+            in ExemptRounds -> GuessRoundType.Exempt
+            in SpecialRounds -> GuessRoundType.Special
+            in ClassicRounds -> GuessRoundType.Classic
+            else -> GuessRoundType.NIL
+        }
     }
 
     fun isSpecialOrClassic(round: RoundType): GuessRoundType {

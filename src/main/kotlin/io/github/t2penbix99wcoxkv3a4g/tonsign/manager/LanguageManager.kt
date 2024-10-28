@@ -18,7 +18,11 @@ object LanguageManager {
     private val states = mutableMapOf<String, MutableState<String>>()
     private val langState = mutableStateOf("")
     private val language: String
-        get() = runCatching { return@runCatching ConfigManager.config.language }.getOrElse { return@getOrElse "en" }
+        get() = runCatching { ConfigManager.config.language }.getOrElse { "en" }
+
+    @Suppress("unused")
+    val lang: MutableState<String>
+        get() = langState
 
     init {
         load()
@@ -36,7 +40,7 @@ object LanguageManager {
                 return
             }
             dir.listFiles { file, filename ->
-                return@listFiles filename.endsWith(".yml")
+                filename.endsWith(".yml")
             }.forEach {
                 val data = Yaml.default.parseToYamlNode(it.readText())
                 val langID = it.name.split('.')[0]
@@ -84,10 +88,6 @@ object LanguageManager {
         else
             states[text]!!.value = get(text, *objects)
         return states[text]!!
-    }
-
-    fun getLang(): MutableState<String> {
-        return langState
     }
 
     fun setLang(lang: String) {
