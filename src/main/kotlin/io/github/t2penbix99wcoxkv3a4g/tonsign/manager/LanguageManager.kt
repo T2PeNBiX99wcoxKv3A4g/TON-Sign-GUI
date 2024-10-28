@@ -39,9 +39,7 @@ object LanguageManager {
                 )
                 return
             }
-            dir.listFiles { file, filename ->
-                filename.endsWith(".yml")
-            }.forEach {
+            dir.listFiles { file, filename -> filename.endsWith(".yml") }.forEach {
                 val data = Yaml.default.parseToYamlNode(it.readText())
                 val langID = it.name.split('.')[0]
 
