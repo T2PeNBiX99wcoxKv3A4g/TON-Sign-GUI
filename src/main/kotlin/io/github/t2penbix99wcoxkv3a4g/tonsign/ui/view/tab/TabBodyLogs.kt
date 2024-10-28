@@ -119,7 +119,7 @@ class TabBodyLogs : TabBodyBase() {
 
         fun searchFilter() {
             val filteredList = changedLogs.filter {
-                it.contains(search.value, ignoreCase = false)
+                it.contains(search.value, ignoreCase = true)
             }
             changedLogs.swapList(filteredList)
         }

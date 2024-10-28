@@ -122,8 +122,11 @@ private const val EXCEPTION_KEY_WORD = " Exception"
 private var textColor = Color.White
 
 private fun onReadLine(line: String) {
-    logs.add(buildAnnotatedString {
-        if (" - " in line) {
+    if (line.isEmpty())
+        return
+    val line = line.replace("\n", "")
+    if (" - " in line) {
+        logs.add(buildAnnotatedString {
             if (textColor != Color.White)
                 textColor = Color.White
 
@@ -144,14 +147,15 @@ private fun onReadLine(line: String) {
 
                 else -> append(line)
             }
-        } else {
+        })
+    } else {
+        logs[logs.size - 1] = logs.last().plus(buildAnnotatedString {
             withStyle(style = SpanStyle(color = textColor)) {
                 append(line)
             }
-        }
-
-        append('\n')
-    })
+            append('\n')
+        })
+    }
 }
 
 fun main() = application {

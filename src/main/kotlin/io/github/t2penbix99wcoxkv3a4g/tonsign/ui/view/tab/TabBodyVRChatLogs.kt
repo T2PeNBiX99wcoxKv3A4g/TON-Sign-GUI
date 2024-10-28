@@ -2,6 +2,7 @@ package io.github.t2penbix99wcoxkv3a4g.tonsign.ui.view.tab
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -47,7 +48,7 @@ class TabBodyVRChatLogs : TabBodyBase() {
 
         fun searchFilter() {
             val filteredList = changedLogs.filter {
-                it.contains(search.value, ignoreCase = false)
+                it.contains(search.value, ignoreCase = true)
             }
             changedLogs.swapList(filteredList)
         }
@@ -61,26 +62,27 @@ class TabBodyVRChatLogs : TabBodyBase() {
             searchFilter()
         }
 
-        LazyColumn(
-            modifier = Modifier.fillMaxSize()
-                .fillMaxWidth()
-                .padding(10.dp),
-            state = scrollState
-        ) {
-            items(changedLogs.size) {
-                Box(
-                    Modifier.fillMaxWidth()
-                        .background(Color(0, 0, 0, 20))
-                        .padding(start = 10.dp),
-                    contentAlignment = Alignment.CenterStart
-                ) {
-                    SelectionContainer {
+        SelectionContainer {
+            LazyColumn(
+                modifier = Modifier.fillMaxSize()
+                    .fillMaxWidth()
+                    .padding(10.dp),
+                state = scrollState
+            ) {
+                items(changedLogs.size) {
+                    Box(
+                        Modifier.fillMaxWidth()
+                            .fillMaxHeight()
+                            .background(Color(0, 0, 0, 20))
+                            .padding(start = 10.dp),
+                        contentAlignment = Alignment.CenterStart
+                    ) {
                         Text(changedLogs[it])
                     }
-                }
 
-                scope.launch {
-                    scrollState.scrollToItem((changedLogs.size - 1).coerceAtLeast(0))
+                    scope.launch {
+                        scrollState.scrollToItem((changedLogs.size - 1).coerceAtLeast(0))
+                    }
                 }
             }
         }
