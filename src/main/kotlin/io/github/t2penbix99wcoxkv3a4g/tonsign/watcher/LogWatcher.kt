@@ -37,10 +37,10 @@ class LogWatcher(val logFile: File) {
             files.sortWith { f1, f2 ->
                 val compare = f1.lastModified() > f2.lastModified()
                 if (compare)
-                    -1
+                    return@sortWith -1
                 else
-                    1
-                0
+                    return@sortWith 1
+                return@sortWith 0
             }
 
             Logger.info("log.current_log_running", files.first().name)
