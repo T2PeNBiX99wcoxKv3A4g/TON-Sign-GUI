@@ -2,6 +2,7 @@ package io.github.t2penbix99wcoxkv3a4g.tonsign.ui.view.tab
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -10,6 +11,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
@@ -22,22 +25,39 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.TrayState
+import androidx.compose.ui.window.Window
+import androidx.compose.ui.window.WindowPosition.Aligned
+import androidx.compose.ui.window.rememberWindowState
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ex.swapList
 import io.github.t2penbix99wcoxkv3a4g.tonsign.logs
 import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.ConfigManager
+import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.theme.MaterialEXTheme
+import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.view.SearchButton
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.view.searchField
 import kotlinx.coroutines.launch
 
 class TabBodyVRChatLogs : TabBodyBase() {
-    override val title = { "gui.tab.title.vrchat_logs" }
+    override val title: String
+        get() {
+            return "gui.tab.title.vrchat_logs"
+        }
+
+    override val onTop: MutableState<Boolean>
+        get() {
+            return isOnTop
+        }
+
+    private val isOnTop = mutableStateOf(false)
 
     @Composable
-    override fun view(
+    private fun viewAll(
         trayState: TrayState,
         needRestart: MutableState<Boolean>,
-        needRefresh: MutableState<Boolean>
+        needRefresh: MutableState<Boolean>,
+        isTopWindow: Boolean
     ) {
         val scope = rememberCoroutineScope()
         val scrollState = rememberLazyListState()
@@ -45,6 +65,7 @@ class TabBodyVRChatLogs : TabBodyBase() {
         var search by remember { mutableStateOf("") }
         var changedLogs = remember { mutableStateListOf<AnnotatedString>() }
         val autoScrollToDown by remember { mutableStateOf(ConfigManager.config.autoScrollToDown) }
+        var isOnTop by remember { isOnTop }
 
         changedLogs.clear()
         changedLogs.addAll(logs)
@@ -59,14 +80,27 @@ class TabBodyVRChatLogs : TabBodyBase() {
         if (search.isNotEmpty())
             searchFilter()
 
-        searchField(search, {
-            search = it
-            searchFilter()
-        }) {
-            scope.launch {
-                scrollState.scrollToItem((changedLogs.size - 1).coerceAtLeast(0))
-            }
-        }
+        val searchButtons = if (!isTopWindow) {
+            listOf(
+                SearchButton({
+                    isOnTop = true
+                }, Icons.Filled.Menu, "IsOnTop")
+            )
+        } else
+            listOf()
+
+        searchField(
+            search,
+            {
+                search = it
+                searchFilter()
+            },
+            {
+                scope.launch {
+                    scrollState.scrollToItem((changedLogs.size - 1).coerceAtLeast(0))
+                }
+            }, searchButtons
+        )
 
         SelectionContainer {
             LazyColumn(
@@ -90,6 +124,38 @@ class TabBodyVRChatLogs : TabBodyBase() {
                     scope.launch {
                         scrollState.scrollToItem((changedLogs.size - 1).coerceAtLeast(0))
                     }
+                }
+            }
+        }
+    }
+
+    @Composable
+    override fun view(
+        trayState: TrayState,
+        needRestart: MutableState<Boolean>,
+        needRefresh: MutableState<Boolean>
+    ) {
+        viewAll(trayState, needRestart, needRefresh, false)
+    }
+
+    @Composable
+    override fun onTopDo(trayState: TrayState, needRestart: MutableState<Boolean>, needRefresh: MutableState<Boolean>) {
+        val windowState =
+            rememberWindowState(position = Aligned(alignment = Alignment.Center), size = DpSize(500.dp, 350.dp))
+        var isOnTop by remember { isOnTop }
+
+        if (!isOnTop) return
+
+        Window(
+            onCloseRequest = { isOnTop = false },
+            visible = true,
+            title = "VRChat Log View",
+            state = windowState,
+            alwaysOnTop = true
+        ) {
+            MaterialEXTheme {
+                Column(Modifier.fillMaxWidth()) {
+                    viewAll(trayState, needRestart, needRefresh, true)
                 }
             }
         }

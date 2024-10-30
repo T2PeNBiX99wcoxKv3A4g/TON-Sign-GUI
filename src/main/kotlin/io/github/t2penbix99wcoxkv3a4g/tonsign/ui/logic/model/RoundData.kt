@@ -8,6 +8,7 @@ import kotlinx.serialization.Serializable
 data class RoundData(
     @TableHeader("gui.tab.table_header.log_data.time", 0)
     val time: String,
-    @TableHeader("Round Type", 1)
-    val roundType: RoundType
+    @TableHeader("gui.tab.table_header.round_data.round_type", 1)
+    val roundType: RoundType,
+    var roundDetail: RoundDataDetail
 )

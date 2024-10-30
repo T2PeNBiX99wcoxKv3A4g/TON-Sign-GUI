@@ -14,7 +14,10 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 class TabBodyLogDatas : TabBodyBase() {
-    override val title = { "gui.tab.title.log_datas" }
+    override val title: String
+        get() {
+            return "gui.tab.title.log_datas"
+        }
     private val logDatas = mutableStateListOf<LogData>()
 
     init {
@@ -35,7 +38,7 @@ class TabBodyLogDatas : TabBodyBase() {
             )
         )
     }
-    
+
     @Composable
     override fun view(
         trayState: TrayState,

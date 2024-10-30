@@ -11,6 +11,7 @@ import com.charleskorn.kaml.yamlList
 import com.charleskorn.kaml.yamlMap
 import com.charleskorn.kaml.yamlScalar
 import io.github.t2penbix99wcoxkv3a4g.tonsign.Utils
+import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.logic.model.RoundData
 import java.io.File
 import kotlin.reflect.KClass
 import kotlin.reflect.KMutableProperty1
@@ -65,20 +66,6 @@ inline fun <reified T> Yaml.safeDecodeFromFile(
                         Utils.logger.debug { "Yaml Value Type Qualified Name: ${yaml.key.content} | ${kClass.qualifiedName}" }
                     }
 
-                    is YamlList -> {
-                        val value = value.yamlList
-                        val list = value.items
-                        val returnType = prop.returnType
-                        val classifier = returnType.classifier!!
-                        val kClass = classifier as KClass<*>
-
-                        list.forEach {
-
-                        }
-
-                        TODO("Not finish")
-                    }
-
                     is YamlMap -> {
                         val value = value.yamlMap
                         val returnType = prop.returnType
@@ -88,6 +75,27 @@ inline fun <reified T> Yaml.safeDecodeFromFile(
                         value.entries
 
                         TODO("Not finish")
+                    }
+
+                    is YamlList -> {
+                        val value = value.yamlList
+                        val list = value.items
+                        val returnType = prop.returnType
+                        val classifier = returnType.classifier!!
+                        val kClass = classifier as KClass<*>
+
+                        if (default is RoundData) {
+                            list.forEach {
+//                                it.key
+                            }
+                        } else {
+                            list.forEach {
+//                                it.yamlScalar
+//                                it.yamlMap
+                            }
+
+                            TODO("Not finish")
+                        }
                     }
 
                     is YamlNull -> TODO("Not finish")
@@ -102,3 +110,16 @@ inline fun <reified T> Yaml.safeDecodeFromFile(
         }
     }
 }
+
+private fun yamlScalarHandle(yamlScalar: YamlScalar) {
+
+}
+
+//fun Yaml.safeDecodeFromFile(
+//    file: File,
+//    default: RoundData,
+//    onError: (Throwable) -> Unit,
+//    onFailure: (Throwable) -> Unit
+//): RoundData {
+//    
+//}

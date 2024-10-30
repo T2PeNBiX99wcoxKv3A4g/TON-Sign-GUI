@@ -18,7 +18,7 @@ object ConfigManager {
     private val filePath = Path(Utils.currentWorkingDirectory, fileName)
     private val fileBakPath = Path(Utils.currentWorkingDirectory, "$fileName.bak")
 
-    val Default = Config("en", 7, 30f, true, true)
+    val Default = Config("en", 7, 30f, true, true, false)
     val onConfigLoaded = EventArg<Config>()
 
     private var _config: Config? = null

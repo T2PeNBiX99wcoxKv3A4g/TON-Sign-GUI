@@ -7,6 +7,7 @@ import io.github.t2penbix99wcoxkv3a4g.tonsign.event.EventArg
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ex.safeDecodeFromFile
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ex.safeFormat
 import io.github.t2penbix99wcoxkv3a4g.tonsign.logger.Logger
+import io.github.t2penbix99wcoxkv3a4g.tonsign.onLoadedSave
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.logic.model.RoundData
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -60,6 +61,7 @@ object SaveManager {
             renameFile()
         }
         save()
+        onLoadedSave(save)
         onLoadedSaveEvent(save)
     }
 

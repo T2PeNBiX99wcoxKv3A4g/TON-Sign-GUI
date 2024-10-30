@@ -1,13 +1,12 @@
 package io.github.t2penbix99wcoxkv3a4g.tonsign.ui.view.tab
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Button
-import androidx.compose.material.Switch
 import androidx.compose.material.Text
-import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
@@ -20,10 +19,14 @@ import androidx.compose.ui.window.TrayState
 import io.github.t2penbix99wcoxkv3a4g.tonsign.OSCSender
 import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.ConfigManager
 import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.LanguageManager
+import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.SaveManager
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.view.switchWithText
 
 class TabBodySetting : TabBodyBase() {
-    override val title = { "gui.tab.title.setting" }
+    override val title: String
+        get() {
+            return "gui.tab.title.setting"
+        }
 
     @Composable
     override fun view(
@@ -32,16 +35,19 @@ class TabBodySetting : TabBodyBase() {
         needRefresh: MutableState<Boolean>
     ) {
         var needRefreshSet by needRefresh
+        var needRestartSet by needRestart
         var onlySpecial by remember { mutableStateOf(ConfigManager.config.onlySpecial) }
         var autoScrollToDown by remember { mutableStateOf(ConfigManager.config.autoScrollToDown) }
-        val forceSendTrue by remember { LanguageManager.getState("gui.button.force_send_true") }
-        val forceSendFalse by remember { LanguageManager.getState("gui.button.force_send_false") }
-        val refresh by remember { LanguageManager.getState("gui.button.refresh") }
-        val state = rememberScrollState()
+        var onTop by remember { mutableStateOf(ConfigManager.config.onTop) }
+        val forceSendTrue by remember { LanguageManager.getState("gui.button.setting.force_send_true") }
+        val forceSendFalse by remember { LanguageManager.getState("gui.button.setting.force_send_false") }
+        val refresh by remember { LanguageManager.getState("gui.button.setting.refresh") }
+        val scrollState = rememberScrollState()
 
         Column(
             modifier = Modifier.padding(10.dp)
-                .verticalScroll(state)
+                .fillMaxSize()
+                .verticalScroll(scrollState)
         ) {
             Button(
                 onClick = {
@@ -59,7 +65,7 @@ class TabBodySetting : TabBodyBase() {
             }
             Button(
                 onClick = {
-                    LanguageManager.setLang("jp")
+                    LanguageManager.setLanguage("jp")
                     needRefreshSet = true
                 }
             ) {
@@ -67,7 +73,7 @@ class TabBodySetting : TabBodyBase() {
             }
             Button(
                 onClick = {
-                    LanguageManager.setLang("en")
+                    LanguageManager.setLanguage("en")
                     needRefreshSet = true
                 }
             ) {
@@ -80,6 +86,20 @@ class TabBodySetting : TabBodyBase() {
             ) {
                 Text(refresh)
             }
+            Button(
+                onClick = {
+                    ConfigManager.save()
+                }
+            ) {
+                Text("Save config")
+            }
+            Button(
+                onClick = {
+                    SaveManager.save()
+                }
+            ) {
+                Text("Save data")
+            }
             switchWithText("Only send notification when round is special", onlySpecial) {
                 onlySpecial = it
                 ConfigManager.config.onlySpecial = it
@@ -87,6 +107,11 @@ class TabBodySetting : TabBodyBase() {
             switchWithText("Auto scroll to down in logs", autoScrollToDown) {
                 autoScrollToDown = it
                 ConfigManager.config.autoScrollToDown = it
+            }
+            switchWithText("Always On Top", onTop) {
+                onTop = it
+                ConfigManager.config.onTop = it
+                needRestartSet = true
             }
         }
     }

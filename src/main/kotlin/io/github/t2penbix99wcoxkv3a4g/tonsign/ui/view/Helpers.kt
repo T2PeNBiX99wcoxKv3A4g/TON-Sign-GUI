@@ -19,7 +19,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.view.tab.TabBodyBase
-import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.view.tab.TabBodyLogDatas
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.view.tab.TabBodyLogs
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.view.tab.TabBodyMain
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.view.tab.TabBodyRoundDatas
@@ -28,10 +27,9 @@ import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.view.tab.TabBodyVRChatLogs
 
 enum class SelectionState(val gui: TabBodyBase) {
     Main(TabBodyMain()),
-    Logs(TabBodyLogs()),
-    LogDatas(TabBodyLogDatas()),
-    VRChatLogs(TabBodyVRChatLogs()),
     RoundDatas(TabBodyRoundDatas()),
+    Logs(TabBodyLogs()),
+    VRChatLogs(TabBodyVRChatLogs()),
     Setting(TabBodySetting())
 }
 

@@ -7,6 +7,7 @@ import com.charleskorn.kaml.YamlMap
 import com.charleskorn.kaml.YamlScalar
 import com.charleskorn.kaml.yamlMap
 import io.github.t2penbix99wcoxkv3a4g.tonsign.Utils
+import io.github.t2penbix99wcoxkv3a4g.tonsign.ex.firstPath
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ex.safeFormat
 import io.github.t2penbix99wcoxkv3a4g.tonsign.exception.FolderNotFoundException
 import io.github.t2penbix99wcoxkv3a4g.tonsign.logger.Logger
@@ -41,7 +42,7 @@ object LanguageManager {
             }
             dir.listFiles { file, filename -> filename.endsWith(".yml") }.forEach {
                 val data = Yaml.default.parseToYamlNode(it.readText())
-                val langID = it.name.split('.')[0]
+                val langID = it.name.firstPath('.')
 
                 dataBase[langID] = data.yamlMap
             }
@@ -51,7 +52,7 @@ object LanguageManager {
     }
 
     fun exists(text: String): Boolean {
-        if (language in dataBase && dataBase[language]?.get<YamlScalar>(text) != null)
+        if (language in dataBase && dataBase[language]!!.get<YamlScalar>(text) != null)
             return true
 
         if ("en" in dataBase && dataBase["en"]!!.get<YamlScalar>(text) != null)
@@ -59,10 +60,12 @@ object LanguageManager {
         return false
     }
 
-    fun existsLang(lang: String) = lang in dataBase
+    fun exists(lang: String, text: String) = lang in dataBase && dataBase[lang]!!.get<YamlScalar>(text) != null
+
+    fun existsLanguage(lang: String) = lang in dataBase
 
     fun getByLang(lang: String, text: String): String {
-        if (lang !in dataBase || dataBase[lang]?.get<YamlScalar>(text) == null) {
+        if (lang !in dataBase || dataBase[lang]!!.get<YamlScalar>(text) == null) {
             if ("en" in dataBase && dataBase["en"]!!.get<YamlScalar>(text) != null)
                 return dataBase["en"]!!.get<YamlScalar>(text)!!.content
             return text
@@ -70,12 +73,13 @@ object LanguageManager {
         return dataBase[lang]!!.get<YamlScalar>(text)!!.content
     }
 
-    fun get(text: String): String {
-        return getByLang(language, text)
-    }
+    fun getByLang(lang: String, text: String, vararg objects: Any) = getByLang(lang, text).safeFormat(*objects)
+    fun get(text: String, vararg objects: Any) = getByLang(language, text, *objects)
 
-    fun get(text: String, vararg objects: Any): String {
-        return get(text).safeFormat(*objects)
+    fun getWithEn(text: String, vararg objects: Any): String {
+        if (!exists(language, text) || language == "en" || get(text, *objects) == getByLang("en", text, *objects))
+            return getByLang("en", text, *objects)
+        return "${get(text, *objects)} (${getByLang("en", text, *objects)})"
     }
 
     fun getState(text: String, vararg objects: Any): MutableState<String> {
@@ -88,8 +92,18 @@ object LanguageManager {
         return states[text]!!
     }
 
-    fun setLang(lang: String) {
-        if (!existsLang(lang)) return
+    fun getStateWithEn(text: String, vararg objects: Any): MutableState<String> {
+        if (!exists(language, text) || language == "en" || get(text, *objects) == getByLang("en", text, *objects))
+            return mutableStateOf(getByLang("en", text, *objects))
+        if (text !in states)
+            states[text] = mutableStateOf(getWithEn(text, *objects))
+        else
+            states[text]!!.value = getWithEn(text, *objects)
+        return states[text]!!
+    }
+
+    fun setLanguage(lang: String) {
+        if (!existsLanguage(lang)) return
         runCatching { ConfigManager.config.language = lang }
         langState.value = lang
     }

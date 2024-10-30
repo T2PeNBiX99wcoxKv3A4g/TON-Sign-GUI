@@ -31,6 +31,7 @@ import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -258,6 +259,55 @@ fun searchField(
                     onBottomDo()
                 }) {
                     Icon(imageVector = Icons.Filled.KeyboardArrowDown, contentDescription = "Bottom")
+                }
+            }
+        }
+    )
+}
+
+data class SearchButton(
+    val onClick: () -> Unit,
+    val imageVector: ImageVector,
+    val contentDescription: String
+)
+
+@Composable
+fun searchField(
+    search: String,
+    onContentUpdate: (String) -> Unit,
+    onBottomDo: () -> Unit,
+    searchButtons: List<SearchButton>
+) {
+    val searchText by remember { LanguageManager.getState("gui.text.search") }
+
+    OutlinedTextField(
+        value = search,
+        onValueChange = {
+            onContentUpdate(it)
+        },
+        label = { Text(searchText) },
+        modifier = Modifier.padding(10.dp).fillMaxWidth(),
+        singleLine = true,
+        trailingIcon = {
+            Row {
+                if (search.isNotEmpty()) {
+                    IconButton(onClick = {
+                        onContentUpdate("")
+                    }) {
+                        Icon(imageVector = Icons.Filled.Clear, contentDescription = "Clear")
+                    }
+                }
+                IconButton(onClick = {
+                    onBottomDo()
+                }) {
+                    Icon(imageVector = Icons.Filled.KeyboardArrowDown, contentDescription = "Bottom")
+                }
+                searchButtons.forEach {
+                    IconButton(onClick = {
+                        it.onClick()
+                    }) {
+                        Icon(imageVector = it.imageVector, contentDescription = it.contentDescription)
+                    }
                 }
             }
         }

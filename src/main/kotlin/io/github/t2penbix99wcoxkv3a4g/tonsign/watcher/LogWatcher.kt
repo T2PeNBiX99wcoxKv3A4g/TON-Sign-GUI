@@ -6,7 +6,10 @@ import io.github.t2penbix99wcoxkv3a4g.tonsign.OSCSender
 import io.github.t2penbix99wcoxkv3a4g.tonsign.Utils
 import io.github.t2penbix99wcoxkv3a4g.tonsign.event.Event
 import io.github.t2penbix99wcoxkv3a4g.tonsign.event.EventArg
-import io.github.t2penbix99wcoxkv3a4g.tonsign.event.EventArg2
+import io.github.t2penbix99wcoxkv3a4g.tonsign.event.EventArg3
+import io.github.t2penbix99wcoxkv3a4g.tonsign.ex.firstPath
+import io.github.t2penbix99wcoxkv3a4g.tonsign.ex.lastPath
+import io.github.t2penbix99wcoxkv3a4g.tonsign.ex.middlePath
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ex.readLineUTF8
 import io.github.t2penbix99wcoxkv3a4g.tonsign.exception.UnknownRoundTypeException
 import io.github.t2penbix99wcoxkv3a4g.tonsign.exception.WrongRecentRoundException
@@ -17,11 +20,17 @@ import io.github.t2penbix99wcoxkv3a4g.tonsign.roundType.GuessRoundType
 import io.github.t2penbix99wcoxkv3a4g.tonsign.roundType.RandomRoundType
 import io.github.t2penbix99wcoxkv3a4g.tonsign.roundType.RoundType
 import io.github.t2penbix99wcoxkv3a4g.tonsign.roundType.RoundTypeConvert
+import io.github.t2penbix99wcoxkv3a4g.tonsign.roundType.getTypeOfRound
+import io.github.t2penbix99wcoxkv3a4g.tonsign.roundType.jpToEn
+import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.logic.model.PlayerData
+import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.logic.model.PlayerStatus
+import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.logic.model.Terror
 import kotlinx.coroutines.delay
 import java.io.File
 import java.io.FileNotFoundException
 import java.io.RandomAccessFile
 
+// TODO: Log Interpreter
 class LogWatcher(val logFile: File) {
     companion object {
         val Default: LogWatcher
@@ -56,8 +65,28 @@ class LogWatcher(val logFile: File) {
         private const val ROUND_FAST_CHANGE = 6
         private const val ROUND_NORMAL_CHANGE = 15
         private const val WORLD_JOIN_KEYWORD =
-            "Memory Usage: after world loaded [wrld_a61cdabe-1218-4287-9ffc-2a4d1414e5bd]"
+            "Memory Usage: after world loaded "
+        private const val WORLD_TON_KEYWORD = "wrld_a61cdabe-1218-4287-9ffc-2a4d1414e5bd"
         private const val WORLD_LEFT_KEYWORD = "OnLeftRoom"
+        private const val WORLD_PLAYER_LEFT_KEYWORD = "OnPlayerLeft"
+        private const val WORLD_PLAYER_JOINED_KEYWORD = "OnPlayerJoined"
+        private const val ROUND_WON_KEYWORD = "Player Won"
+        private const val ROUND_LOST_KEYWORD = "Player lost,"
+        private const val ROUND_DEATH_KEYWORD = "You died."
+        private const val PLAYER_DEATH_KEYWORD = "[DEATH]"
+        private const val KILLER_MATRIX_KEYWORD = "Killers have been set - "
+        private const val KILLER_MATRIX_UNKNOWN = "Killers is unknown - "
+        private const val KILLER_MATRIX_REVEAL = "Killers have been revealed - "
+        private const val KILLER_ROUND_TYPE_KEYWORD = " // Round type is "
+        private const val TERROR_HUNGRY_HOME_INVADER_KEYWORD = "HungryHomeInvader"
+        private const val TERROR_ATRACHED_KEYWORD = "Atrached"
+        private const val TERROR_WILD_YET_BLOODTHIRSTY_CREATURE_KEYWORD = "Wild Yet Bloodthirsty Creature"
+        private const val TERROR_TRANSPORTATION_TRIO_THE_DRIFTER_KEYWORD = "Transportation Trio & The Drifter"
+        private const val TERROR_RED_MIST_APPARITION_KEYWORD = "Red Mist Apparition"
+        private const val TERROR_BALDI_KEYWORD = "Baldi"
+        private const val TERROR_SHADOW_FREDDY_KEYWORD = "Shadow Freddy"
+        private const val TERROR_SEARCHLIGHTS_KEYWORD = "Searchlights"
+        private const val TERROR_ALTERNATES_KEYWORD = "Alternates"
         private const val RANDOM_COUNT_CHANGE = 1
         private const val RANDOM_COUNT_RESET = 3
     }
@@ -66,6 +95,7 @@ class LogWatcher(val logFile: File) {
     private var lastPosition = 0L
     private var lastPredictionForOSC = false
     private var lastPrediction = GuessRoundType.NIL
+    private var lastRoundType = RoundType.Unknown
     private var bonusFlag = false
     private var randomRound = RandomRoundType.Unknown
     private var randomCount = 0
@@ -74,11 +104,21 @@ class LogWatcher(val logFile: File) {
     private var isTONLoaded = false
 
     val onNextPredictionEvent = EventArg<GuessRoundType>()
-    val onRoundStartEvent = EventArg2<String, RoundType>()
+    val onRoundStartEvent = EventArg3<String, RoundType, String>()
     val onRoundOverEvent = EventArg<GuessRoundType>()
+    val onRoundWonEvent = Event()
+    val onRoundLostEvent = Event()
+    val onRoundDeathEvent = Event()
     val onReadLineEvent = EventArg<String>()
     val onJoinTONEvent = Event()
     val onLeftTONEvent = Event()
+    val onJoinRoomEvent = EventArg<String>()
+    val onLeftRoomEvent = Event()
+    val onPlayerLeftRoomEvent = EventArg<String>()
+    val onPlayerJoinedRoomEvent = EventArg<String>()
+    val onPlayerDeathEvent = EventArg<PlayerData>()
+    val onKillerSetEvent = EventArg<ArrayList<Int>>()
+    val onHideTerrorShowUpEvent = EventArg<Int>()
     val isInTON = mutableStateOf(false)
 
     private val maxRoundChange: Int
@@ -234,13 +274,20 @@ class LogWatcher(val logFile: File) {
             }
 
             WORLD_JOIN_KEYWORD in line -> {
-                isTONLoaded = true
-                isInTON.value = true
-                Logger.info("log.is_join_ton")
-                onJoinTONEvent()
+                val worldId = line.lastPath(WORLD_JOIN_KEYWORD).middlePath('[', ']')
+
+                onJoinRoomEvent(worldId)
+
+                if (worldId == WORLD_TON_KEYWORD) {
+                    isTONLoaded = true
+                    isInTON.value = true
+                    Logger.info("log.is_join_ton")
+                    onJoinTONEvent()
+                }
             }
 
             WORLD_LEFT_KEYWORD in line -> {
+                onLeftRoomEvent()
                 if (isTONLoaded) {
                     isInTON.value = false
                     Logger.info("log.is_left_ton")
@@ -249,30 +296,123 @@ class LogWatcher(val logFile: File) {
                 }
             }
 
+            WORLD_PLAYER_LEFT_KEYWORD in line -> {
+                val player = line.lastPath(WORLD_PLAYER_LEFT_KEYWORD).trim()
+                onPlayerLeftRoomEvent(player)
+            }
+
+            WORLD_PLAYER_JOINED_KEYWORD in line -> {
+                val player = line.lastPath(WORLD_PLAYER_JOINED_KEYWORD).trim()
+                onPlayerJoinedRoomEvent(player)
+            }
+
             ROUND_OVER_KEYWORD in line -> {
+                if (!isInTON.value) return
                 onRoundOverEvent(lastPrediction)
             }
 
+            ROUND_WON_KEYWORD in line -> {
+                if (!isInTON.value) return
+                onRoundWonEvent()
+            }
+
+            ROUND_LOST_KEYWORD in line -> {
+                if (!isInTON.value) return
+                onRoundLostEvent()
+            }
+
+            ROUND_DEATH_KEYWORD in line -> {
+                if (!isInTON.value) return
+                onRoundDeathEvent()
+            }
+
+            PLAYER_DEATH_KEYWORD in line -> {
+                if (!isInTON.value) return
+                val str = line.lastPath(PLAYER_DEATH_KEYWORD)
+                val msgAndName = str.split(']')
+                val name = msgAndName[0].substring(1).trim()
+                val msg = msgAndName[1].trim()
+                onPlayerDeathEvent(PlayerData(name, PlayerStatus.Death, msg))
+            }
+
+            TERROR_HUNGRY_HOME_INVADER_KEYWORD in line -> {
+                if (!isInTON.value || lastRoundType != RoundType.Classic) return
+                onHideTerrorShowUpEvent(Terror.HIDE)
+            }
+
+            TERROR_ATRACHED_KEYWORD in line -> {
+                if (!isInTON.value || lastRoundType != RoundType.Classic) return
+                onHideTerrorShowUpEvent(Terror.HIDE + 1)
+            }
+
+            TERROR_WILD_YET_BLOODTHIRSTY_CREATURE_KEYWORD in line -> {
+                if (!isInTON.value || lastRoundType != RoundType.Classic) return
+                onHideTerrorShowUpEvent(Terror.HIDE + 2)
+            }
+
+            TERROR_TRANSPORTATION_TRIO_THE_DRIFTER_KEYWORD in line -> {
+                if (!isInTON.value || lastRoundType != RoundType.Unbound) return
+                onHideTerrorShowUpEvent(Terror.HIDE)
+            }
+
+            TERROR_RED_MIST_APPARITION_KEYWORD in line -> {
+                if (!isInTON.value || lastRoundType != RoundType.EightPages) return
+                onHideTerrorShowUpEvent(Terror.HIDE)
+            }
+
+            TERROR_BALDI_KEYWORD in line -> {
+                if (!isInTON.value || lastRoundType != RoundType.EightPages) return
+                onHideTerrorShowUpEvent(Terror.HIDE + 1)
+            }
+
+            TERROR_SHADOW_FREDDY_KEYWORD in line -> {
+                if (!isInTON.value || lastRoundType != RoundType.EightPages) return
+                onHideTerrorShowUpEvent(Terror.HIDE + 2)
+            }
+
+            TERROR_SEARCHLIGHTS_KEYWORD in line -> {
+                if (!isInTON.value || lastRoundType != RoundType.EightPages) return
+                onHideTerrorShowUpEvent(Terror.HIDE + 3)
+            }
+
+            TERROR_ALTERNATES_KEYWORD in line -> {
+                if (!isInTON.value || lastRoundType != RoundType.EightPages) return
+                onHideTerrorShowUpEvent(Terror.HIDE + 4)
+            }
+
+            // https://github.com/ChrisFeline/ToNSaveManager/blob/main/Windows/MainWindow.cs
+            KILLER_MATRIX_KEYWORD in line || KILLER_MATRIX_UNKNOWN in line || KILLER_MATRIX_REVEAL in line -> {
+                if (!isInTON.value) return
+                val isUnknown = KILLER_MATRIX_UNKNOWN in line
+                val isRevealed = KILLER_MATRIX_REVEAL in line
+                val killerMatrix = arrayListOf<Int>(Terror.UNKNOWN, Terror.UNKNOWN, Terror.UNKNOWN)
+
+                if (!isUnknown) {
+                    val kMatrixRaw = line.middlePath(
+                        if (isRevealed) KILLER_MATRIX_REVEAL else KILLER_MATRIX_KEYWORD,
+                        KILLER_ROUND_TYPE_KEYWORD
+                    ).trim().split(' ')
+                    for (i in 0..killerMatrix.size - 1) {
+                        killerMatrix[i] = runCatching { kMatrixRaw[i].trim().toInt() }.getOrElse { -1 }
+                    }
+                }
+
+                onKillerSetEvent(killerMatrix)
+            }
+
             ROUND_TYPE_IS_KEYWORD in line -> {
-                val parts = line.split(ROUND_TYPE_IS_KEYWORD)
-
-                if (parts.size < 2)
-                    return
-
-                val path = parts[1]
-                var possibleRoundType = path.substring(1, path.length)
+                if (!isInTON.value) return
+                var possibleRoundType = line.lastPath(ROUND_TYPE_IS_KEYWORD).trim()
                 val possibleRoundTypeForPrint = possibleRoundType
 
                 Logger.debug({ this::class.simpleName!! }, "possibleRoundType: '${possibleRoundType}'")
 
-                if (possibleRoundType in RoundTypeConvert.JPRoundTypes)
-                    possibleRoundType =
-                        RoundTypeConvert.ENRoundTypes[RoundTypeConvert.JPRoundTypes.indexOf(possibleRoundType)]
+                possibleRoundType = possibleRoundType.jpToEn()
 
                 if (possibleRoundType !in RoundTypeConvert.ENRoundTypes)
                     return
 
-                val roundType = RoundTypeConvert.getTypeOfRound(possibleRoundType)
+                val roundType = possibleRoundType.getTypeOfRound()
 
                 if (!RoundTypeConvert.isCorrectGuess(lastPrediction, roundType)) {
                     wrongCount++
@@ -285,8 +425,8 @@ class LogWatcher(val logFile: File) {
                     )
                 }
 
-                val time = line.split(" - ")[0].substring(0, 19)
-                onRoundStartEvent(time, roundType)
+                val time = line.firstPath(" - ").substring(0, 19).trim()
+                onRoundStartEvent(time, roundType, line)
 
                 updateRoundLog(roundType)
                 Logger.info(
@@ -331,6 +471,7 @@ class LogWatcher(val logFile: File) {
                 // Send OSC message
                 OSCSender.send(sendValue)
                 lastPredictionForOSC = sendValue
+                lastRoundType = roundType
             }
         }
     }

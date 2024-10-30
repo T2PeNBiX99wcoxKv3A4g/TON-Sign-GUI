@@ -8,5 +8,6 @@ data class Config(
     var maxRecentRounds: Int,
     var autoSaveMinutes: Float,
     var onlySpecial: Boolean,
-    var autoScrollToDown: Boolean
+    var autoScrollToDown: Boolean,
+    var onTop: Boolean
 )

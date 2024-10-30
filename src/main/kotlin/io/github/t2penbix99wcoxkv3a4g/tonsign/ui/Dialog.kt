@@ -75,8 +75,8 @@ fun openDialogWindow(
 
 @Composable
 fun openDialogWindow(title: String, msg: String, yesDo: () -> Unit, noDo: () -> Unit) {
-    val yes by remember { LanguageManager.getState("gui.button.yes") }
-    val no by remember { LanguageManager.getState("gui.button.no") }
+    val yes by remember { LanguageManager.getState("gui.button.dialog.yes") }
+    val no by remember { LanguageManager.getState("gui.button.dialog.no") }
 
     openDialogWindow(
         title,
@@ -92,8 +92,8 @@ fun openDialogWindow(title: String, msg: String, yesDo: () -> Unit, noDo: () -> 
 fun showConfirmExitWindow(isAskingToClose: MutableState<Boolean>, isOpen: MutableState<Boolean>) {
     var isAskingToCloseSet by isAskingToClose
     var isOpenSet by isOpen
-    val confirmExitTitle by remember { LanguageManager.getState("gui.title.confirm_exit") }
-    val confirmExitText by remember { LanguageManager.getState("gui.text.confirm_exit") }
+    val confirmExitTitle by remember { LanguageManager.getState("gui.title.dialog.confirm_exit") }
+    val confirmExitText by remember { LanguageManager.getState("gui.text.dialog.confirm_exit") }
 
     openDialogWindow(
         title = confirmExitTitle,
@@ -112,8 +112,8 @@ fun showConfirmExitWindow(isAskingToClose: MutableState<Boolean>, isOpen: Mutabl
 fun showNeedRestartWindows(needRestart: MutableState<Boolean>, isOpen: MutableState<Boolean>) {
     var needRestartSet by needRestart
     var isOpenSet by isOpen
-    val needRestartTitle by remember { LanguageManager.getState("gui.title.need_restart") }
-    val needRestartText by remember { LanguageManager.getState("gui.text.need_restart") }
+    val needRestartTitle by remember { LanguageManager.getState("gui.title.dialog.need_restart") }
+    val needRestartText by remember { LanguageManager.getState("gui.text.dialog.need_restart") }
 
     openDialogWindow(
         title = needRestartTitle,

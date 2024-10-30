@@ -134,4 +134,17 @@ object RoundTypeConvert {
             return true
         return lastGuess == isSpecialOrClassic(round)
     }
+
+    fun jpToEn(round: String): String {
+        if (round !in JPRoundTypes) return round
+        return ENRoundTypes[JPRoundTypes.indexOf(round)]
+    }
+}
+
+fun String.jpToEn(): String {
+    return RoundTypeConvert.jpToEn(this)
+}
+
+fun String.getTypeOfRound(): RoundType {
+    return RoundTypeConvert.getTypeOfRound(this)
 }

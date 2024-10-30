@@ -52,7 +52,7 @@ fun tabs(tableState: MutableState<SelectionState>) {
     TabRow(selectedTabIndex = tableState.value.ordinal) {
         SelectionState.entries.forEach {
 //            LeadingIconTab()
-            val title by remember { LanguageManager.getState(it.gui.title()) }
+            val title by remember { LanguageManager.getState(it.gui.title) }
             Tab(text = { Text(title) }, selected = tableState.value == it, onClick = {
                 tableState.value = it
             })
@@ -68,8 +68,9 @@ fun tableBody(
     needRefresh: MutableState<Boolean>
 ) {
     Row {
-        Column(Modifier.fillMaxWidth()) {
+        Column(Modifier.fillMaxWidth(tableState.value.gui.maxWidth)) {
             tableState.value.gui.view(trayState, needRestart, needRefresh)
         }
+        tableState.value.gui.detailView(trayState, needRestart, needRefresh)
     }
 }
