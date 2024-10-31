@@ -38,6 +38,7 @@ import ch.qos.logback.classic.spi.ILoggingEvent
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ex.swapList
 import io.github.t2penbix99wcoxkv3a4g.tonsign.logger.EventAppender
 import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.ConfigManager
+import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.LanguageManager
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.theme.MaterialEXTheme
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.view.SearchButton
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.view.searchField
@@ -214,7 +215,7 @@ class TabBodyLogs : TabBodyBase() {
         Window(
             onCloseRequest = { isOnTop = false },
             visible = true,
-            title = "Log Viewer",
+            title = LanguageManager.get("gui.title.window.log_viewer"),
             state = windowState,
             alwaysOnTop = true
         ) {

@@ -34,6 +34,7 @@ import androidx.compose.ui.window.rememberWindowState
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ex.swapList
 import io.github.t2penbix99wcoxkv3a4g.tonsign.logs
 import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.ConfigManager
+import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.LanguageManager
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.theme.MaterialEXTheme
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.view.SearchButton
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.view.searchField
@@ -148,7 +149,7 @@ class TabBodyVRChatLogs : TabBodyBase() {
         Window(
             onCloseRequest = { isOnTop = false },
             visible = true,
-            title = "VRChat Log Viewer",
+            title = LanguageManager.get("gui.title.window.vrchat_log_viewer"),
             state = windowState,
             alwaysOnTop = true
         ) {
