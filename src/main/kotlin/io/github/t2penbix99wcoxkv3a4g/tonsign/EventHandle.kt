@@ -10,16 +10,13 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.window.Notification
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ex.middlePath
 import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.ConfigManager
-import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.LanguageManager
+import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.i18n
 import io.github.t2penbix99wcoxkv3a4g.tonsign.roundType.GuessRoundType
 import io.github.t2penbix99wcoxkv3a4g.tonsign.roundType.RoundType
-import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.logWatcher
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.logic.model.PlayerData
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.logic.model.PlayerStatus
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.logic.model.RoundData
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.logic.model.RoundDataDetail
-import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.logic.model.Terror
-import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.logic.model.Terrors
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.logic.model.WonOrLost
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.nextPrediction
 import io.github.t2penbix99wcoxkv3a4g.tonsign.watcher.LogWatcher
@@ -90,15 +87,12 @@ private fun onRoundOver(guessRound: GuessRoundType) {
     if (guessRound == GuessRoundType.NIL || guessRound == GuessRoundType.Exempt) return
     if (ConfigManager.config.onlySpecial && guessRound == GuessRoundType.Classic) return
 
-    val special = LanguageManager.get("gui.text.main.round_special")
-    val classic = LanguageManager.get("gui.text.main.round_classic")
+    val special = "gui.text.main.round_special".i18n()
+    val classic = "gui.text.main.round_classic".i18n()
 
     val nextPredictionNotification = Notification(
-        LanguageManager.get("gui.notification.next_prediction_title"),
-        LanguageManager.get(
-            "gui.notification.next_prediction_message",
-            if (guessRound == GuessRoundType.Special) special else classic
-        )
+        "gui.notification.next_prediction_title".i18n(),
+        "gui.notification.next_prediction_message".i18n(if (guessRound == GuessRoundType.Special) special else classic)
     )
 
     trayState.sendNotification(nextPredictionNotification)
@@ -110,16 +104,16 @@ private fun onRoundOver(guessRound: GuessRoundType) {
         roundData.roundDetail = roundData.roundDetail.copy(isWon = WonOrLost.UnKnown)
 }
 
-private fun onPlayerJoinedRoom(player: String) {
-    players.add(PlayerData(player, PlayerStatus.Alive, null))
+private fun onPlayerJoinedRoom(player: PlayerData) {
+    players.add(player)
 }
 
-private fun onPlayerLeftRoom(player: String) {
-    players.removeAll { it.name == player }
+private fun onPlayerLeftRoom(player: PlayerData) {
+    players.removeAll { it.id == player.id }
     if (lastTime !in roundDatas) return
     val roundData = roundDatas[lastTime]!!
     val players = roundData.roundDetail.players
-    val data = players.find { it.name == player }
+    val data = players.find { it.id == player.id }
     if (data == null) return
     val i = players.indexOf(data)
     if (players[i].status == PlayerStatus.Death) return
@@ -136,6 +130,9 @@ private fun onPlayerDeath(player: PlayerData) {
     val data = players.find { it.name == player.name }
     if (data == null) return
     val i = players.indexOf(data)
+    var player = player
+    if (player.id.isNullOrBlank())
+        player = player.copy(id = data.id)
     players[i] = player
 }
 

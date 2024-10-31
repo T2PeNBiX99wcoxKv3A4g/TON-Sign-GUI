@@ -5,7 +5,6 @@ import io.github.t2penbix99wcoxkv3a4g.tonsign.Utils
 import io.github.t2penbix99wcoxkv3a4g.tonsign.coroutineScope.ConfigScope
 import io.github.t2penbix99wcoxkv3a4g.tonsign.event.EventArg
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ex.safeDecodeFromFile
-import io.github.t2penbix99wcoxkv3a4g.tonsign.ex.safeFormat
 import io.github.t2penbix99wcoxkv3a4g.tonsign.logger.Logger
 import io.github.t2penbix99wcoxkv3a4g.tonsign.onLoadedSave
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.logic.model.RoundData
@@ -53,11 +52,10 @@ object SaveManager {
 
     fun load() {
         _save = Yaml.default.safeDecodeFromFile<Save>(file, Default.copy(), {
-            val text =
-                LanguageManager.getByLang("en", "exception.config_load_error").safeFormat(it.message ?: "Unknown")
+            val text = "exception.save_load_error".i18nByLang("en", it.message ?: "Unknown")
             Utils.logger.error(it) { "[${this::class.simpleName!!}] $text" }
         }) {
-            Utils.logger.error(it) { "[${this::class.simpleName!!}] Config auto fix failed: ${it.message}" }
+            Utils.logger.error(it) { "[${this::class.simpleName!!}] Save fix failed: ${it.message}" }
             renameFile()
         }
         save()

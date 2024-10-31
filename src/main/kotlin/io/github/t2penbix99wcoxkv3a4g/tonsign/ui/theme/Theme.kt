@@ -17,11 +17,19 @@
 
 package io.github.t2penbix99wcoxkv3a4g.tonsign.ui.theme
 
+import androidx.compose.foundation.DarkDefaultContextMenuRepresentation
+import androidx.compose.foundation.LightDefaultContextMenuRepresentation
+import androidx.compose.foundation.LocalContextMenuRepresentation
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.ColorScheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.Modifier
 
 // https://github.com/JetBrains/compose-multiplatform/blob/master/examples/nav_cupcake/composeApp/src/commonMain/kotlin/org/jetbrains/nav_cupcake/ui/theme/Theme.kt
 
@@ -89,6 +97,10 @@ private val DarkColors = darkColorScheme(
     scrim = md_theme_dark_scrim,
 )
 
+val colorScheme: ColorScheme
+    @Composable
+    get() = if (isSystemInDarkTheme()) DarkColors else LightColors
+
 @Composable
 fun CupcakeTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
@@ -103,4 +115,20 @@ fun CupcakeTheme(
         typography = Typography,
         content = content
     )
+}
+
+@Composable
+fun CupcakeEXTheme(
+    darkTheme: Boolean = isSystemInDarkTheme(),
+    content: @Composable () -> Unit
+) {
+    CupcakeTheme(darkTheme) {
+        val contextMenuRepresentation = if (isSystemInDarkTheme())
+            DarkDefaultContextMenuRepresentation
+        else
+            LightDefaultContextMenuRepresentation
+        CompositionLocalProvider(LocalContextMenuRepresentation provides contextMenuRepresentation) {
+            Surface(Modifier.fillMaxSize(), content = content)
+        }
+    }
 }

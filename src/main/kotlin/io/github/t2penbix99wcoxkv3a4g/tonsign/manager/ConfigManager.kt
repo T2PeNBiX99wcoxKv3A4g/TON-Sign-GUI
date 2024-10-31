@@ -47,11 +47,10 @@ object ConfigManager {
 
     fun load() {
         _config = Yaml.default.safeDecodeFromFile<Config>(file, Default.copy(), {
-            val text =
-                LanguageManager.getByLang("en", "exception.config_load_error").safeFormat(it.message ?: "Unknown")
+            val text = "exception.config_load_error".i18nByLang("en", it.message ?: "Unknown")
             Utils.logger.error(it) { "[${this::class.simpleName!!}] $text" }
         }) {
-            Utils.logger.error(it) { "[${this::class.simpleName!!}] Config auto fix failed: ${(it.message)}" }
+            Utils.logger.error(it) { "[${this::class.simpleName!!}] Config fix failed: ${(it.message)}" }
             renameFile()
         }
         save()

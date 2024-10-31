@@ -1,76 +1,121 @@
 package io.github.t2penbix99wcoxkv3a4g.tonsign.ui.view
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.material.Scaffold
-import androidx.compose.material.Tab
-import androidx.compose.material.TabRow
-import androidx.compose.material.Text
-import androidx.compose.material.TopAppBar
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.BottomNavigation
+import androidx.compose.material.BottomNavigationItem
+import androidx.compose.material3.BottomAppBar
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.TrayState
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
 import io.github.t2penbix99wcoxkv3a4g.tonsign.Utils
-import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.LanguageManager
+import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.i18n
+import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.theme.colorScheme
 
 // https://github.com/olk90/compose-tableView/blob/main/src/main/kotlin/de/olk90/tableview/view/TabView.kt
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun tableSelection(
     trayState: TrayState,
     needRestart: MutableState<Boolean>,
     needRefresh: MutableState<Boolean>
 ) {
-    val tableState = remember { mutableStateOf(SelectionState.Main) }
+    val navController = rememberNavController()
 
     Column {
         Scaffold(
             topBar = {
                 TopAppBar(
+                    colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                        containerColor = colorScheme.primaryContainer,
+                        titleContentColor = colorScheme.primary
+                    ),
                     title = { Text(text = Utils.TITLE) },
                     actions = {
+//                        IconButton(onClick = {}) {
+//                            Icon(Icons.Default.Menu, contentDescription = "Menu")
+//                        }
                     }
                 )
             },
-            content = {
-                Column {
-                    tabs(tableState)
-                    tableBody(tableState, trayState, needRestart, needRefresh)
+            bottomBar = {
+                BottomAppBar {
+                    bottomNav(navController)
                 }
+            },
+            content = {
+                screenNavigation(navController, it, trayState, needRestart, needRefresh)
             }
         )
     }
 }
 
 @Composable
-fun tabs(tableState: MutableState<SelectionState>) {
-    TabRow(selectedTabIndex = tableState.value.ordinal) {
-        SelectionState.entries.forEach {
-//            LeadingIconTab()
-            val title by remember { LanguageManager.getState(it.gui.title) }
-            Tab(text = { Text(title) }, selected = tableState.value == it, onClick = {
-                tableState.value = it
-            })
+fun screenNavigation(
+    navController: NavHostController,
+    padding: PaddingValues,
+    trayState: TrayState,
+    needRestart: MutableState<Boolean>,
+    needRefresh: MutableState<Boolean>
+) {
+    NavHost(navController = navController, startDestination = SelectionState.Main.gui.id) {
+        SelectionState.entries.forEach { state ->
+            composable(state.gui.id) {
+                Row(
+                    modifier = Modifier.padding(padding)
+                ) {
+                    Column(Modifier.fillMaxWidth(state.gui.maxWidth)) {
+                        state.gui.view(navController, padding, trayState, needRestart, needRefresh)
+                    }
+                    state.gui.detailView(navController, padding, trayState, needRestart, needRefresh)
+                }
+            }
         }
     }
 }
 
 @Composable
-fun tableBody(
-    tableState: MutableState<SelectionState>,
-    trayState: TrayState,
-    needRestart: MutableState<Boolean>,
-    needRefresh: MutableState<Boolean>
-) {
-    Row {
-        Column(Modifier.fillMaxWidth(tableState.value.gui.maxWidth)) {
-            tableState.value.gui.view(trayState, needRestart, needRefresh)
+fun bottomNav(navController: NavHostController) {
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentDestination = navBackStackEntry?.destination
+
+    BottomNavigation(
+        modifier = Modifier.height(80.dp),
+        backgroundColor = MaterialTheme.colorScheme.primaryContainer,
+        contentColor = MaterialTheme.colorScheme.primary
+    ) {
+        SelectionState.entries.forEach {
+            BottomNavigationItem(
+                icon = {
+                    it.gui.icon()
+                },
+                selected = currentDestination?.route == it.gui.id,
+                onClick = {
+                    navController.navigate(it.gui.id)
+                },
+                label = {
+                    Text(it.gui.title.i18n())
+                }
+            )
         }
-        tableState.value.gui.detailView(trayState, needRestart, needRefresh)
     }
 }

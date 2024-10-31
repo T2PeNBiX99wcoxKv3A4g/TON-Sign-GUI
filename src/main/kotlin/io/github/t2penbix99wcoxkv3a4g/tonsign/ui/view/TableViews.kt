@@ -11,16 +11,17 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.Card
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.OutlinedTextField
-import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardColors
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
@@ -36,7 +37,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ex.swapList
-import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.LanguageManager
+import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.i18nState
 import kotlin.collections.sortedBy
 import kotlin.collections.sortedByDescending
 import kotlin.reflect.KCallable
@@ -208,7 +209,7 @@ fun searchField(
     search: String,
     onContentUpdate: (String) -> Unit
 ) {
-    val searchText by remember { LanguageManager.getState("gui.text.search") }
+    val searchText by remember { "gui.text.search".i18nState() }
 
     OutlinedTextField(
         value = search,
@@ -236,7 +237,7 @@ fun searchField(
     onContentUpdate: (String) -> Unit,
     onBottomDo: () -> Unit
 ) {
-    val searchText by remember { LanguageManager.getState("gui.text.search") }
+    val searchText by remember { "gui.text.search".i18nState() }
 
     OutlinedTextField(
         value = search,
@@ -278,7 +279,7 @@ fun searchField(
     onBottomDo: () -> Unit,
     searchButtons: List<SearchButton>
 ) {
-    val searchText by remember { LanguageManager.getState("gui.text.search") }
+    val searchText by remember { "gui.text.search".i18nState() }
 
     OutlinedTextField(
         value = search,
@@ -335,7 +336,7 @@ fun tableHeader(
                 ) {
                     Text(
                         text = "#",
-                        style = MaterialTheme.typography.body1,
+                        style = MaterialTheme.typography.labelLarge,
                         fontWeight = FontWeight.Bold
                     )
                 }
@@ -350,11 +351,11 @@ fun tableHeader(
                     horizontalArrangement = Arrangement.SpaceEvenly,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    val headerText by remember { LanguageManager.getState(it.headerText) }
+                    val headerText by remember { it.headerText.i18nState() }
 
                     Text(
                         text = headerText,
-                        style = MaterialTheme.typography.body1,
+                        style = MaterialTheme.typography.labelLarge,
                         fontWeight = FontWeight.Bold
                     )
 
@@ -414,7 +415,18 @@ inline fun <reified T> tableRow(
     noinline onRowSelection: (T) -> Unit,
     selected: Boolean
 ) {
-    val color = if (selected) MaterialTheme.colors.primary else MaterialTheme.colors.background
+//    val color = if (selected) MaterialTheme.colors.primary else MaterialTheme.colors.background
+    val color = if (selected) CardColors(
+        containerColor = MaterialTheme.colorScheme.primaryContainer,
+        contentColor = MaterialTheme.colorScheme.primary,
+        disabledContentColor = MaterialTheme.colorScheme.surfaceContainer,
+        disabledContainerColor = MaterialTheme.colorScheme.surface
+    ) else CardColors(
+        containerColor = MaterialTheme.colorScheme.secondaryContainer,
+        contentColor = MaterialTheme.colorScheme.secondary,
+        disabledContentColor = MaterialTheme.colorScheme.surfaceContainer,
+        disabledContainerColor = MaterialTheme.colorScheme.surface
+    )
     Card(
         modifier = Modifier
             .padding(3.dp)
@@ -422,7 +434,7 @@ inline fun <reified T> tableRow(
             .clickable {
                 onRowSelection(item)
             },
-        backgroundColor = color
+        colors = color
     ) {
         Row(
             horizontalArrangement = Arrangement.SpaceEvenly,

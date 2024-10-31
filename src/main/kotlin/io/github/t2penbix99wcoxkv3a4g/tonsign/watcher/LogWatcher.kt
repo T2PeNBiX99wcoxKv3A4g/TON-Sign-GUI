@@ -15,7 +15,7 @@ import io.github.t2penbix99wcoxkv3a4g.tonsign.exception.UnknownRoundTypeExceptio
 import io.github.t2penbix99wcoxkv3a4g.tonsign.exception.WrongRecentRoundException
 import io.github.t2penbix99wcoxkv3a4g.tonsign.logger.Logger
 import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.ConfigManager
-import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.LanguageManager
+import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.i18n
 import io.github.t2penbix99wcoxkv3a4g.tonsign.roundType.GuessRoundType
 import io.github.t2penbix99wcoxkv3a4g.tonsign.roundType.RandomRoundType
 import io.github.t2penbix99wcoxkv3a4g.tonsign.roundType.RoundType
@@ -42,7 +42,7 @@ class LogWatcher(val logFile: File) {
             }
 
             if (files.size < 1)
-                throw FileNotFoundException(LanguageManager.get("exception.no_log_file"))
+                throw FileNotFoundException("exception.no_log_file".i18n())
 
             files.sortWith { f1, f2 ->
                 val compare = f1.lastModified() > f2.lastModified()
@@ -68,8 +68,8 @@ class LogWatcher(val logFile: File) {
             "Memory Usage: after world loaded "
         private const val WORLD_TON_KEYWORD = "wrld_a61cdabe-1218-4287-9ffc-2a4d1414e5bd"
         private const val WORLD_LEFT_KEYWORD = "OnLeftRoom"
-        private const val WORLD_PLAYER_LEFT_KEYWORD = "OnPlayerLeft"
-        private const val WORLD_PLAYER_JOINED_KEYWORD = "OnPlayerJoined"
+        private const val WORLD_PLAYER_LEFT_KEYWORD = "[Behaviour] OnPlayerLeft "
+        private const val WORLD_PLAYER_JOINED_KEYWORD = "[Behaviour] OnPlayerJoined "
         private const val ROUND_WON_KEYWORD = "Player Won"
         private const val ROUND_LOST_KEYWORD = "Player lost,"
         private const val ROUND_DEATH_KEYWORD = "You died."
@@ -114,8 +114,8 @@ class LogWatcher(val logFile: File) {
     val onLeftTONEvent = Event()
     val onJoinRoomEvent = EventArg<String>()
     val onLeftRoomEvent = Event()
-    val onPlayerLeftRoomEvent = EventArg<String>()
-    val onPlayerJoinedRoomEvent = EventArg<String>()
+    val onPlayerLeftRoomEvent = EventArg<PlayerData>()
+    val onPlayerJoinedRoomEvent = EventArg<PlayerData>()
     val onPlayerDeathEvent = EventArg<PlayerData>()
     val onKillerSetEvent = EventArg<ArrayList<Int>>()
     val onHideTerrorShowUpEvent = EventArg<Int>()
@@ -207,9 +207,10 @@ class LogWatcher(val logFile: File) {
     fun getRecentRoundsLog(maxRecent: Int): String {
         return roundLog.takeLast(maxRecent).joinToString {
             when (it) {
-                GuessRoundType.Classic -> LanguageManager.get("log.recent_rounds_log_classic")
-                GuessRoundType.Special -> LanguageManager.get("log.recent_rounds_log_special")
-                else -> throw WrongRecentRoundException(LanguageManager.get("exception.wrong_recent_round", it))
+                GuessRoundType.Classic -> "log.recent_rounds_log_classic".i18n()
+                GuessRoundType.Special -> "log.recent_rounds_log_special".i18n()
+
+                else -> throw WrongRecentRoundException("exception.wrong_recent_round".i18n(it))
             }
         }
     }
@@ -298,12 +299,16 @@ class LogWatcher(val logFile: File) {
 
             WORLD_PLAYER_LEFT_KEYWORD in line -> {
                 val player = line.lastPath(WORLD_PLAYER_LEFT_KEYWORD).trim()
-                onPlayerLeftRoomEvent(player)
+                val name = player.firstPath('(').trim()
+                val id = player.middlePath('(', ')').trim()
+                onPlayerLeftRoomEvent(PlayerData(name, id, PlayerStatus.Left, null))
             }
 
             WORLD_PLAYER_JOINED_KEYWORD in line -> {
                 val player = line.lastPath(WORLD_PLAYER_JOINED_KEYWORD).trim()
-                onPlayerJoinedRoomEvent(player)
+                val name = player.firstPath('(').trim()
+                val id = player.middlePath('(', ')').trim()
+                onPlayerJoinedRoomEvent(PlayerData(name, id, PlayerStatus.Alive, null))
             }
 
             ROUND_OVER_KEYWORD in line -> {
@@ -332,7 +337,7 @@ class LogWatcher(val logFile: File) {
                 val msgAndName = str.split(']')
                 val name = msgAndName[0].substring(1).trim()
                 val msg = msgAndName[1].trim()
-                onPlayerDeathEvent(PlayerData(name, PlayerStatus.Death, msg))
+                onPlayerDeathEvent(PlayerData(name, null, PlayerStatus.Death, msg))
             }
 
             TERROR_HUNGRY_HOME_INVADER_KEYWORD in line -> {
@@ -440,10 +445,7 @@ class LogWatcher(val logFile: File) {
                                     "exception.unknown_round_type",
                                     possibleRoundTypeForPrint
                                 )
-                                LanguageManager.get(
-                                    "exception.unknown_round_type_simple",
-                                    possibleRoundTypeForPrint
-                                )
+                                "exception.unknown_round_type_simple".i18n(possibleRoundTypeForPrint)
                             }
 
                             else -> throw it
@@ -451,8 +453,8 @@ class LogWatcher(val logFile: File) {
                     }
                 )
 
-                val classic = LanguageManager.get("log.predict_next_round_classic")
-                val special = LanguageManager.get("log.predict_next_round_special")
+                val classic = "log.predict_next_round_classic".i18n()
+                val special = "log.predict_next_round_special".i18n()
                 val prediction = predictNextRound()
                 val recentRoundsLog = getRecentRoundsLog(ConfigManager.config.maxRecentRounds)
 

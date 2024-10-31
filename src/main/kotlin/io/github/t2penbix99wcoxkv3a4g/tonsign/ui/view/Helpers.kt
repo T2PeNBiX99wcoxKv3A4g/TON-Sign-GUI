@@ -8,16 +8,19 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Switch
-import androidx.compose.material.Text
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Switch
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.LinkAnnotation
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.unit.dp
+import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.logic.model.PlayerData
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.view.tab.TabBodyBase
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.view.tab.TabBodyLogs
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.view.tab.TabBodyMain
@@ -49,6 +52,21 @@ fun textBox(text: String = "Item") {
     }
 }
 
+@Composable
+fun textBoxWithLink(text: String = "Item", link: String = "https://vrchat.com") {
+    Box(
+        Modifier.fillMaxWidth()
+            .background(Color(0, 0, 0, 40))
+            .padding(start = 10.dp, top = 5.dp, end = 10.dp, bottom = 5.dp),
+        contentAlignment = Alignment.CenterStart
+    ) {
+        Text(text = buildAnnotatedString {
+            append(text)
+            addLink(LinkAnnotation.Url(link), 0, text.length)
+        })
+    }
+}
+
 @Suppress("unused")
 @Composable
 fun textBox(text: AnnotatedString) {
@@ -75,9 +93,9 @@ fun switchWithText(text: String, checked: Boolean, onCheckedChange: ((Boolean) -
             modifier = Modifier
                 .align(Alignment.CenterVertically)
                 .padding(16.dp),
-            style = MaterialTheme.typography.subtitle1
+            style = MaterialTheme.typography.bodyMedium
         )
-        Spacer(Modifier.weight(1f))
+        Spacer(Modifier.weight(1f, true))
         Switch(
             checked = checked,
             onCheckedChange = onCheckedChange,
@@ -103,6 +121,9 @@ fun updateSortingStates(
     sortingStates.value = newMap
 }
 
+fun playerUrl(player: PlayerData): String {
+    return "https://vrchat.com/home/user/${player.id}"
+}
 
 inline fun <reified T : Any> sort(t: T, tableHeader: TableHeader): String {
     val filterCriterion = t::class.members.first { f -> f.annotations.any { a -> a == tableHeader } }

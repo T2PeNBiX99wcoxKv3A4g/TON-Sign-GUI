@@ -1,6 +1,6 @@
 package io.github.t2penbix99wcoxkv3a4g.tonsign.ui.logic.model
 
-import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.LanguageManager
+import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.i18nWithEn
 import io.github.t2penbix99wcoxkv3a4g.tonsign.roundType.RoundType
 
 class Terror(terrorId: Int, val roundType: RoundType) {
@@ -236,10 +236,10 @@ class Terror(terrorId: Int, val roundType: RoundType) {
     }
 
     private fun nameFromID(): String {
-        val notFound = LanguageManager.getWithEn("gui.terror.name.not_found")
+        val notFound = "gui.terror.name.not_found".i18nWithEn()
 
-        if (id < 0) return LanguageManager.getWithEn("gui.terror.name.still_in_loading")
-        if (id == UNKNOWN) return LanguageManager.getWithEn("gui.terror.name.unknown")
+        if (id < 0) return "gui.terror.name.still_in_loading".i18nWithEn()
+        if (id == UNKNOWN) return "gui.terror.name.unknown".i18nWithEn()
 
         if (isHideTerror()) {
             val newId = id - HIDE
@@ -247,17 +247,17 @@ class Terror(terrorId: Int, val roundType: RoundType) {
             return when (roundType) {
                 RoundType.Unbound -> {
                     if (newId >= hideUnbounds.size) return notFound
-                    return LanguageManager.getWithEn("gui.terror.name.hide_unbound.${hideNormals[newId]}")
+                    return "gui.terror.name.hide_unbound.${hideNormals[newId]}".i18nWithEn()
                 }
 
                 RoundType.EightPages -> {
                     if (newId >= hide8Pages.size) return notFound
-                    return LanguageManager.getWithEn("gui.terror.name.hide_8_pages.${hideNormals[newId]}")
+                    return "gui.terror.name.hide_8_pages.${hideNormals[newId]}".i18nWithEn()
                 }
 
                 else -> {
                     if (newId >= hideNormals.size) return notFound
-                    return LanguageManager.getWithEn("gui.terror.name.hide_normal.${hideNormals[newId]}")
+                    return "gui.terror.name.hide_normal.${hideNormals[newId]}".i18nWithEn()
                 }
             }
         }
@@ -265,18 +265,18 @@ class Terror(terrorId: Int, val roundType: RoundType) {
         return when (roundType) {
             RoundType.Alternate -> {
                 if (id >= alternates.size) return notFound
-                return LanguageManager.getWithEn("gui.terror.name.alternate.${alternates[id]}")
+                return "gui.terror.name.alternate.${alternates[id]}".i18nWithEn()
             }
 
-            RoundType.MysticMoon -> LanguageManager.getWithEn("gui.terror.name.mystic_moon.psychosis")
-            RoundType.BloodMoon -> LanguageManager.getWithEn("gui.terror.name.blood_moon.virus")
-            RoundType.Twilight -> LanguageManager.getWithEn("gui.terror.name.twilight.apocalypse_bird")
-            RoundType.Solstice -> LanguageManager.getWithEn("gui.terror.name.solstice.pandora")
-            RoundType.RUN -> LanguageManager.getWithEn("gui.terror.name.run.the_meat_ball_man")
+            RoundType.MysticMoon -> "gui.terror.name.mystic_moon.psychosis".i18nWithEn()
+            RoundType.BloodMoon -> "gui.terror.name.blood_moon.virus".i18nWithEn()
+            RoundType.Twilight -> "gui.terror.name.twilight.apocalypse_bird".i18nWithEn()
+            RoundType.Solstice -> "gui.terror.name.solstice.pandora".i18nWithEn()
+            RoundType.RUN -> "gui.terror.name.run.the_meat_ball_man".i18nWithEn()
 
             else -> {
                 if (id >= normals.size) return notFound
-                return LanguageManager.getWithEn("gui.terror.name.normal.${normals[id]}")
+                return "gui.terror.name.normal.${normals[id]}".i18nWithEn()
             }
         }
     }

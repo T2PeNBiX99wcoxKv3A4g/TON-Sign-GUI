@@ -7,8 +7,8 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.Button
-import androidx.compose.material.Text
+import androidx.compose.material3.Button
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
@@ -21,8 +21,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogWindow
 import androidx.compose.ui.window.WindowPosition.Aligned
 import androidx.compose.ui.window.rememberDialogState
-import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.LanguageManager
-import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.theme.MaterialEXTheme
+import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.i18nState
+import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.theme.CupcakeEXTheme
 
 private val dialogSize = DpSize(280.dp, 180.dp)
 
@@ -41,7 +41,7 @@ fun openDialogWindow(
         title = title,
         state = state
     ) {
-        MaterialEXTheme {
+        CupcakeEXTheme {
             Column(
                 modifier = Modifier.padding(10.dp)
                     .fillMaxSize(),
@@ -75,8 +75,8 @@ fun openDialogWindow(
 
 @Composable
 fun openDialogWindow(title: String, msg: String, yesDo: () -> Unit, noDo: () -> Unit) {
-    val yes by remember { LanguageManager.getState("gui.button.dialog.yes") }
-    val no by remember { LanguageManager.getState("gui.button.dialog.no") }
+    val yes by remember { "gui.button.dialog.yes".i18nState() }
+    val no by remember { "gui.button.dialog.no".i18nState() }
 
     openDialogWindow(
         title,
@@ -92,8 +92,8 @@ fun openDialogWindow(title: String, msg: String, yesDo: () -> Unit, noDo: () -> 
 fun showConfirmExitWindow(isAskingToClose: MutableState<Boolean>, isOpen: MutableState<Boolean>) {
     var isAskingToCloseSet by isAskingToClose
     var isOpenSet by isOpen
-    val confirmExitTitle by remember { LanguageManager.getState("gui.title.dialog.confirm_exit") }
-    val confirmExitText by remember { LanguageManager.getState("gui.text.dialog.confirm_exit") }
+    val confirmExitTitle by remember { "gui.title.dialog.confirm_exit".i18nState() }
+    val confirmExitText by remember { "gui.text.dialog.confirm_exit".i18nState() }
 
     openDialogWindow(
         title = confirmExitTitle,
@@ -112,8 +112,8 @@ fun showConfirmExitWindow(isAskingToClose: MutableState<Boolean>, isOpen: Mutabl
 fun showNeedRestartWindows(needRestart: MutableState<Boolean>, isOpen: MutableState<Boolean>) {
     var needRestartSet by needRestart
     var isOpenSet by isOpen
-    val needRestartTitle by remember { LanguageManager.getState("gui.title.dialog.need_restart") }
-    val needRestartText by remember { LanguageManager.getState("gui.text.dialog.need_restart") }
+    val needRestartTitle by remember { "gui.title.dialog.need_restart".i18nState() }
+    val needRestartText by remember { "gui.text.dialog.need_restart".i18nState() }
 
     openDialogWindow(
         title = needRestartTitle,

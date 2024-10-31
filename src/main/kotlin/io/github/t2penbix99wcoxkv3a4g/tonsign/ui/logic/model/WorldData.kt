@@ -2,10 +2,9 @@ package io.github.t2penbix99wcoxkv3a4g.tonsign.ui.logic.model
 
 import kotlinx.serialization.Serializable
 
+// TODO: World Data
 @Serializable
-data class PlayerData(
+data class WorldData(
     val name: String,
-    val id: String?,
-    var status: PlayerStatus,
-    var deathMsg: String?
+    val id: String
 )

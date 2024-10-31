@@ -3,6 +3,7 @@ package io.github.t2penbix99wcoxkv3a4g.tonsign.ui.view.tab
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -10,9 +11,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.selection.SelectionContainer
-import androidx.compose.material.Text
+import androidx.compose.material3.Icon
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
@@ -31,26 +34,37 @@ import androidx.compose.ui.window.TrayState
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.WindowPosition.Aligned
 import androidx.compose.ui.window.rememberWindowState
+import androidx.navigation.NavHostController
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ex.swapList
 import io.github.t2penbix99wcoxkv3a4g.tonsign.logs
 import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.ConfigManager
-import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.LanguageManager
-import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.theme.MaterialEXTheme
+import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.i18n
+import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.theme.CupcakeEXTheme
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.view.SearchButton
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.view.searchField
+import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.view.tab.tray.TrayItem
+import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.view.tab.tray.TrayVRChatLogs
 import kotlinx.coroutines.launch
 
 class TabBodyVRChatLogs : TabBodyBase() {
     override val title: String
         get() = "gui.tab.title.vrchat_logs"
 
+    override val id: String
+        get() = "vrchat_logs"
+
     override val isOnTop: MutableState<Boolean>
-        get() = _isOnTop
+        get() = internalIsOnTop
 
-    override val trayName: String?
-        get() = "VRChat Log Viewer"
+    override val trays: List<TrayItem>
+        get() = listOf(TrayVRChatLogs())
 
-    private val _isOnTop = mutableStateOf(false)
+    internal val internalIsOnTop = mutableStateOf(false)
+
+    @Composable
+    override fun icon() {
+        Icon(Icons.Default.Info, contentDescription = title.i18n())
+    }
 
     @Composable
     private fun viewAll(
@@ -65,7 +79,7 @@ class TabBodyVRChatLogs : TabBodyBase() {
         var search by remember { mutableStateOf("") }
         var changedLogs = remember { mutableStateListOf<AnnotatedString>() }
         val autoScrollToDown by remember { mutableStateOf(ConfigManager.config.autoScrollToDown) }
-        var isOnTop by remember { _isOnTop }
+        var isOnTop by remember { internalIsOnTop }
 
         changedLogs.clear()
         changedLogs.addAll(logs)
@@ -84,7 +98,7 @@ class TabBodyVRChatLogs : TabBodyBase() {
             listOf(
                 SearchButton({
                     isOnTop = true
-                }, Icons.Filled.Menu, "IsOnTop")
+                }, Icons.Filled.Lock, "IsOnTop")
             )
         } else
             listOf()
@@ -131,6 +145,8 @@ class TabBodyVRChatLogs : TabBodyBase() {
 
     @Composable
     override fun view(
+        navController: NavHostController,
+        padding: PaddingValues,
         trayState: TrayState,
         needRestart: MutableState<Boolean>,
         needRefresh: MutableState<Boolean>
@@ -142,30 +158,22 @@ class TabBodyVRChatLogs : TabBodyBase() {
     override fun topMenu(trayState: TrayState, needRestart: MutableState<Boolean>, needRefresh: MutableState<Boolean>) {
         val windowState =
             rememberWindowState(position = Aligned(alignment = Alignment.Center), size = DpSize(500.dp, 350.dp))
-        var isOnTop by remember { _isOnTop }
+        var isOnTop by remember { internalIsOnTop }
 
         if (!isOnTop) return
 
         Window(
             onCloseRequest = { isOnTop = false },
             visible = true,
-            title = LanguageManager.get("gui.title.window.vrchat_log_viewer"),
+            title = "gui.title.window.vrchat_log_viewer".i18n(),
             state = windowState,
             alwaysOnTop = true
         ) {
-            MaterialEXTheme {
+            CupcakeEXTheme {
                 Column(Modifier.fillMaxWidth()) {
                     viewAll(trayState, needRestart, needRefresh, true)
                 }
             }
         }
-    }
-
-    override fun trayClick(
-        trayState: TrayState,
-        needRestart: MutableState<Boolean>,
-        needRefresh: MutableState<Boolean>
-    ) {
-        _isOnTop.value = true
     }
 }

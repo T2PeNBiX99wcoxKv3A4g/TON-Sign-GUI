@@ -21,7 +21,9 @@ dependencies {
     // compose.desktop.currentOs should be used in launcher-sourceSet
     // (in a separate module for demo project and in testMain).
     // With compose.desktop.common you will also lose @Preview functionality
-    implementation(compose.desktop.currentOs)
+    implementation(compose.desktop.currentOs) {
+        exclude(compose.material)
+    }
     implementation(compose.material3)
     implementation(kotlin("reflect"))
     implementation("com.illposed.osc:javaosc-core:${property("javaosc.version")}")
@@ -34,9 +36,12 @@ dependencies {
     implementation("org.codehaus.janino:janino:${property("janino.version")}")
     implementation("org.fusesource.jansi:jansi:${property("jansi.version")}")
     implementation("io.github.oshai:kotlin-logging-jvm:${property("kotlin-logging.version")}")
-//    implementation("org.jetbrains.androidx.navigation:navigation-compose:${property("navigation-compose.version")}")
+    implementation("org.jetbrains.androidx.navigation:navigation-compose:${property("navigation-compose.version")}")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:${property("kotlinx-serialization-json.version")}")
-//    implementation("io.github.kdroidfilter:composenativetray:${property("composenativetray.version")}")
+    implementation("io.github.kdroidfilter:composenativetray:${property("composenativetray.version")}")
+//    implementation("jakarta.servlet:jakarta.servlet-api:${property("jakarta.version")}")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:${property("kotlinx-coroutines.version")}")
+    implementation("javassist:javassist:${property("javassist.version")}")
 }
 
 compose.desktop {
@@ -48,6 +53,12 @@ compose.desktop {
             modules("java.naming")
             packageName = "TON-Sign"
             packageVersion = "1.0.0"
+            logging.captureStandardOutput(LogLevel.INFO)
+        }
+
+        buildTypes.release.proguard {
+            version.set("7.5.0")
+            configurationFiles.from("proguard.pro")
         }
     }
 }
