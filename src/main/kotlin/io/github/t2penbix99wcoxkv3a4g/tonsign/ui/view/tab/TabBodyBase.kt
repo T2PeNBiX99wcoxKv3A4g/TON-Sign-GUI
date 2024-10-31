@@ -7,17 +7,16 @@ import androidx.compose.ui.window.TrayState
 
 abstract class TabBodyBase {
     open val title: String
-        get() {
-            return "Base"
-        }
-    open val onTop: MutableState<Boolean>
-        get() {
-            return mutableStateOf(false)
-        }
+        get() = "Base"
+
+    open val isOnTop: MutableState<Boolean>
+        get() = mutableStateOf(false)
+
     open val maxWidth: Float
-        get() {
-            return 1f
-        }
+        get() = 1f
+    
+    open val trayName: String?
+        get() = null
 
     @Composable
     abstract fun view(trayState: TrayState, needRestart: MutableState<Boolean>, needRefresh: MutableState<Boolean>)
@@ -27,6 +26,9 @@ abstract class TabBodyBase {
     }
 
     @Composable
-    open fun onTopDo(trayState: TrayState, needRestart: MutableState<Boolean>, needRefresh: MutableState<Boolean>) {
+    open fun topMenu(trayState: TrayState, needRestart: MutableState<Boolean>, needRefresh: MutableState<Boolean>) {
+    }
+    
+    open fun trayClick(trayState: TrayState, needRestart: MutableState<Boolean>, needRefresh: MutableState<Boolean>) {
     }
 }

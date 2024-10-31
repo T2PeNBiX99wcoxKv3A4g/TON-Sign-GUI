@@ -15,9 +15,8 @@ import java.time.format.DateTimeFormatter
 
 class TabBodyLogDatas : TabBodyBase() {
     override val title: String
-        get() {
-            return "gui.tab.title.log_datas"
-        }
+        get() = "gui.tab.title.log_datas"
+    
     private val logDatas = mutableStateListOf<LogData>()
 
     init {

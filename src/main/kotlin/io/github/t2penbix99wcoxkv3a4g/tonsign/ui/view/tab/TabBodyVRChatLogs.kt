@@ -41,16 +41,15 @@ import kotlinx.coroutines.launch
 
 class TabBodyVRChatLogs : TabBodyBase() {
     override val title: String
-        get() {
-            return "gui.tab.title.vrchat_logs"
-        }
+        get() = "gui.tab.title.vrchat_logs"
 
-    override val onTop: MutableState<Boolean>
-        get() {
-            return isOnTop
-        }
+    override val isOnTop: MutableState<Boolean>
+        get() = _isOnTop
 
-    private val isOnTop = mutableStateOf(false)
+    override val trayName: String?
+        get() = "VRChat Log Viewer"
+
+    private val _isOnTop = mutableStateOf(false)
 
     @Composable
     private fun viewAll(
@@ -65,7 +64,7 @@ class TabBodyVRChatLogs : TabBodyBase() {
         var search by remember { mutableStateOf("") }
         var changedLogs = remember { mutableStateListOf<AnnotatedString>() }
         val autoScrollToDown by remember { mutableStateOf(ConfigManager.config.autoScrollToDown) }
-        var isOnTop by remember { isOnTop }
+        var isOnTop by remember { _isOnTop }
 
         changedLogs.clear()
         changedLogs.addAll(logs)
@@ -139,17 +138,17 @@ class TabBodyVRChatLogs : TabBodyBase() {
     }
 
     @Composable
-    override fun onTopDo(trayState: TrayState, needRestart: MutableState<Boolean>, needRefresh: MutableState<Boolean>) {
+    override fun topMenu(trayState: TrayState, needRestart: MutableState<Boolean>, needRefresh: MutableState<Boolean>) {
         val windowState =
             rememberWindowState(position = Aligned(alignment = Alignment.Center), size = DpSize(500.dp, 350.dp))
-        var isOnTop by remember { isOnTop }
+        var isOnTop by remember { _isOnTop }
 
         if (!isOnTop) return
 
         Window(
             onCloseRequest = { isOnTop = false },
             visible = true,
-            title = "VRChat Log View",
+            title = "VRChat Log Viewer",
             state = windowState,
             alwaysOnTop = true
         ) {
@@ -159,5 +158,13 @@ class TabBodyVRChatLogs : TabBodyBase() {
                 }
             }
         }
+    }
+
+    override fun trayClick(
+        trayState: TrayState,
+        needRestart: MutableState<Boolean>,
+        needRefresh: MutableState<Boolean>
+    ) {
+        _isOnTop.value = true
     }
 }

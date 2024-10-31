@@ -24,9 +24,7 @@ import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.view.switchWithText
 
 class TabBodySetting : TabBodyBase() {
     override val title: String
-        get() {
-            return "gui.tab.title.setting"
-        }
+        get() = "gui.tab.title.setting"
 
     @Composable
     override fun view(

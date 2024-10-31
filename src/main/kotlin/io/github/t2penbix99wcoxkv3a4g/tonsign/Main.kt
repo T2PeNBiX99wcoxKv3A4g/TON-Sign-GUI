@@ -1,10 +1,6 @@
 package io.github.t2penbix99wcoxkv3a4g.tonsign
 
-import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
-import androidx.compose.material.darkColors
-import androidx.compose.material.lightColors
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -66,12 +62,19 @@ fun main() = application {
                     isVisible = true
             },
             menu = {
-                MaterialTheme(colors = if (isSystemInDarkTheme()) darkColors() else lightColors()) {
-                    Item("Exit",
-                        onClick = {
-                            isAskingToCloseSet = true
-                        })
+                SelectionState.entries.forEach {
+                    val gui = it.gui
+                    if (!gui.trayName.isNullOrBlank()) {
+                        Item(gui.trayName!!,
+                            onClick = {
+                                gui.trayClick(trayState, needRestart, needRefresh)
+                            })
+                    }
                 }
+                Item("Exit",
+                    onClick = {
+                        isAskingToCloseSet = true
+                    })
             }
         )
 
@@ -108,10 +111,10 @@ fun main() = application {
 
         SelectionState.entries.forEach {
             val gui = it.gui
-            var isOnTop by remember { gui.onTop }
+            var isOnTop by remember { gui.isOnTop }
 
             if (isOnTop) {
-                gui.onTopDo(trayState, needRestart, needRefresh)
+                gui.topMenu(trayState, needRestart, needRefresh)
             }
         }
     }

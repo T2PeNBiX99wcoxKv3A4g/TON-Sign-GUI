@@ -23,9 +23,7 @@ import io.github.t2penbix99wcoxkv3a4g.tonsign.watcher.VRChatWatcher
 
 class TabBodyMain : TabBodyBase() {
     override val title: String
-        get() {
-            return "gui.tab.title.main"
-        }
+        get() = "gui.tab.title.main"
 
     @Composable
     override fun view(

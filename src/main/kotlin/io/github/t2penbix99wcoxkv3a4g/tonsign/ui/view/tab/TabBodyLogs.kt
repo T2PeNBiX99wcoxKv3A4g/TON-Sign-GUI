@@ -47,16 +47,15 @@ import java.time.format.DateTimeFormatter
 
 class TabBodyLogs : TabBodyBase() {
     override val title: String
-        get() {
-            return "gui.tab.title.logs"
-        }
+        get() = "gui.tab.title.logs"
 
-    override val onTop: MutableState<Boolean>
-        get() {
-            return isOnTop
-        }
+    override val isOnTop: MutableState<Boolean>
+        get() = _isOnTop
 
-    private val isOnTop = mutableStateOf(false)
+    override val trayName: String?
+        get() = "Log Viewer"
+
+    private val _isOnTop = mutableStateOf(false)
 
     private val logs = mutableStateListOf<AnnotatedString>()
 
@@ -132,7 +131,7 @@ class TabBodyLogs : TabBodyBase() {
         var search by remember { mutableStateOf("") }
         var changedLogs = remember { mutableStateListOf<AnnotatedString>() }
         val autoScrollToDown by remember { mutableStateOf(ConfigManager.config.autoScrollToDown) }
-        var isOnTop by remember { isOnTop }
+        var isOnTop by remember { _isOnTop }
 
         changedLogs.clear()
         changedLogs.addAll(logs)
@@ -205,17 +204,17 @@ class TabBodyLogs : TabBodyBase() {
     }
 
     @Composable
-    override fun onTopDo(trayState: TrayState, needRestart: MutableState<Boolean>, needRefresh: MutableState<Boolean>) {
+    override fun topMenu(trayState: TrayState, needRestart: MutableState<Boolean>, needRefresh: MutableState<Boolean>) {
         val windowState =
             rememberWindowState(position = Aligned(alignment = Alignment.Center), size = DpSize(500.dp, 350.dp))
-        var isOnTop by remember { isOnTop }
+        var isOnTop by remember { _isOnTop }
 
         if (!isOnTop) return
 
         Window(
             onCloseRequest = { isOnTop = false },
             visible = true,
-            title = "Log View",
+            title = "Log Viewer",
             state = windowState,
             alwaysOnTop = true
         ) {
@@ -225,5 +224,13 @@ class TabBodyLogs : TabBodyBase() {
                 }
             }
         }
+    }
+
+    override fun trayClick(
+        trayState: TrayState,
+        needRestart: MutableState<Boolean>,
+        needRefresh: MutableState<Boolean>
+    ) {
+        _isOnTop.value = true
     }
 }

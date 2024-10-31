@@ -32,13 +32,10 @@ import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.view.tableView
 
 class TabBodyRoundDatas : TabBodyBase() {
     override val title: String
-        get() {
-            return "gui.tab.title.round_datas"
-        }
+        get() = "gui.tab.title.round_datas"
+    
     override val maxWidth: Float
-        get() {
-            return 0.35f
-        }
+        get() = 0.35f
 
     val roundData: MutableState<RoundData?> = mutableStateOf(null)
 
