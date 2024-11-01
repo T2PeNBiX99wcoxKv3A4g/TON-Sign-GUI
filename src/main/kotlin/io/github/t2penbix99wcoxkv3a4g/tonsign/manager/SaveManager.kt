@@ -2,7 +2,7 @@ package io.github.t2penbix99wcoxkv3a4g.tonsign.manager
 
 import com.charleskorn.kaml.Yaml
 import io.github.t2penbix99wcoxkv3a4g.tonsign.Utils
-import io.github.t2penbix99wcoxkv3a4g.tonsign.coroutineScope.ConfigScope
+import io.github.t2penbix99wcoxkv3a4g.tonsign.coroutineScope.SaveScope
 import io.github.t2penbix99wcoxkv3a4g.tonsign.event.EventArg
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ex.safeDecodeFromFile
 import io.github.t2penbix99wcoxkv3a4g.tonsign.logger.Logger
@@ -15,7 +15,7 @@ import kotlin.io.path.Path
 
 object SaveManager {
     private const val fileName = "save.yml"
-    private val scope = ConfigScope()
+    private val scope = SaveScope()
     private val filePath = Path(Utils.currentWorkingDirectory, fileName)
     private val fileBakPath = Path(Utils.currentWorkingDirectory, "$fileName.bak")
 

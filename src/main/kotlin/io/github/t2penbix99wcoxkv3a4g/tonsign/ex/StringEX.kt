@@ -3,6 +3,7 @@
 package io.github.t2penbix99wcoxkv3a4g.tonsign.ex
 
 import io.github.t2penbix99wcoxkv3a4g.tonsign.logger.Logger
+import java.io.File
 
 fun String.toUTF8(): String {
     return this.toByteArray(Charsets.ISO_8859_1).decodeToString()
@@ -57,4 +58,18 @@ fun String.middlePath(first: Char, last: String): String {
 
 fun String.middlePath(first: String, last: Char): String {
     return this.firstPath(last).lastPath(first)
+}
+
+fun String.asResource(work: (String) -> Unit) {
+    val content = object {}.javaClass.getResource(this)?.readText()
+    if (content == null) return
+    work(content)
+}
+
+fun String.asResourceUrl() = object {}.javaClass.getResource(this)
+fun String.asResourceFile(): File? {
+    val url = asResourceUrl()
+    if (url == null)
+        return null
+    return File(url.file)
 }

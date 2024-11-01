@@ -9,6 +9,7 @@ import com.charleskorn.kaml.YamlMap
 import com.charleskorn.kaml.YamlScalar
 import com.charleskorn.kaml.yamlMap
 import io.github.t2penbix99wcoxkv3a4g.tonsign.Utils
+import io.github.t2penbix99wcoxkv3a4g.tonsign.coroutineScope.LanguageScope
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ex.firstPath
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ex.safeFormat
 import io.github.t2penbix99wcoxkv3a4g.tonsign.exception.FolderNotFoundException
@@ -17,6 +18,7 @@ import kotlin.io.path.Path
 
 object LanguageManager {
     private const val DIR = "language"
+    private val scope = LanguageScope()
     private val dataBase = mutableMapOf<String, YamlMap>()
     private val states = mutableMapOf<String, MutableState<String>>()
     private val langState = mutableStateOf("")
@@ -34,7 +36,10 @@ object LanguageManager {
     fun load() {
         runCatching {
             val dir = Path(Utils.currentWorkingDirectory, DIR).toFile()
+
             if (!dir.exists()) {
+                // Can't find, don't know why
+                // TODO: Make network download
                 Logger.error(
                     { this::class.simpleName!! },
                     FolderNotFoundException("'${dir.path}' is not exists!"),
