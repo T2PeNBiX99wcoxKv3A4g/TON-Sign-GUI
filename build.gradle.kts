@@ -53,7 +53,11 @@ compose.desktop {
             modules("java.naming")
             packageName = "TON-Sign"
             packageVersion = "1.0.0"
-            logging.captureStandardOutput(LogLevel.INFO)
+        }
+
+        buildTypes.release {
+            // Stupid
+            System.setProperty("logback.configurationFile", "/logback.xml")
         }
 
         buildTypes.release.proguard {
