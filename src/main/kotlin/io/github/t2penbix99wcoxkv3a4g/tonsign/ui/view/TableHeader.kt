@@ -5,7 +5,8 @@ package io.github.t2penbix99wcoxkv3a4g.tonsign.ui.view
 @Target(AnnotationTarget.PROPERTY, AnnotationTarget.FUNCTION)
 annotation class TableHeader(
     val headerText: String,
-    val columnIndex: Int
+    val columnIndex: Int,
+    val isTime: Boolean = false
 )
 
 fun getTableHeader(annotations: List<Annotation>): TableHeader {

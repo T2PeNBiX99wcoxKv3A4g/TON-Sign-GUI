@@ -1,5 +1,6 @@
 package io.github.t2penbix99wcoxkv3a4g.tonsign
 
+import androidx.compose.runtime.mutableStateOf
 import io.github.t2penbix99wcoxkv3a4g.tonsign.coroutineScope.LogicScope
 import io.github.t2penbix99wcoxkv3a4g.tonsign.event.EventArg
 import io.github.t2penbix99wcoxkv3a4g.tonsign.logger.Logger
@@ -18,6 +19,7 @@ private val logicScope = LogicScope()
 private var needToWait = false
 
 val readerInitEvent = EventArg<LogWatcher>()
+val delayToLoadingLog = mutableStateOf(false)
 
 internal fun startWatcher() {
     if (logWatcherIsStarted)
@@ -37,13 +39,17 @@ internal fun startWatcher() {
 
                 if (needToWait) {
                     Logger.info("log.wait_until_join_game")
+                    delayToLoadingLog.value = true
                     delay(60000)
                 }
+
+                if (delayToLoadingLog.value)
+                    delayToLoadingLog.value = false
 
                 runningTime++
                 logWatcher = LogWatcher.Default
                 val logWatcher = logWatcher!!
-                handle(logWatcher)
+                handleEvent(logWatcher)
                 readerInitEvent(logWatcher)
                 logWatcher.monitorRoundType()
             }.getOrElse {
@@ -56,14 +62,12 @@ internal fun startWatcher() {
     logWatcherIsStarted = true
 }
 
-
 internal fun onLoadedSave(save: Save) {
     val saveList = save.roundHistories
     if (saveList.isEmpty()) return
 
     saveList.forEach {
-        val time = it.time
-        roundDatas[time] = it
+        roundDatas[it.time] = it
     }
 }
 

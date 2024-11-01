@@ -1,3 +1,5 @@
+@file:Suppress("unused")
+
 package io.github.t2penbix99wcoxkv3a4g.tonsign.ui.view
 
 import androidx.compose.foundation.background
@@ -53,7 +55,12 @@ fun textBox(text: String = "Item") {
 }
 
 @Composable
-fun textBoxWithLink(text: String = "Item", link: String = "https://vrchat.com") {
+fun textBoxWithLink(
+    text: String = "Item",
+    link: String = "https://vrchat.com",
+    start: Int = 0,
+    end: Int = text.length
+) {
     Box(
         Modifier.fillMaxWidth()
             .background(Color(0, 0, 0, 40))
@@ -62,10 +69,14 @@ fun textBoxWithLink(text: String = "Item", link: String = "https://vrchat.com") 
     ) {
         Text(text = buildAnnotatedString {
             append(text)
-            addLink(LinkAnnotation.Url(link), 0, text.length)
+            addLink(LinkAnnotation.Url(link), start, end)
         })
     }
 }
+
+@Composable
+fun textBoxWithLink(text: String = "Item", link: String = "https://vrchat.com", linkString: String) =
+    textBoxWithLink(text, link, text.indexOf(linkString), text.lastIndexOf(linkString))
 
 @Suppress("unused")
 @Composable
@@ -123,6 +134,14 @@ fun updateSortingStates(
 
 fun playerUrl(player: PlayerData): String {
     return "https://vrchat.com/home/user/${player.id}"
+}
+
+fun playerUrl(player: String): String {
+    return "https://vrchat.com/home/user/${player}"
+}
+
+fun worldUrl(world: String): String {
+    return "https://vrchat.com/home/world/${world}"
 }
 
 inline fun <reified T : Any> sort(t: T, tableHeader: TableHeader): String {

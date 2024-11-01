@@ -38,6 +38,9 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ex.swapList
 import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.i18nState
+import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 import kotlin.collections.sortedBy
 import kotlin.collections.sortedByDescending
 import kotlin.reflect.KCallable
@@ -457,14 +460,36 @@ inline fun <reified T> tableRow(
                     header.columnIndex
                 }
                 .map { t -> t.call(item) }
+
+            val headerList = item::class.members
+                .flatMap { it.annotations }
+                .filter { it is TableHeader && it.columnIndex >= 0 }
+                .sortedBy {
+                    if (it !is TableHeader) return@sortedBy -1
+                    it.columnIndex
+                }
+                .map { it as TableHeader }
+
+            var i = 0
+
             rowContent.forEach { rc ->
                 Box(modifier = Modifier.fillMaxWidth().weight(1f), contentAlignment = Alignment.Center) {
                     if (rc != null) {
-                        Text(modifier = Modifier.padding(5.dp), text = "$rc")
+                        if (i < headerList.size) {
+                            val header = headerList[i]
+                            if (header.isTime && rc is Long) {
+                                val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+                                val zone = Instant.ofEpochSecond(rc).atZone(ZoneId.systemDefault())
+                                Text(modifier = Modifier.padding(5.dp), text = "${zone.format(formatter)}")
+                            } else
+                                Text(modifier = Modifier.padding(5.dp), text = "$rc")
+                        } else
+                            Text(modifier = Modifier.padding(5.dp), text = "$rc")
                     } else {
                         Text(modifier = Modifier.padding(5.dp), text = "--")
                     }
                 }
+                i++
             }
         }
     }

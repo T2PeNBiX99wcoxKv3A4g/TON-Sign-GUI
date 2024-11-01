@@ -1,3 +1,5 @@
+@file:Suppress("unused")
+
 package io.github.t2penbix99wcoxkv3a4g.tonsign.event
 
 // https://stackoverflow.com/questions/62289168/kotlin-equivalent-of-c-sharp-events

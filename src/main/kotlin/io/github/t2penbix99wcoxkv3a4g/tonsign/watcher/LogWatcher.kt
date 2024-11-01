@@ -6,13 +6,14 @@ import io.github.t2penbix99wcoxkv3a4g.tonsign.OSCSender
 import io.github.t2penbix99wcoxkv3a4g.tonsign.Utils
 import io.github.t2penbix99wcoxkv3a4g.tonsign.event.Event
 import io.github.t2penbix99wcoxkv3a4g.tonsign.event.EventArg
-import io.github.t2penbix99wcoxkv3a4g.tonsign.event.EventArg3
+import io.github.t2penbix99wcoxkv3a4g.tonsign.event.EventArg4
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ex.firstPath
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ex.lastPath
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ex.middlePath
-import io.github.t2penbix99wcoxkv3a4g.tonsign.ex.readLineUTF8
 import io.github.t2penbix99wcoxkv3a4g.tonsign.exception.UnknownRoundTypeException
 import io.github.t2penbix99wcoxkv3a4g.tonsign.exception.WrongRecentRoundException
+import io.github.t2penbix99wcoxkv3a4g.tonsign.interpreter.LogEvent
+import io.github.t2penbix99wcoxkv3a4g.tonsign.interpreter.LogInterpreter
 import io.github.t2penbix99wcoxkv3a4g.tonsign.logger.Logger
 import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.ConfigManager
 import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.i18n
@@ -28,10 +29,9 @@ import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.logic.model.Terror
 import kotlinx.coroutines.delay
 import java.io.File
 import java.io.FileNotFoundException
-import java.io.RandomAccessFile
+import java.time.ZonedDateTime
 
-// TODO: Log Interpreter
-class LogWatcher(val logFile: File) {
+class LogWatcher(logFile: File) {
     companion object {
         val Default: LogWatcher
             get() = LogWatcher(findLatestLog())
@@ -68,12 +68,12 @@ class LogWatcher(val logFile: File) {
             "Memory Usage: after world loaded "
         private const val WORLD_TON_KEYWORD = "wrld_a61cdabe-1218-4287-9ffc-2a4d1414e5bd"
         private const val WORLD_LEFT_KEYWORD = "OnLeftRoom"
-        private const val WORLD_PLAYER_LEFT_KEYWORD = "[Behaviour] OnPlayerLeft "
-        private const val WORLD_PLAYER_JOINED_KEYWORD = "[Behaviour] OnPlayerJoined "
+        private const val WORLD_PLAYER_LEFT_KEYWORD = "OnPlayerLeft"
+        private const val WORLD_PLAYER_JOINED_KEYWORD = "OnPlayerJoined"
         private const val ROUND_WON_KEYWORD = "Player Won"
         private const val ROUND_LOST_KEYWORD = "Player lost,"
         private const val ROUND_DEATH_KEYWORD = "You died."
-        private const val PLAYER_DEATH_KEYWORD = "[DEATH]"
+        private const val PLAYER_DEATH_KEYWORD = "DEATH"
         private const val KILLER_MATRIX_KEYWORD = "Killers have been set - "
         private const val KILLER_MATRIX_UNKNOWN = "Killers is unknown - "
         private const val KILLER_MATRIX_REVEAL = "Killers have been revealed - "
@@ -87,12 +87,14 @@ class LogWatcher(val logFile: File) {
         private const val TERROR_SHADOW_FREDDY_KEYWORD = "Shadow Freddy"
         private const val TERROR_SEARCHLIGHTS_KEYWORD = "Searchlights"
         private const val TERROR_ALTERNATES_KEYWORD = "Alternates"
+        private const val AND_THE_ROUND_TYPE_IS_KEYWORD = " and the round type is "
+        private const val ROUND_MAP_LOCATION_KEYWORD = "This round is taking place at "
+        private const val BEHAVIOUR_KEYWORD = "Behaviour"
         private const val RANDOM_COUNT_CHANGE = 1
         private const val RANDOM_COUNT_RESET = 3
     }
 
     private val roundLog = mutableListOf<GuessRoundType>()
-    private var lastPosition = 0L
     private var lastPredictionForOSC = false
     private var lastPrediction = GuessRoundType.NIL
     private var lastRoundType = RoundType.Unknown
@@ -103,13 +105,14 @@ class LogWatcher(val logFile: File) {
     private var wrongCount = 0
     private var isTONLoaded = false
 
+    val logInterpreter = LogInterpreter(logFile)
     val onNextPredictionEvent = EventArg<GuessRoundType>()
-    val onRoundStartEvent = EventArg3<String, RoundType, String>()
+    val onRoundStartEvent = EventArg4<ZonedDateTime, RoundType, String, Int>()
     val onRoundOverEvent = EventArg<GuessRoundType>()
     val onRoundWonEvent = Event()
     val onRoundLostEvent = Event()
     val onRoundDeathEvent = Event()
-    val onReadLineEvent = EventArg<String>()
+    val onReadLogEvent = logInterpreter.onReadLogEvent
     val onJoinTONEvent = Event()
     val onLeftTONEvent = Event()
     val onJoinRoomEvent = EventArg<String>()
@@ -120,6 +123,10 @@ class LogWatcher(val logFile: File) {
     val onKillerSetEvent = EventArg<ArrayList<Int>>()
     val onHideTerrorShowUpEvent = EventArg<Int>()
     val isInTON = mutableStateOf(false)
+
+    init {
+        logInterpreter.onReadLogEvent += ::onReadLog
+    }
 
     private val maxRoundChange: Int
         get() {
@@ -225,7 +232,6 @@ class LogWatcher(val logFile: File) {
 
     fun clear() {
         roundLog.clear()
-        lastPosition = 0L
         lastPredictionForOSC = false
         lastPrediction = GuessRoundType.NIL
         bonusFlag = false
@@ -253,29 +259,28 @@ class LogWatcher(val logFile: File) {
         roundLog.add(classification)
     }
 
-    private fun readLine(line: String) {
-        onReadLineEvent(line)
+    private fun onReadLog(log: LogEvent) {
         when {
             // TERROR NIGHTS STRING
-            BONUS_ACTIVE_KEYWORD in line -> {
+            BONUS_ACTIVE_KEYWORD in log.msg -> {
                 bonusFlag = true
                 Logger.info("log.think_terror_nights")
             }
 
-            MASTER_CLIENT_SWITCHED_KEYWORD in line -> {
+            MASTER_CLIENT_SWITCHED_KEYWORD in log.msg -> {
                 Logger.info("log.host_just_left")
                 clear()
                 OSCSender.send(true)
                 lastPredictionForOSC = true
             }
 
-            SAVING_AVATAR_DATA_KEYWORD in line -> {
+            SAVING_AVATAR_DATA_KEYWORD in log.msg -> {
                 Logger.info("log.saving_avatar_data")
                 OSCSender.send(lastPredictionForOSC)
             }
 
-            WORLD_JOIN_KEYWORD in line -> {
-                val worldId = line.lastPath(WORLD_JOIN_KEYWORD).middlePath('[', ']')
+            WORLD_JOIN_KEYWORD in log.msg -> {
+                val worldId = log.msg.lastPath(WORLD_JOIN_KEYWORD).middlePath('[', ']')
 
                 onJoinRoomEvent(worldId)
 
@@ -287,7 +292,7 @@ class LogWatcher(val logFile: File) {
                 }
             }
 
-            WORLD_LEFT_KEYWORD in line -> {
+            WORLD_LEFT_KEYWORD in log.msg -> {
                 onLeftRoomEvent()
                 if (isTONLoaded) {
                     isInTON.value = false
@@ -297,103 +302,101 @@ class LogWatcher(val logFile: File) {
                 }
             }
 
-            WORLD_PLAYER_LEFT_KEYWORD in line -> {
-                val player = line.lastPath(WORLD_PLAYER_LEFT_KEYWORD).trim()
+            WORLD_PLAYER_LEFT_KEYWORD in log.msg -> {
+                val player = log.msg.lastPath(WORLD_PLAYER_LEFT_KEYWORD).trim()
                 val name = player.firstPath('(').trim()
                 val id = player.middlePath('(', ')').trim()
                 onPlayerLeftRoomEvent(PlayerData(name, id, PlayerStatus.Left, null))
             }
 
-            WORLD_PLAYER_JOINED_KEYWORD in line -> {
-                val player = line.lastPath(WORLD_PLAYER_JOINED_KEYWORD).trim()
+            log.name == BEHAVIOUR_KEYWORD && WORLD_PLAYER_JOINED_KEYWORD in log.msg -> {
+                val player = log.msg.lastPath(WORLD_PLAYER_JOINED_KEYWORD).trim()
                 val name = player.firstPath('(').trim()
                 val id = player.middlePath('(', ')').trim()
                 onPlayerJoinedRoomEvent(PlayerData(name, id, PlayerStatus.Alive, null))
             }
 
-            ROUND_OVER_KEYWORD in line -> {
+            ROUND_OVER_KEYWORD in log.msg -> {
                 if (!isInTON.value) return
                 onRoundOverEvent(lastPrediction)
             }
 
-            ROUND_WON_KEYWORD in line -> {
+            ROUND_WON_KEYWORD in log.msg -> {
                 if (!isInTON.value) return
                 onRoundWonEvent()
             }
 
-            ROUND_LOST_KEYWORD in line -> {
+            ROUND_LOST_KEYWORD in log.msg -> {
                 if (!isInTON.value) return
                 onRoundLostEvent()
             }
 
-            ROUND_DEATH_KEYWORD in line -> {
+            ROUND_DEATH_KEYWORD in log.msg -> {
                 if (!isInTON.value) return
                 onRoundDeathEvent()
             }
 
-            PLAYER_DEATH_KEYWORD in line -> {
+            log.name == PLAYER_DEATH_KEYWORD -> {
                 if (!isInTON.value) return
-                val str = line.lastPath(PLAYER_DEATH_KEYWORD)
-                val msgAndName = str.split(']')
-                val name = msgAndName[0].substring(1).trim()
-                val msg = msgAndName[1].trim()
+                val name = log.msg.middlePath('[', ']').trim()
+                val msg = log.msg.lastPath(']').trim()
                 onPlayerDeathEvent(PlayerData(name, null, PlayerStatus.Death, msg))
             }
 
-            TERROR_HUNGRY_HOME_INVADER_KEYWORD in line -> {
+            TERROR_HUNGRY_HOME_INVADER_KEYWORD in log.msg -> {
                 if (!isInTON.value || lastRoundType != RoundType.Classic) return
                 onHideTerrorShowUpEvent(Terror.HIDE)
             }
 
-            TERROR_ATRACHED_KEYWORD in line -> {
+            TERROR_ATRACHED_KEYWORD in log.msg -> {
                 if (!isInTON.value || lastRoundType != RoundType.Classic) return
                 onHideTerrorShowUpEvent(Terror.HIDE + 1)
             }
 
-            TERROR_WILD_YET_BLOODTHIRSTY_CREATURE_KEYWORD in line -> {
+            TERROR_WILD_YET_BLOODTHIRSTY_CREATURE_KEYWORD in log.msg -> {
                 if (!isInTON.value || lastRoundType != RoundType.Classic) return
                 onHideTerrorShowUpEvent(Terror.HIDE + 2)
             }
 
-            TERROR_TRANSPORTATION_TRIO_THE_DRIFTER_KEYWORD in line -> {
+            TERROR_TRANSPORTATION_TRIO_THE_DRIFTER_KEYWORD in log.msg -> {
                 if (!isInTON.value || lastRoundType != RoundType.Unbound) return
                 onHideTerrorShowUpEvent(Terror.HIDE)
             }
 
-            TERROR_RED_MIST_APPARITION_KEYWORD in line -> {
+            TERROR_RED_MIST_APPARITION_KEYWORD in log.msg -> {
                 if (!isInTON.value || lastRoundType != RoundType.EightPages) return
                 onHideTerrorShowUpEvent(Terror.HIDE)
             }
 
-            TERROR_BALDI_KEYWORD in line -> {
+            TERROR_BALDI_KEYWORD in log.msg -> {
                 if (!isInTON.value || lastRoundType != RoundType.EightPages) return
                 onHideTerrorShowUpEvent(Terror.HIDE + 1)
             }
 
-            TERROR_SHADOW_FREDDY_KEYWORD in line -> {
+            TERROR_SHADOW_FREDDY_KEYWORD in log.msg -> {
                 if (!isInTON.value || lastRoundType != RoundType.EightPages) return
                 onHideTerrorShowUpEvent(Terror.HIDE + 2)
             }
 
-            TERROR_SEARCHLIGHTS_KEYWORD in line -> {
+            TERROR_SEARCHLIGHTS_KEYWORD in log.msg -> {
                 if (!isInTON.value || lastRoundType != RoundType.EightPages) return
                 onHideTerrorShowUpEvent(Terror.HIDE + 3)
             }
 
-            TERROR_ALTERNATES_KEYWORD in line -> {
+            TERROR_ALTERNATES_KEYWORD in log.msg -> {
                 if (!isInTON.value || lastRoundType != RoundType.EightPages) return
                 onHideTerrorShowUpEvent(Terror.HIDE + 4)
             }
 
             // https://github.com/ChrisFeline/ToNSaveManager/blob/main/Windows/MainWindow.cs
-            KILLER_MATRIX_KEYWORD in line || KILLER_MATRIX_UNKNOWN in line || KILLER_MATRIX_REVEAL in line -> {
+            KILLER_MATRIX_KEYWORD in log.msg || KILLER_MATRIX_UNKNOWN in log.msg || KILLER_MATRIX_REVEAL in log.msg -> {
                 if (!isInTON.value) return
-                val isUnknown = KILLER_MATRIX_UNKNOWN in line
-                val isRevealed = KILLER_MATRIX_REVEAL in line
+                val isUnknown = KILLER_MATRIX_UNKNOWN in log.msg
+                val isRevealed = KILLER_MATRIX_REVEAL in log.msg
                 val killerMatrix = arrayListOf<Int>(Terror.UNKNOWN, Terror.UNKNOWN, Terror.UNKNOWN)
 
                 if (!isUnknown) {
-                    val kMatrixRaw = line.middlePath(
+                    val kMatrixRaw = log.msg.middlePath(
                         if (isRevealed) KILLER_MATRIX_REVEAL else KILLER_MATRIX_KEYWORD,
                         KILLER_ROUND_TYPE_KEYWORD
                     ).trim().split(' ')
@@ -405,9 +408,9 @@ class LogWatcher(val logFile: File) {
                 onKillerSetEvent(killerMatrix)
             }
 
-            ROUND_TYPE_IS_KEYWORD in line -> {
+            ROUND_TYPE_IS_KEYWORD in log.msg -> {
                 if (!isInTON.value) return
-                var possibleRoundType = line.lastPath(ROUND_TYPE_IS_KEYWORD).trim()
+                var possibleRoundType = log.msg.lastPath(ROUND_TYPE_IS_KEYWORD).trim()
                 val possibleRoundTypeForPrint = possibleRoundType
 
                 Logger.debug({ this::class.simpleName!! }, "possibleRoundType: '${possibleRoundType}'")
@@ -430,8 +433,12 @@ class LogWatcher(val logFile: File) {
                     )
                 }
 
-                val time = line.firstPath(" - ").substring(0, 19).trim()
-                onRoundStartEvent(time, roundType, line)
+                val mapString = log.msg.middlePath(ROUND_MAP_LOCATION_KEYWORD, AND_THE_ROUND_TYPE_IS_KEYWORD).trim()
+                val idAndMap = mapString.split('(')
+                val map = idAndMap[0].trim()
+                val id = idAndMap[1].filter { it.isDigit() }.trim()
+
+                onRoundStartEvent(log.time, roundType, map, id.toInt())
 
                 updateRoundLog(roundType)
                 Logger.info(
@@ -476,25 +483,13 @@ class LogWatcher(val logFile: File) {
                 lastRoundType = roundType
             }
         }
+
+        if (roundLog.size >= ROUND_FAST_CHANGE && bonusFlag)
+            bonusFlag = false
     }
 
-    fun read() {
-        val raf = RandomAccessFile(logFile, "r")
-        val length = raf.length()
-        raf.seek(lastPosition)
-        var charPosition = raf.filePointer
-
-        while (charPosition < length) {
-            val line = raf.readLineUTF8()
-            readLine(line)
-            charPosition = raf.filePointer
-
-            if (roundLog.size >= ROUND_FAST_CHANGE && bonusFlag)
-                bonusFlag = false
-        }
-
-        lastPosition = charPosition
-    }
+    @Suppress("unused")
+    fun read() = logInterpreter.read()
 
     suspend fun monitorRoundType() {
         while (true) {
@@ -503,7 +498,7 @@ class LogWatcher(val logFile: File) {
                 break
             }
 
-            read()
+            logInterpreter.read()
             delay(2000)
         }
     }

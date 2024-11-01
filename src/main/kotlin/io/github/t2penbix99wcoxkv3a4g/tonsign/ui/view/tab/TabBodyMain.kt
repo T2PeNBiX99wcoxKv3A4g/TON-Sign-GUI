@@ -18,8 +18,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.TrayState
 import androidx.navigation.NavHostController
+import io.github.t2penbix99wcoxkv3a4g.tonsign.delayToLoadingLog
+import io.github.t2penbix99wcoxkv3a4g.tonsign.isInWorld
 import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.i18n
 import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.i18nState
+import io.github.t2penbix99wcoxkv3a4g.tonsign.nowWorldID
 import io.github.t2penbix99wcoxkv3a4g.tonsign.players
 import io.github.t2penbix99wcoxkv3a4g.tonsign.roundType.GuessRoundType
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.logWatcher
@@ -27,6 +30,7 @@ import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.nextPrediction
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.view.playerUrl
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.view.textBox
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.view.textBoxWithLink
+import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.view.worldUrl
 import io.github.t2penbix99wcoxkv3a4g.tonsign.watcher.VRChatWatcher
 
 class TabBodyMain : TabBodyBase() {
@@ -51,13 +55,17 @@ class TabBodyMain : TabBodyBase() {
     ) {
         var isWaitingVRChat by VRChatWatcher.isWaitingVRChat
         var nextPredictionSet by nextPrediction
+        var delayToLoadingLog by delayToLoadingLog
         val isNotRunning by remember { "gui.text.main.vrchat_is_not_running".i18nState() }
         val roundSpecial by remember { "gui.text.main.round_special".i18nState() }
         val roundClassic by remember { "gui.text.main.round_classic".i18nState() }
         val waitingJoinTon by remember { "gui.text.main.waiting_join_ton".i18nState() }
         val theIsNothingHere by remember { "gui.text.main.the_is_nothing_here".i18nState() }
         val playersText by remember { "gui.text.round_datas.players".i18nState() }
+        val waitUntilJoin by remember { "log.wait_until_join_game".i18nState() }
         val players = remember { players }
+        val nowWorldId by remember { nowWorldID }
+        val isInWorld by remember { isInWorld }
         val scrollState = rememberScrollState()
 
         SelectionContainer {
@@ -65,31 +73,36 @@ class TabBodyMain : TabBodyBase() {
                 modifier = Modifier.padding(10.dp)
                     .verticalScroll(scrollState)
             ) {
-                if (isWaitingVRChat)
-                    textBox(isNotRunning)
-                else if (logWatcher != null) {
-                    if (logWatcher!!.isInTON.value) {
-                        val special = roundSpecial
-                        val classic = roundClassic
+                when {
+                    isWaitingVRChat -> textBox(isNotRunning)
+                    delayToLoadingLog -> textBox(waitUntilJoin)
+                    logWatcher != null -> {
+                        if (logWatcher!!.isInTON.value) {
+                            val special = roundSpecial
+                            val classic = roundClassic
 
-                        if (nextPredictionSet == GuessRoundType.Special || nextPredictionSet == GuessRoundType.Classic)
-                            textBox("gui.text.main.next_prediction".i18n(if (nextPredictionSet == GuessRoundType.Special) special else classic))
+                            if (nextPredictionSet == GuessRoundType.Special || nextPredictionSet == GuessRoundType.Classic)
+                                textBox("gui.text.main.next_prediction".i18n(if (nextPredictionSet == GuessRoundType.Special) special else classic))
 
-                        val recentRounds by remember { logWatcher!!.getRecentRoundsLogState }
+                            val recentRounds by remember { logWatcher!!.getRecentRoundsLogState }
 
-                        if (!recentRounds.isBlank()) {
-                            textBox("gui.text.main.recent_rounds".i18n(recentRounds))
+                            if (!recentRounds.isBlank()) {
+                                textBox("gui.text.main.recent_rounds".i18n(recentRounds))
+                            } else {
+                                textBox(theIsNothingHere)
+                            }
                         } else {
-                            textBox(theIsNothingHere)
+                            textBox(waitingJoinTon)
                         }
-                    } else {
-                        textBox(waitingJoinTon)
-                    }
-                    if (players.isNotEmpty())
-                        textBox(playersText)
-                    Column(Modifier.padding(10.dp)) {
-                        players.forEach {
-                            textBoxWithLink(it.name, playerUrl(it))
+                        if (isInWorld && nowWorldId.isNotEmpty()) {
+                            textBoxWithLink("Current World: [${nowWorldId}]", worldUrl(nowWorldId))
+                        }
+                        if (players.isNotEmpty())
+                            textBox(playersText)
+                        Column(Modifier.padding(10.dp)) {
+                            players.forEach {
+                                textBoxWithLink(it.name, playerUrl(it))
+                            }
                         }
                     }
                 }

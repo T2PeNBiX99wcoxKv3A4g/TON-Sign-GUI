@@ -12,14 +12,13 @@ import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Tray
 import androidx.compose.ui.window.TrayState
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.WindowPosition.Aligned
 import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
-import com.kdroid.composetray.tray.api.Tray
 import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.ConfigManager
-import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.i18n
 import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.i18nByLang
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.app
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.showConfirmExitWindow
@@ -45,6 +44,7 @@ fun main() = application {
     var needRefreshSet by needRefresh
     val trayState by remember { mutableStateOf(trayState) }
     val onTop by remember { mutableStateOf(ConfigManager.config.onTop) }
+    var testWindow by remember { mutableStateOf(false) }
 
     startWatcher()
 
@@ -56,34 +56,35 @@ fun main() = application {
 
     if (isOpenSet) {
         Tray(
-            iconPath = "", // TODO: Icon
-            windowsIconPath = "",
+            state = trayState,
+            icon = TrayIcon,
             tooltip = Utils.TITLE,
-            primaryAction = {
+            onAction = {
                 if (!isVisible)
                     isVisible = true
+                if (!testWindow)
+                    testWindow = true
             },
-            primaryActionLinuxLabel = "Open Application"
-        ) {
-            SelectionState.entries.forEach {
-                val gui = it.gui
+            menu = {
+                SelectionState.entries.forEach {
+                    val gui = it.gui
 
-                if (gui.trays.isNotEmpty()) {
-                    // TODO: ??? Japanese not supported?
-                    SubMenu(gui.title.i18nByLang("en")) {
-                        gui.trays.forEach {
-                            Item(it.label.i18nByLang("en"), it.isEnabled) {
-                                it.onClick(gui, trayState, needRestart, needRefresh)
+                    if (gui.trays.isNotEmpty()) {
+                        Menu(gui.title.i18nByLang("en")) {
+                            gui.trays.forEach {
+                                Item(it.label.i18nByLang("en"), enabled = it.isEnabled) {
+                                    it.onClick(gui, trayState, needRestart, needRefresh)
+                                }
                             }
                         }
                     }
                 }
+                Separator()
+                Item("gui.tray.exit".i18nByLang("en")) {
+                    isAskingToCloseSet = true
+                }
             }
-            Divider()
-            Item("gui.tray.exit".i18n()) {
-                isAskingToCloseSet = true
-            }
-        }
+        )
 
         if (!needRefreshSet) {
             Window(
