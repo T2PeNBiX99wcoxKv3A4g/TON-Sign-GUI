@@ -94,9 +94,8 @@ class TabBodyMain : TabBodyBase() {
                         } else {
                             textBox(waitingJoinTon)
                         }
-                        if (isInWorld && nowWorldId.isNotEmpty()) {
-                            textBoxWithLink("Current World: [${nowWorldId}]", worldUrl(nowWorldId))
-                        }
+                        if (isInWorld && nowWorldId.isNotEmpty())
+                            textBoxWithLink("gui.text.main.current_world".i18n(nowWorldId), worldUrl(nowWorldId))
                         if (players.isNotEmpty())
                             textBox(playersText)
                         Column(Modifier.padding(10.dp)) {

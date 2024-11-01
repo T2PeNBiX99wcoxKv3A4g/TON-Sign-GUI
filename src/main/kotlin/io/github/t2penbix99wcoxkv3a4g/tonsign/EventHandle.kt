@@ -111,8 +111,8 @@ private fun onPlayerJoinedRoom(player: PlayerData) {
     if (!isInWorld.value) return
 
     val newPlayerNotification = Notification(
-        "New player joined world",
-        "${player.name} is joined to your world"
+        "gui.notification.player_join_world_title".i18n(),
+        "gui.notification.player_join_world_message".i18n(player.name)
     )
 
     trayState.sendNotification(newPlayerNotification)
@@ -128,8 +128,8 @@ private fun onPlayerLeftRoom(player: PlayerData) {
 
     if (isInWorld.value) {
         val playerLeftNotification = Notification(
-            "Player left your world",
-            "${player.name} is left from your world"
+            "gui.notification.player_left_world_title".i18n(),
+            "gui.notification.player_left_world_message".i18n(player.name)
         )
 
         trayState.sendNotification(playerLeftNotification)

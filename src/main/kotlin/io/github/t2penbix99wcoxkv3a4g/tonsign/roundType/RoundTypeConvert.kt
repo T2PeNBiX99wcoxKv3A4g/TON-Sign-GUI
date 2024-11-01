@@ -141,10 +141,8 @@ object RoundTypeConvert {
     }
 }
 
-fun String.jpToEn(): String {
-    return RoundTypeConvert.jpToEn(this)
-}
-
-fun String.getTypeOfRound(): RoundType {
-    return RoundTypeConvert.getTypeOfRound(this)
-}
+fun String.jpToEn() = RoundTypeConvert.jpToEn(this)
+fun String.getTypeOfRound() = RoundTypeConvert.getTypeOfRound(this)
+fun RoundType.getTextOfRound() = RoundTypeConvert.getTextOfRound(this)
+fun RoundType.classifyRound() = RoundTypeConvert.classifyRound(this)
+fun RoundType.isSpecialOrClassic() = RoundTypeConvert.isSpecialOrClassic(this)

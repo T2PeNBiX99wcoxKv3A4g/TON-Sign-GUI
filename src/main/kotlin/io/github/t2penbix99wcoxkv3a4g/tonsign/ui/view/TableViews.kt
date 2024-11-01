@@ -38,6 +38,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ex.swapList
 import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.i18nState
+import io.github.t2penbix99wcoxkv3a4g.tonsign.roundType.RoundType
+import io.github.t2penbix99wcoxkv3a4g.tonsign.roundType.getTextOfRound
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -234,6 +236,7 @@ fun searchField(
     )
 }
 
+@Suppress("unused")
 @Composable
 fun searchField(
     search: String,
@@ -474,17 +477,20 @@ inline fun <reified T> tableRow(
 
             rowContent.forEach { rc ->
                 Box(modifier = Modifier.fillMaxWidth().weight(1f), contentAlignment = Alignment.Center) {
-                    if (rc != null) {
-                        if (i < headerList.size) {
-                            val header = headerList[i]
-                            if (header.isTime && rc is Long) {
+                    if (rc != null && i < headerList.size) {
+                        val header = headerList[i]
+                        
+                        when {
+                            header.isTime && rc is Long -> {
                                 val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
                                 val zone = Instant.ofEpochSecond(rc).atZone(ZoneId.systemDefault())
                                 Text(modifier = Modifier.padding(5.dp), text = "${zone.format(formatter)}")
-                            } else
-                                Text(modifier = Modifier.padding(5.dp), text = "$rc")
-                        } else
-                            Text(modifier = Modifier.padding(5.dp), text = "$rc")
+                            }
+                            rc is RoundType -> {
+                                Text(modifier = Modifier.padding(5.dp), text = rc.getTextOfRound())
+                            }
+                            else -> Text(modifier = Modifier.padding(5.dp), text = "$rc")
+                        }
                     } else {
                         Text(modifier = Modifier.padding(5.dp), text = "--")
                     }

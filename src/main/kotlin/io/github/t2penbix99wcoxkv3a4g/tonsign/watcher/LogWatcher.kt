@@ -21,7 +21,9 @@ import io.github.t2penbix99wcoxkv3a4g.tonsign.roundType.GuessRoundType
 import io.github.t2penbix99wcoxkv3a4g.tonsign.roundType.RandomRoundType
 import io.github.t2penbix99wcoxkv3a4g.tonsign.roundType.RoundType
 import io.github.t2penbix99wcoxkv3a4g.tonsign.roundType.RoundTypeConvert
+import io.github.t2penbix99wcoxkv3a4g.tonsign.roundType.classifyRound
 import io.github.t2penbix99wcoxkv3a4g.tonsign.roundType.getTypeOfRound
+import io.github.t2penbix99wcoxkv3a4g.tonsign.roundType.isSpecialOrClassic
 import io.github.t2penbix99wcoxkv3a4g.tonsign.roundType.jpToEn
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.logic.model.PlayerData
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.logic.model.PlayerStatus
@@ -240,7 +242,7 @@ class LogWatcher(logFile: File) {
     }
 
     private fun updateRoundLog(round: RoundType) {
-        var classification = RoundTypeConvert.classifyRound(round)
+        var classification = round.classifyRound()
 
         if (classification == GuessRoundType.Exempt && roundLog.size >= 2) {
             val last = roundLog.takeLast(2)
@@ -425,7 +427,7 @@ class LogWatcher(logFile: File) {
                 if (!RoundTypeConvert.isCorrectGuess(lastPrediction, roundType)) {
                     wrongCount++
 
-                    val isSpecialOrNot = RoundTypeConvert.isSpecialOrClassic(roundType)
+                    val isSpecialOrNot = roundType.isSpecialOrClassic()
 
                     Logger.debug(
                         { this::class.simpleName!! },
