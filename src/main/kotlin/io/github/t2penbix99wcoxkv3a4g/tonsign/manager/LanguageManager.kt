@@ -11,7 +11,6 @@ import com.charleskorn.kaml.yamlMap
 import io.github.t2penbix99wcoxkv3a4g.tonsign.Utils
 import io.github.t2penbix99wcoxkv3a4g.tonsign.coroutineScope.LanguageScope
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ex.firstPath
-import io.github.t2penbix99wcoxkv3a4g.tonsign.ex.safeFormat
 import io.github.t2penbix99wcoxkv3a4g.tonsign.exception.FolderNotFoundException
 import io.github.t2penbix99wcoxkv3a4g.tonsign.logger.Logger
 import kotlin.io.path.Path
@@ -80,7 +79,7 @@ object LanguageManager {
         return dataBase[lang]!!.get<YamlScalar>(text)!!.content
     }
 
-    fun getByLang(lang: String, text: String, vararg objects: Any) = getByLang(lang, text).safeFormat(*objects)
+    fun getByLang(lang: String, text: String, vararg objects: Any) = getByLang(lang, text).format(*objects)
     fun get(text: String, vararg objects: Any) = getByLang(language, text, *objects)
 
     fun getWithEn(text: String, vararg objects: Any): String {

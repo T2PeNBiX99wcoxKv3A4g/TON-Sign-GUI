@@ -1,9 +1,7 @@
 package io.github.t2penbix99wcoxkv3a4g.tonsign.logger
 
 import io.github.t2penbix99wcoxkv3a4g.tonsign.Utils
-import io.github.t2penbix99wcoxkv3a4g.tonsign.ex.safeFormat
 import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.LanguageManager
-import kotlin.reflect.KClass
 
 @Suppress("unused")
 object Logger {
@@ -21,42 +19,42 @@ object Logger {
 
     fun debug(theClass: () -> String, message: String, vararg objects: Any) {
         val msg = LanguageManager.get(message)
-        Utils.logger.debug { "[%s] $msg".safeFormat(theClass(), *objects) }
+        Utils.logger.debug { "[%s] $msg".format(theClass(), *objects) }
     }
 
     fun info(theClass: () -> String, message: String, vararg objects: Any) {
         val msg = LanguageManager.get(message)
-        Utils.logger.info { "[%s] $msg".safeFormat(theClass(), *objects) }
+        Utils.logger.info { "[%s] $msg".format(theClass(), *objects) }
     }
 
     fun warn(theClass: () -> String, message: String, vararg objects: Any) {
         val msg = LanguageManager.get(message)
-        Utils.logger.warn { "[%s] $msg".safeFormat(theClass(), *objects) }
+        Utils.logger.warn { "[%s] $msg".format(theClass(), *objects) }
     }
 
     fun error(theClass: () -> String, message: String, vararg objects: Any) {
         val msg = LanguageManager.get(message)
-        Utils.logger.error { "[%s] $msg".safeFormat(theClass(), *objects) }
+        Utils.logger.error { "[%s] $msg".format(theClass(), *objects) }
     }
 
     fun debug(theClass: () -> String, throwable: Throwable?, message: String, vararg objects: Any) {
         val msg = LanguageManager.get(message)
-        Utils.logger.debug(throwable) { "[%s] $msg".safeFormat(theClass(), *objects) }
+        Utils.logger.debug(throwable) { "[%s] $msg".format(theClass(), *objects) }
     }
 
     fun info(theClass: () -> String, throwable: Throwable?, message: String, vararg objects: Any) {
         val msg = LanguageManager.get(message)
-        Utils.logger.info(throwable) { "[%s] $msg".safeFormat(theClass(), *objects) }
+        Utils.logger.info(throwable) { "[%s] $msg".format(theClass(), *objects) }
     }
 
     fun warn(theClass: () -> String, throwable: Throwable?, message: String, vararg objects: Any) {
         val msg = LanguageManager.get(message)
-        Utils.logger.warn(throwable) { "[%s] $msg".safeFormat(theClass(), *objects) }
+        Utils.logger.warn(throwable) { "[%s] $msg".format(theClass(), *objects) }
     }
 
     fun error(theClass: () -> String, throwable: Throwable?, message: String, vararg objects: Any) {
         val msg = LanguageManager.get(message)
-        Utils.logger.error(throwable) { "[%s] $msg".safeFormat(theClass(), *objects) }
+        Utils.logger.error(throwable) { "[%s] $msg".format(theClass(), *objects) }
     }
 
     fun debug(throwable: Throwable?, message: String, vararg objects: Any) =

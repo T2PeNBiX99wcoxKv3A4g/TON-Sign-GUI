@@ -61,7 +61,6 @@ class TabBodyMain : TabBodyBase() {
         val roundClassic by remember { "gui.text.main.round_classic".i18nState() }
         val waitingJoinTon by remember { "gui.text.main.waiting_join_ton".i18nState() }
         val theIsNothingHere by remember { "gui.text.main.the_is_nothing_here".i18nState() }
-        val playersText by remember { "gui.text.round_datas.players".i18nState() }
         val waitUntilJoin by remember { "log.wait_until_join_game".i18nState() }
         val players = remember { players }
         val nowWorldId by remember { nowWorldID }
@@ -97,7 +96,7 @@ class TabBodyMain : TabBodyBase() {
                         if (isInWorld && nowWorldId.isNotEmpty())
                             textBoxWithLink("gui.text.main.current_world".i18n(nowWorldId), worldUrl(nowWorldId))
                         if (players.isNotEmpty())
-                            textBox(playersText)
+                            textBox("gui.text.round_datas.players".i18n(players.size))
                         Column(Modifier.padding(10.dp)) {
                             players.forEach {
                                 textBoxWithLink(it.name, playerUrl(it))

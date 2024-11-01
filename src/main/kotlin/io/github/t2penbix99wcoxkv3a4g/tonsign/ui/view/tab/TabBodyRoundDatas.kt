@@ -98,8 +98,6 @@ class TabBodyRoundDatas : TabBodyBase() {
         val scrollState = rememberScrollState()
         val youDeath by remember { "gui.text.round_datas.you_death".i18nState() }
         val youAlive by remember { "gui.text.round_datas.you_alive".i18nState() }
-        val playersText by remember { "gui.text.round_datas.players".i18nState() }
-        val terrorText by remember { "gui.text.round_datas.terror".i18nState() }
 
         SelectionContainer {
             Column(
@@ -123,7 +121,7 @@ class TabBodyRoundDatas : TabBodyBase() {
                 }
 
                 if (roundDetail.players.isNotEmpty())
-                    Text(playersText)
+                    Text("gui.text.round_datas.players".i18n(roundDetail.players.size))
                 Column(Modifier.padding(10.dp)) {
                     roundDetail.players.forEach {
                         Box(
@@ -145,7 +143,7 @@ class TabBodyRoundDatas : TabBodyBase() {
                 }
 
                 if (terrors.names.isNotEmpty())
-                    Text(terrorText)
+                    Text("gui.text.round_datas.terror".i18n(terrors.names.size))
                 Column(Modifier.padding(10.dp)) {
                     terrors.names.forEach {
                         Box(
