@@ -41,7 +41,7 @@ object RoundTypeConvert {
         "トワイライト",
         "ソルスティス",
         "8ページ",
-        "ブラッドバス",
+        "ブラッドムーン",
         "走れ！",
         "冷たい夜",
         "アンバウンド",
@@ -106,7 +106,7 @@ object RoundTypeConvert {
         if (langText == "eight_pages")
             langText = "8_pages"
 
-        if (langText == "r_u_n")
+        if (langText == "ru_n")
             langText = "run"
 
         return "log.round_$langText".i18n()
