@@ -16,7 +16,7 @@ enum class RoundType {
     Solstice,
     EightPages,
     BloodMoon,
-    RUN,
+    Run,
     ColdNight,
     Unbound,
     DoubleTrouble,

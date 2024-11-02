@@ -19,7 +19,7 @@ object RoundTypeConvert {
         "Solstice",
         "8 Pages",
         "Blood Moon",
-        "RUN",
+        "Run",
         "Cold Night",
         "Unbound",
         "Double Trouble",
@@ -74,7 +74,7 @@ object RoundTypeConvert {
     val ClassicRounds: List<RoundType> = listOf(
         RoundType.Classic,
         RoundType.BloodMoon,
-        RoundType.RUN
+        RoundType.Run
     )
 
     fun getTypeOfRound(round: String): RoundType {
