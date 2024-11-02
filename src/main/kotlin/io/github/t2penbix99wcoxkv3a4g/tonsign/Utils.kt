@@ -1,15 +1,21 @@
 package io.github.t2penbix99wcoxkv3a4g.tonsign
 
 import io.github.oshai.kotlinlogging.KotlinLogging
+import java.io.File
 import java.nio.file.Path
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import java.util.Properties
 import kotlin.io.path.Path
 
 object Utils {
     const val TITLE = "Ton Sign"
+    const val ID = "TonSign"
+    private const val VERSION_FILE = "/version.properties"
 
-    val logger = KotlinLogging.logger("TonSign")
+    private val versionProperties = Properties()
+
+    val logger = KotlinLogging.logger(ID)
 
     val logDirectory: Path
         get() = Path(System.getProperty("user.home"), "AppData", "LocalLow", "VRChat", "VRChat")
@@ -23,4 +29,22 @@ object Utils {
             val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd-HH-mm-ss-SSS")
             return current.format(formatter)
         }
+
+    val version: String
+        get() = versionProperties.getProperty("version") ?: "0.0.0"
+
+    fun resourceUrl(name: String) = this.javaClass.getResource(name)
+
+    fun resourceFile(name: String): File? {
+        val url = resourceUrl(name)
+        if (url == null)
+            return null
+        return File(url.file)
+    }
+
+    fun resourceAsStream(name: String) = this.javaClass.getResourceAsStream(name)
+
+    init {
+        versionProperties.load(resourceAsStream(VERSION_FILE))
+    }
 }

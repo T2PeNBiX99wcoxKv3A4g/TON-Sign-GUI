@@ -11,34 +11,52 @@ import com.charleskorn.kaml.yamlMap
 import io.github.t2penbix99wcoxkv3a4g.tonsign.Utils
 import io.github.t2penbix99wcoxkv3a4g.tonsign.coroutineScope.LanguageScope
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ex.firstPath
+import io.github.t2penbix99wcoxkv3a4g.tonsign.ex.toFile
 import io.github.t2penbix99wcoxkv3a4g.tonsign.exception.FolderNotFoundException
 import io.github.t2penbix99wcoxkv3a4g.tonsign.logger.Logger
 import kotlin.io.path.Path
 
 object LanguageManager {
     private const val DIR = "language"
+    private const val YML = ".yml"
     private val scope = LanguageScope()
     private val dataBase = mutableMapOf<String, YamlMap>()
     private val states = mutableMapOf<String, MutableState<String>>()
     private val langState = mutableStateOf("")
     private val language: String
         get() = runCatching { ConfigManager.config.language }.getOrElse { "en" }
+    private val internalLanguageList = listOf(
+        "en",
+        "jp"
+    )
 
     @Suppress("unused")
     val lang: MutableState<String>
         get() = langState
 
+    val dir = Path(Utils.currentWorkingDirectory, DIR).toFile()
+
     init {
+        checkDir()
         load()
+    }
+
+    fun checkDir() {
+        if (!dir.exists())
+            dir.mkdir()
+
+        internalLanguageList.forEach {
+            val file = Path(Utils.currentWorkingDirectory, DIR, "$it$YML").toFile()
+            if (file.exists()) return@forEach
+            val stream = Utils.resourceAsStream("/$DIR/$it$YML")
+            requireNotNull(stream)
+            stream.toFile(file.path)
+        }
     }
 
     fun load() {
         runCatching {
-            val dir = Path(Utils.currentWorkingDirectory, DIR).toFile()
-
             if (!dir.exists()) {
-                // Can't find, don't know why
-                // TODO: Make network download
                 Logger.error(
                     { this::class.simpleName!! },
                     FolderNotFoundException("'${dir.path}' is not exists!"),
@@ -46,7 +64,7 @@ object LanguageManager {
                 )
                 return
             }
-            dir.listFiles { file, filename -> filename.endsWith(".yml") }.forEach {
+            dir.listFiles { file, filename -> filename.endsWith(YML) }.forEach {
                 val data = Yaml.default.parseToYamlNode(it.readText())
                 val langID = it.name.firstPath('.')
 
@@ -114,14 +132,3 @@ object LanguageManager {
         langState.value = lang
     }
 }
-
-fun String.i18n() = LanguageManager.get(this)
-fun String.i18n(vararg objects: Any) = LanguageManager.get(this, *objects)
-fun String.i18nByLang(lang: String) = LanguageManager.getByLang(lang, this)
-fun String.i18nByLang(lang: String, vararg objects: Any) = LanguageManager.getByLang(lang, this, *objects)
-fun String.i18nWithEn() = LanguageManager.getWithEn(this)
-fun String.i18nWithEn(vararg objects: Any) = LanguageManager.getWithEn(this, *objects)
-fun String.i18nState(vararg objects: Any) = LanguageManager.getState(this, *objects)
-fun String.i18nStateWithEn(vararg objects: Any) = LanguageManager.getStateWithEn(this, *objects)
-fun String.i18nExists() = LanguageManager.exists(this)
-fun String.i18nExists(lang: String) = LanguageManager.exists(lang, this)

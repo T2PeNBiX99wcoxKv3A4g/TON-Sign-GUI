@@ -1,4 +1,6 @@
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
+import java.io.FileOutputStream
+import java.util.Properties
 
 plugins {
     kotlin("jvm")
@@ -8,7 +10,10 @@ plugins {
 }
 
 group = "io.github.T2PeNBiX99wcoxKv3A4g.ton-sign"
-version = "0.0.1"
+version = property("ton-sign.version")!!
+
+val generatedVersionDir = "${layout.buildDirectory.asFile.get()}/generated-version"
+val generatedLanguageDir = "${layout.buildDirectory.asFile.get()}/generated-language"
 
 repositories {
     mavenCentral()
@@ -45,6 +50,66 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:${property("kotlinx-coroutines.version")}")
     implementation("javassist:javassist:${property("javassist.version")}")
     implementation("com.github.vrchatapi:vrchatapi-java:${property("vrchatapi.version")}")
+}
+
+sourceSets {
+    main {
+        kotlin {
+            output.dir(generatedVersionDir)
+            output.dir(generatedLanguageDir)
+        }
+    }
+}
+
+// https://ao.nmoe/questions/50117966/get-version-in-kotlin-java-code-in-gradle-project
+tasks.register("generateVersionProperties") {
+    doLast {
+        val propertiesFile = file("$generatedVersionDir/version.properties")
+        propertiesFile.parentFile.mkdirs()
+        val properties = Properties()
+        properties.setProperty("version", "$version")
+        val out = FileOutputStream(propertiesFile)
+        properties.store(out, null)
+    }
+}
+
+val languageDir = "language"
+
+tasks.register("generateLanguageFolder") {
+    doLast {
+        val language = file("./$languageDir")
+        val languageCopyTo = file("$generatedLanguageDir/$languageDir")
+
+        if (languageCopyTo.exists()) {
+            when {
+                languageCopyTo.isFile -> languageCopyTo.delete()
+                languageCopyTo.isDirectory -> {
+                    languageCopyTo.listFiles().forEach { 
+                        it.delete()
+                    }
+                }
+            }
+            languageCopyTo.delete()
+        }
+        
+        languageCopyTo.parentFile.mkdirs()
+        language.copyTo(languageCopyTo, true)
+
+        language.listFiles { file, filename -> filename.endsWith(".yml") }.forEach {
+            it.copyTo(file("${languageCopyTo.path}/${it.name}"), true)
+        }
+    }
+}
+
+tasks.named("processResources") {
+    dependsOn("generateVersionProperties")
+    dependsOn("generateLanguageFolder")
+}
+
+compose.resources {
+    publicResClass = false
+    packageOfResClass = "$group.resources"
+    generateResClass = auto
 }
 
 compose.desktop {
