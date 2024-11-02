@@ -3,17 +3,22 @@
 package io.github.t2penbix99wcoxkv3a4g.tonsign.ui.view
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Key
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -28,7 +33,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.buildAnnotatedString
@@ -171,26 +178,73 @@ inline fun <reified T : Any> sort(t: T, tableHeader: TableHeader): String {
 }
 
 @Composable
-fun passwordField(
+fun loginField(
     value: String,
     onValueChange: (String) -> Unit,
-    submit: () -> Unit,
     modifier: Modifier = Modifier,
-    leadingIcon: @Composable (() -> Unit)?,
-    label: @Composable (() -> Unit)? = @Composable { Text("Password") },
-    placeholder: @Composable (() -> Unit)? = @Composable { Text("Enter your Password") }
+    label: @Composable (() -> Unit)? = @Composable { Text("Login") },
+    placeholder: @Composable (() -> Unit)? = @Composable { Text("Enter your Login") }
 ) {
-    var isPasswordVisible by remember { mutableStateOf(false) }
+    var isVisible by remember { mutableStateOf(false) }
+    val focusManager = LocalFocusManager.current
 
     TextField(
         value = value,
         onValueChange = onValueChange,
         modifier = modifier,
-        leadingIcon = leadingIcon,
+        leadingIcon = {
+            Icon(
+                Icons.Default.Person,
+                contentDescription = "",
+                tint = MaterialTheme.colorScheme.primary
+            )
+        },
         trailingIcon = {
-            IconButton(onClick = { isPasswordVisible = !isPasswordVisible }) {
+            IconButton(onClick = { isVisible = !isVisible }) {
                 Icon(
-                    if (isPasswordVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility,
+                    if (isVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility,
+                    contentDescription = "",
+                    tint = MaterialTheme.colorScheme.primary
+                )
+            }
+        },
+        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next, keyboardType = KeyboardType.Password),
+        keyboardActions = KeyboardActions(
+            onNext = { focusManager.moveFocus(FocusDirection.Down) }
+        ),
+        placeholder = placeholder,
+        label = label,
+        singleLine = true,
+        visualTransformation = if (isVisible) VisualTransformation.None else PasswordVisualTransformation()
+    )
+}
+
+@Composable
+fun passwordField(
+    value: String,
+    onValueChange: (String) -> Unit,
+    submit: () -> Unit,
+    modifier: Modifier = Modifier,
+    label: @Composable (() -> Unit)? = @Composable { Text("Password") },
+    placeholder: @Composable (() -> Unit)? = @Composable { Text("Enter your Password") }
+) {
+    var isVisible by remember { mutableStateOf(false) }
+
+    TextField(
+        value = value,
+        onValueChange = onValueChange,
+        modifier = modifier,
+        leadingIcon = {
+            Icon(
+                Icons.Default.Key,
+                contentDescription = "",
+                tint = MaterialTheme.colorScheme.primary
+            )
+        },
+        trailingIcon = {
+            IconButton(onClick = { isVisible = !isVisible }) {
+                Icon(
+                    if (isVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility,
                     contentDescription = "",
                     tint = MaterialTheme.colorScheme.primary
                 )
@@ -206,6 +260,26 @@ fun passwordField(
         placeholder = placeholder,
         label = label,
         singleLine = true,
-        visualTransformation = if (isPasswordVisible) VisualTransformation.None else PasswordVisualTransformation()
+        visualTransformation = if (isVisible) VisualTransformation.None else PasswordVisualTransformation()
     )
+}
+
+@Composable
+fun labeledCheckbox(
+    label: String,
+    onCheckChanged: () -> Unit,
+    onCheckedChange: ((Boolean) -> Unit)?,
+    isChecked: Boolean
+) {
+    Row(
+        Modifier
+            .clickable(
+                onClick = onCheckChanged
+            )
+            .padding(4.dp)
+    ) {
+        Checkbox(checked = isChecked, onCheckedChange = onCheckedChange)
+        Spacer(Modifier.size(6.dp))
+        Text(label)
+    }
 }

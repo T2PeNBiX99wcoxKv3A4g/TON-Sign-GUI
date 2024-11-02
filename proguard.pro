@@ -12,6 +12,7 @@
 -keep class com.kdroid.composetray.** { *; }
 -keep class io.github.t2penbix99wcoxkv3a4g.tonsign.** { *; } # Hello??? WTF?
 -keep class com.illposed.osc.argument.handler.** { *; }
+-keep class java.sql.** { *; }
 
 # We're excluding Material 2 from the project as we're using Material 3
 -dontwarn androidx.compose.material.**
