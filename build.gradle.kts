@@ -13,6 +13,7 @@ version = "0.0.1"
 repositories {
     mavenCentral()
     maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
+    maven("https://jitpack.io")
     google()
 }
 
@@ -25,6 +26,7 @@ dependencies {
         exclude(compose.material)
     }
     implementation(compose.material3)
+    implementation(compose.materialIconsExtended)
     implementation(kotlin("reflect"))
     implementation("com.illposed.osc:javaosc-core:${property("javaosc.version")}")
     // No type handler registered for serializing class java.lang.String
@@ -42,6 +44,7 @@ dependencies {
 //    implementation("jakarta.servlet:jakarta.servlet-api:${property("jakarta.version")}")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:${property("kotlinx-coroutines.version")}")
     implementation("javassist:javassist:${property("javassist.version")}")
+    implementation("com.github.vrchatapi:vrchatapi-java:${property("vrchatapi.version")}")
 }
 
 compose.desktop {

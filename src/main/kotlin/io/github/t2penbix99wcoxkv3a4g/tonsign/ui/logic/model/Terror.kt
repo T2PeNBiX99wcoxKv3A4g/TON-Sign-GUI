@@ -3,7 +3,7 @@ package io.github.t2penbix99wcoxkv3a4g.tonsign.ui.logic.model
 import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.i18nWithEn
 import io.github.t2penbix99wcoxkv3a4g.tonsign.roundType.RoundType
 
-class Terror(terrorId: Int, val roundType: RoundType) {
+class Terror(val id: Int, val terrorId: Int, val roundType: RoundType) {
     companion object {
         const val UNKNOWN = 999
         const val HIDE = 500
@@ -92,11 +92,11 @@ class Terror(terrorId: Int, val roundType: RoundType) {
             "astrum_aureus",// 81
             "snarbolax",// 82
             "all-around－helper",// 83
-            "sakuya_izayoi",// 84
+            "lain",// 84
             "arrival",// 85
             "bff",// 86 TODO: Not sure
             "miros_birds",// 87
-            "lain",// 88 TODO: Not sure
+            "sakuya_izayoi",// 88 TODO: Not sure
             "scavenger",// 89
             "tinky_winky",// 90
             "tricky",// 91
@@ -121,15 +121,15 @@ class Terror(terrorId: Int, val roundType: RoundType) {
             "ghost_girl",// 110
             "cubor_s_revenge",// 111
             "poly",// 112
-            "beyond",// 113
-            "express_train_to_hell",// 114 TODO: Not sure
+            "fox_squad",// 113 TODO: Not sure
+            "warden",// 114
             "deleted",// 115
-            "the_origin",// 116 TODO: Not sure
+            "express_train_to_hell",// 114 TODO: Not sure
             "dog_mimic",// 117
             "killer_fish",// 118 TODO: Not sure
             "terror_of_nowhere",// 119
-            "fox_squad",// 120
-            "warden",// 121 TODO: Not sure
+            "beyond",// 120
+            "the_origin",// 121
             "time_ripper",// 122
             "this_killer_does_not_exist", // 123 TODO: Not sure
             "parhelion_s_victims",// 124
@@ -203,14 +203,17 @@ class Terror(terrorId: Int, val roundType: RoundType) {
             "alternates"
         )
     }
-
-    val id = terrorId
+    
     val name: String
         get() {
             return "${idToString()} ${nameFromID()}".trim()
         }
 
     private fun terrorType(): String {
+        when {
+            roundType == RoundType.Midnight && id == 3 -> return "A"
+        }
+
         return when (roundType) {
             RoundType.Alternate -> "A"
             else -> "T"
@@ -218,28 +221,28 @@ class Terror(terrorId: Int, val roundType: RoundType) {
     }
 
     private fun isHideTerror(): Boolean {
-        return id >= HIDE
+        return terrorId >= HIDE
     }
 
     private fun idToString(): String {
-        if (roundType == RoundType.MysticMoon || roundType == RoundType.BloodMoon || roundType == RoundType.Twilight || roundType == RoundType.Solstice || roundType == RoundType.Run)
-            return ""
-        var idStr = "${id + 1}"
-        if (id == UNKNOWN)
-            return "???"
+        when {
+            roundType == RoundType.MysticMoon || roundType == RoundType.BloodMoon || roundType == RoundType.Twilight || roundType == RoundType.Solstice || roundType == RoundType.Run -> return ""
+            terrorId == UNKNOWN -> return "???"
+        }
+        var idStr = "${terrorId + 1}"
         if (isHideTerror())
-            idStr = "${id - HIDE + 1}"
+            idStr = "${terrorId - HIDE + 1}"
         return "${terrorType()}${idStr.padStart(3, '0')}"
     }
 
     private fun nameFromID(): String {
         val notFound = "gui.terror.name.not_found".i18nWithEn()
 
-        if (id < 0) return "gui.terror.name.still_in_loading".i18nWithEn()
-        if (id == UNKNOWN) return "gui.terror.name.unknown".i18nWithEn()
+        if (terrorId < 0) return "gui.terror.name.still_in_loading".i18nWithEn()
+        if (terrorId == UNKNOWN) return "gui.terror.name.unknown".i18nWithEn()
 
         if (isHideTerror()) {
-            val newId = id - HIDE
+            val newId = terrorId - HIDE
 
             return when (roundType) {
                 RoundType.Unbound -> {
@@ -258,11 +261,18 @@ class Terror(terrorId: Int, val roundType: RoundType) {
                 }
             }
         }
+        
+        when {
+            roundType == RoundType.Midnight && id == 3 -> {
+                if (terrorId >= alternates.size) return notFound
+                return "gui.terror.name.alternate.${alternates[terrorId]}".i18nWithEn()
+            }
+        }
 
         return when (roundType) {
             RoundType.Alternate -> {
-                if (id >= alternates.size) return notFound
-                return "gui.terror.name.alternate.${alternates[id]}".i18nWithEn()
+                if (terrorId >= alternates.size) return notFound
+                return "gui.terror.name.alternate.${alternates[terrorId]}".i18nWithEn()
             }
 
             RoundType.MysticMoon -> "gui.terror.name.mystic_moon.psychosis".i18nWithEn()
@@ -272,8 +282,8 @@ class Terror(terrorId: Int, val roundType: RoundType) {
             RoundType.Run -> "gui.terror.name.run.the_meat_ball_man".i18nWithEn()
 
             else -> {
-                if (id >= normals.size) return notFound
-                return "gui.terror.name.normal.${normals[id]}".i18nWithEn()
+                if (terrorId >= normals.size) return notFound
+                return "gui.terror.name.normal.${normals[terrorId]}".i18nWithEn()
             }
         }
     }

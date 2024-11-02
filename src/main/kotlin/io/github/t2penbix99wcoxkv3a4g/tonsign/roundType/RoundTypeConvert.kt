@@ -78,7 +78,7 @@ object RoundTypeConvert {
     )
 
     fun getTypeOfRound(round: String): RoundType {
-        val id = round.replace("8", "Eight").replace(" ", "")
+        val id = round.replace("8", "Eight").replace("RUN", "Run").replace(" ", "")
         return runCatching { RoundType.valueOf(id) }.getOrElse { RoundType.Unknown }
     }
 
