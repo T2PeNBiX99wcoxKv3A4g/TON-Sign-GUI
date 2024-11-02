@@ -24,10 +24,7 @@ round type beside the start button, meaning you should never miss another Altern
 ### 🚨 Important Notice 🚨
 
 **You still need to download asset
-from [original repository](https://github.com/Emmyvee/TON-Sign?tab=readme-ov-file#-important-notice-)**  
-**This asset uses VRCFury for automatic setup. Please ensure the latest version of VRCFury is installed in your Unity
-project.**
-[Download VRCFury Here](https://vrcfury.com/download)
+from [original repository](https://github.com/Emmyvee/TON-Sign?tab=readme-ov-file#-important-notice-)**
 
 ---
 
