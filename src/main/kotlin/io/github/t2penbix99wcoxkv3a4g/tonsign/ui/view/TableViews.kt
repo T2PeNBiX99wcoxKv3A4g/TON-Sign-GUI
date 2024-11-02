@@ -214,7 +214,7 @@ fun searchField(
     search: String,
     onContentUpdate: (String) -> Unit
 ) {
-    val searchText by remember { "gui.text.search".i18nState() }
+    val searchText by "gui.text.search".i18nState()
 
     OutlinedTextField(
         value = search,
@@ -243,7 +243,7 @@ fun searchField(
     onContentUpdate: (String) -> Unit,
     onBottomDo: () -> Unit
 ) {
-    val searchText by remember { "gui.text.search".i18nState() }
+    val searchText by "gui.text.search".i18nState()
 
     OutlinedTextField(
         value = search,
@@ -285,7 +285,7 @@ fun searchField(
     onBottomDo: () -> Unit,
     searchButtons: List<SearchButton>
 ) {
-    val searchText by remember { "gui.text.search".i18nState() }
+    val searchText by "gui.text.search".i18nState()
 
     OutlinedTextField(
         value = search,
@@ -357,7 +357,7 @@ fun tableHeader(
                     horizontalArrangement = Arrangement.SpaceEvenly,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    val headerText by remember { it.headerText.i18nState() }
+                    val headerText by it.headerText.i18nState()
 
                     Text(
                         text = headerText,

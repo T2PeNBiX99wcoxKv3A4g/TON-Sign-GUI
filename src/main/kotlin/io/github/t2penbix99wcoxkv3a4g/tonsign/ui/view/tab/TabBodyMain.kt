@@ -12,7 +12,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -56,15 +55,14 @@ class TabBodyMain : TabBodyBase() {
         var isWaitingVRChat by VRChatWatcher.isWaitingVRChat
         var nextPredictionSet by nextPrediction
         var delayToLoadingLog by delayToLoadingLog
-        val isNotRunning by remember { "gui.text.main.vrchat_is_not_running".i18nState() }
-        val roundSpecial by remember { "gui.text.main.round_special".i18nState() }
-        val roundClassic by remember { "gui.text.main.round_classic".i18nState() }
-        val waitingJoinTon by remember { "gui.text.main.waiting_join_ton".i18nState() }
-        val theIsNothingHere by remember { "gui.text.main.the_is_nothing_here".i18nState() }
-        val waitUntilJoin by remember { "log.wait_until_join_game".i18nState() }
-        val players = remember { players }
-        val nowWorldId by remember { nowWorldID }
-        val isInWorld by remember { isInWorld }
+        val isNotRunning by "gui.text.main.vrchat_is_not_running".i18nState()
+        val roundSpecial by "gui.text.main.round_special".i18nState()
+        val roundClassic by "gui.text.main.round_classic".i18nState()
+        val waitingJoinTon by "gui.text.main.waiting_join_ton".i18nState()
+        val theIsNothingHere by "gui.text.main.the_is_nothing_here".i18nState()
+        val waitUntilJoin by "log.wait_until_join_game".i18nState()
+        val nowWorldId by nowWorldID
+        val isInWorld by isInWorld
         val scrollState = rememberScrollState()
 
         SelectionContainer {
@@ -80,10 +78,12 @@ class TabBodyMain : TabBodyBase() {
                             val special = roundSpecial
                             val classic = roundClassic
 
-                            if (nextPredictionSet == GuessRoundType.Special || nextPredictionSet == GuessRoundType.Classic)
-                                textBox("gui.text.main.next_prediction".i18n(if (nextPredictionSet == GuessRoundType.Special) special else classic))
+                            if (nextPredictionSet == GuessRoundType.Special || nextPredictionSet == GuessRoundType.Classic) {
+                                val nextPrediction by "gui.text.main.next_prediction".i18nState(if (nextPredictionSet == GuessRoundType.Special) special else classic)
+                                textBox(nextPrediction)
+                            }
 
-                            val recentRounds by remember { logWatcher!!.getRecentRoundsLogState }
+                            val recentRounds by logWatcher!!.getRecentRoundsLogState
 
                             if (!recentRounds.isBlank()) {
                                 textBox("gui.text.main.recent_rounds".i18n(recentRounds))
@@ -96,7 +96,7 @@ class TabBodyMain : TabBodyBase() {
                         if (isInWorld && nowWorldId.isNotEmpty())
                             textBoxWithLink("gui.text.main.current_world".i18n(nowWorldId), worldUrl(nowWorldId))
                         if (players.isNotEmpty())
-                            textBox("gui.text.round_datas.players".i18n(players.size))
+                            textBox("gui.text.main.players".i18n(players.size))
                         Column(Modifier.padding(10.dp)) {
                             players.forEach {
                                 textBoxWithLink(it.name, playerUrl(it))

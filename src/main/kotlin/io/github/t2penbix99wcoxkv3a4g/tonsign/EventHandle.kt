@@ -31,8 +31,8 @@ internal val logs = mutableStateListOf<AnnotatedString>()
 internal val players = mutableStateListOf<PlayerData>()
 internal val nowWorldID = mutableStateOf("")
 internal var isInWorld = mutableStateOf(false)
+internal var lastTime = 0L
 
-private var lastTime = 0L
 private var isRoundStart = false
 
 private fun onNextPrediction(guessRound: GuessRoundType) {

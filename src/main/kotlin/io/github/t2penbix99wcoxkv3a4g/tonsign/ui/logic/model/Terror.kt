@@ -94,9 +94,9 @@ class Terror(val id: Int, val terrorId: Int, val roundType: RoundType) {
             "all-around－helper",// 83
             "lain",// 84
             "arrival",// 85
-            "bff",// 86 TODO: Not sure
+            "sakuya_izayoi",// 86 TODO: Not sure
             "miros_birds",// 87
-            "sakuya_izayoi",// 88 TODO: Not sure
+            "bff",// 88 TODO: Not sure
             "scavenger",// 89
             "tinky_winky",// 90
             "tricky",// 91
@@ -124,14 +124,14 @@ class Terror(val id: Int, val terrorId: Int, val roundType: RoundType) {
             "fox_squad",// 113 TODO: Not sure
             "warden",// 114
             "deleted",// 115
-            "express_train_to_hell",// 114 TODO: Not sure
+            "express_train_to_hell",// 116
             "dog_mimic",// 117
-            "killer_fish",// 118 TODO: Not sure
+            "killer_fish",// 118
             "terror_of_nowhere",// 119
             "beyond",// 120
             "the_origin",// 121
             "time_ripper",// 122
-            "this_killer_does_not_exist", // 123 TODO: Not sure
+            "this_killer_does_not_exist", // 123
             "parhelion_s_victims",// 124
             "bed_mecha",// 125
             "killer_rabbit",// 126
@@ -177,10 +177,10 @@ class Terror(val id: Int, val terrorId: Int, val roundType: RoundType) {
             "roblander",// 29
             "fusion_pilot",// 30
             "walpurgisnacht",// 31
-            "sanic", // 32 TODO: Maybe is wrong id
+            "the_red_mist",// 32
             "sakuya_the_ripper",// 33
             "dev_maulers",// 34
-            "the_red_mist",// 35
+            "sanic", // 35 TODO: Maybe is wrong id
             "restless_creator",// 36
             "overseer" // 37 Should not be show in game but still add it
         )
@@ -203,7 +203,7 @@ class Terror(val id: Int, val terrorId: Int, val roundType: RoundType) {
             "alternates"
         )
     }
-    
+
     val name: String
         get() {
             return "${idToString()} ${nameFromID()}".trim()
@@ -216,6 +216,10 @@ class Terror(val id: Int, val terrorId: Int, val roundType: RoundType) {
 
         return when (roundType) {
             RoundType.Alternate -> "A"
+            RoundType.Fog -> {
+                if (terrorId >= alternates.size) return "T"
+                "T-A"
+            }
             else -> "T"
         }
     }
@@ -261,7 +265,7 @@ class Terror(val id: Int, val terrorId: Int, val roundType: RoundType) {
                 }
             }
         }
-        
+
         when {
             roundType == RoundType.Midnight && id == 3 -> {
                 if (terrorId >= alternates.size) return notFound
@@ -280,6 +284,17 @@ class Terror(val id: Int, val terrorId: Int, val roundType: RoundType) {
             RoundType.Twilight -> "gui.terror.name.twilight.apocalypse_bird".i18nWithEn()
             RoundType.Solstice -> "gui.terror.name.solstice.pandora".i18nWithEn()
             RoundType.Run -> "gui.terror.name.run.the_meat_ball_man".i18nWithEn()
+
+            RoundType.Fog -> {
+                if (terrorId >= normals.size) return notFound
+                
+                var orName = ""
+
+                if (terrorId < alternates.size)
+                    orName = "gui.terror.name.alternate.${alternates[terrorId]}".i18nWithEn()
+
+                return "${"gui.terror.name.normal.${normals[terrorId]}".i18nWithEn()} ${if (terrorId < alternates.size) "|" else ""} $orName".trim()
+            }
 
             else -> {
                 if (terrorId >= normals.size) return notFound

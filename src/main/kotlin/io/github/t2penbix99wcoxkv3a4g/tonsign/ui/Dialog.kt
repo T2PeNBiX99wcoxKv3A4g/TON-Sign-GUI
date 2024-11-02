@@ -12,7 +12,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -75,8 +74,8 @@ fun openDialogWindow(
 
 @Composable
 fun openDialogWindow(title: String, msg: String, yesDo: () -> Unit, noDo: () -> Unit) {
-    val yes by remember { "gui.button.dialog.yes".i18nState() }
-    val no by remember { "gui.button.dialog.no".i18nState() }
+    val yes by "gui.button.dialog.yes".i18nState()
+    val no by "gui.button.dialog.no".i18nState()
 
     openDialogWindow(
         title,
@@ -92,8 +91,8 @@ fun openDialogWindow(title: String, msg: String, yesDo: () -> Unit, noDo: () -> 
 fun showConfirmExitWindow(isAskingToClose: MutableState<Boolean>, isOpen: MutableState<Boolean>) {
     var isAskingToCloseSet by isAskingToClose
     var isOpenSet by isOpen
-    val confirmExitTitle by remember { "gui.title.dialog.confirm_exit".i18nState() }
-    val confirmExitText by remember { "gui.text.dialog.confirm_exit".i18nState() }
+    val confirmExitTitle by "gui.title.dialog.confirm_exit".i18nState()
+    val confirmExitText by "gui.text.dialog.confirm_exit".i18nState()
 
     openDialogWindow(
         title = confirmExitTitle,
@@ -112,8 +111,8 @@ fun showConfirmExitWindow(isAskingToClose: MutableState<Boolean>, isOpen: Mutabl
 fun showNeedRestartWindows(needRestart: MutableState<Boolean>, isOpen: MutableState<Boolean>) {
     var needRestartSet by needRestart
     var isOpenSet by isOpen
-    val needRestartTitle by remember { "gui.title.dialog.need_restart".i18nState() }
-    val needRestartText by remember { "gui.text.dialog.need_restart".i18nState() }
+    val needRestartTitle by "gui.title.dialog.need_restart".i18nState()
+    val needRestartText by "gui.text.dialog.need_restart".i18nState()
 
     openDialogWindow(
         title = needRestartTitle,

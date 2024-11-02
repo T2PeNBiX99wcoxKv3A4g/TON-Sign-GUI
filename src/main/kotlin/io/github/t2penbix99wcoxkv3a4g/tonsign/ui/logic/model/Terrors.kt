@@ -1,17 +1,36 @@
 package io.github.t2penbix99wcoxkv3a4g.tonsign.ui.logic.model
 
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import io.github.t2penbix99wcoxkv3a4g.tonsign.roundType.RoundType
 
-class Terrors(ids: ArrayList<Int>, val roundType: RoundType) {
+class Terrors {
+    val ids: ArrayList<Int>
+    val roundType: RoundType
+    val terrors: List<Terror>
+
+    constructor(ids: ArrayList<Int>, roundType: RoundType) {
+        this.ids = ids
+        this.roundType = roundType
+
+        terrors = listOf(
+            Terror(1, ids[0], roundType), Terror(2, ids[1], roundType), Terror(3, ids[2], roundType)
+        )
+    }
+
+    constructor(ids: SnapshotStateList<Int>, roundType: RoundType) {
+        this.ids = arrayListOf(ids[0], ids[1], ids[2])
+        this.roundType = roundType
+
+        terrors = listOf(
+            Terror(1, ids[0], roundType), Terror(2, ids[1], roundType), Terror(3, ids[2], roundType)
+        )
+    }
+
     private companion object {
         private val specialRounds = listOf(
             RoundType.Bloodbath
         )
     }
-
-    val terrors = listOf(
-        Terror(1, ids[0], roundType), Terror(2, ids[1], roundType), Terror(3, ids[2], roundType)
-    )
 
     val names: List<String>
         get() {
