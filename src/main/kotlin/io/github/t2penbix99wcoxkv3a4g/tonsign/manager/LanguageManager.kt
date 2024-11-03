@@ -11,6 +11,7 @@ import com.charleskorn.kaml.yamlMap
 import io.github.t2penbix99wcoxkv3a4g.tonsign.Utils
 import io.github.t2penbix99wcoxkv3a4g.tonsign.coroutineScope.LanguageScope
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ex.firstPath
+import io.github.t2penbix99wcoxkv3a4g.tonsign.ex.sha256
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ex.toFile
 import io.github.t2penbix99wcoxkv3a4g.tonsign.exception.FolderNotFoundException
 import io.github.t2penbix99wcoxkv3a4g.tonsign.logger.Logger
@@ -19,6 +20,7 @@ import kotlin.io.path.Path
 object LanguageManager {
     private const val DIR = "language"
     private const val YML = ".yml"
+    private const val SHA256 = ".sha256"
     private val scope = LanguageScope()
     private val dataBase = mutableMapOf<String, YamlMap>()
     private val states = mutableMapOf<String, MutableState<String>>()
@@ -38,19 +40,39 @@ object LanguageManager {
 
     init {
         checkDir()
+        updateLanguage()
         load()
     }
 
     fun checkDir() {
         if (!dir.exists())
             dir.mkdir()
-
+        
         internalLanguageList.forEach {
             val file = Path(Utils.currentWorkingDirectory, DIR, "$it$YML").toFile()
             if (file.exists()) return@forEach
             val stream = Utils.resourceAsStream("/$DIR/$it$YML")
             requireNotNull(stream)
             stream.toFile(file.path)
+        }
+    }
+
+    fun updateLanguage() {
+        if (!dir.exists()) return
+        
+        internalLanguageList.forEach {
+            val file = Path(Utils.currentWorkingDirectory, DIR, "$it$YML").toFile()
+            if (!file.exists()) return@forEach
+            val sha256Stream = Utils.resourceAsStream("/$DIR/$it$YML$SHA256")
+            requireNotNull(sha256Stream)
+            val reader = sha256Stream.reader(charset = Charsets.UTF_8)
+            val sha256FromJar = reader.readText().firstPath(' ')
+            val sha256FromFile = file.readText(charset = Charsets.UTF_8).sha256()
+            if (sha256FromFile != sha256FromJar) {
+                val stream = Utils.resourceAsStream("/$DIR/$it$YML")
+                requireNotNull(stream)
+                stream.toFile(file.path)
+            }
         }
     }
 

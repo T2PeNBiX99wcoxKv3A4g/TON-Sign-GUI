@@ -1,5 +1,6 @@
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import java.io.FileOutputStream
+import java.security.MessageDigest
 import java.util.Properties
 
 plugins {
@@ -14,6 +15,16 @@ version = property("ton-sign.version")!!
 
 val generatedVersionDir = "${layout.buildDirectory.asFile.get()}/generated-version"
 val generatedLanguageDir = "${layout.buildDirectory.asFile.get()}/generated-language"
+
+fun String.sha256() = hashString(this, "SHA-256")
+
+// https://gist.github.com/lovubuntu/164b6b9021f5ba54cefc67f60f7a1a25
+private fun hashString(input: String, algorithm: String): String {
+    return MessageDigest
+        .getInstance(algorithm)
+        .digest(input.toByteArray())
+        .fold(StringBuilder()) { sb, it -> sb.append("%02x".format(it)) }.toString()
+}
 
 repositories {
     mavenCentral()
@@ -84,19 +95,24 @@ tasks.register("generateLanguageFolder") {
             when {
                 languageCopyTo.isFile -> languageCopyTo.delete()
                 languageCopyTo.isDirectory -> {
-                    languageCopyTo.listFiles().forEach { 
+                    languageCopyTo.listFiles().forEach {
                         it.delete()
                     }
                 }
             }
             languageCopyTo.delete()
         }
-        
+
         languageCopyTo.parentFile.mkdirs()
         language.copyTo(languageCopyTo, true)
 
-        language.listFiles { file, filename -> filename.endsWith(".yml") }.forEach {
+        language.listFiles { _, filename -> filename.endsWith(".yml") }.forEach {
             it.copyTo(file("${languageCopyTo.path}/${it.name}"), true)
+
+            val shaFile = file("${languageCopyTo.path}/${it.name}.sha256")
+            val sha256Text = it.readText().sha256()
+            shaFile.createNewFile()
+            shaFile.writeText("$sha256Text ${it.name}")
         }
     }
 }
@@ -119,6 +135,7 @@ compose.desktop {
         nativeDistributions {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
             modules("java.naming")
+            modules("java.sql")
             packageName = "TON-Sign"
             packageVersion = "1.0.0"
         }
