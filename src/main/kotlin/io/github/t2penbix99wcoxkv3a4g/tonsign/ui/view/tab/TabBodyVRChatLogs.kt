@@ -12,8 +12,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowOutward
-import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.automirrored.filled.Notes
+import androidx.compose.material.icons.automirrored.filled.OpenInNew
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -63,9 +63,10 @@ class TabBodyVRChatLogs : TabBodyBase() {
 
     @Composable
     override fun icon() {
-        Icon(Icons.Default.Info, contentDescription = title.i18n())
+        Icon(Icons.AutoMirrored.Filled.Notes, contentDescription = title.i18n())
     }
 
+    @Suppress("unused")
     @Composable
     private fun viewAll(
         trayState: TrayState,
@@ -98,7 +99,7 @@ class TabBodyVRChatLogs : TabBodyBase() {
             listOf(
                 SearchButton({
                     isOnTop = true
-                }, Icons.Filled.ArrowOutward, "IsOnTop")
+                }, Icons.AutoMirrored.Filled.OpenInNew, "IsOnTop")
             )
         } else
             listOf()

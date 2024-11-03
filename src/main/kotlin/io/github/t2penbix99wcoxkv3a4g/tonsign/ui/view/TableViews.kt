@@ -15,6 +15,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material.icons.filled.VerticalAlignBottom
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardColors
 import androidx.compose.material3.Icon
@@ -307,7 +308,7 @@ fun searchField(
                 IconButton(onClick = {
                     onBottomDo()
                 }) {
-                    Icon(imageVector = Icons.Filled.KeyboardArrowDown, contentDescription = "Bottom")
+                    Icon(imageVector = Icons.Filled.VerticalAlignBottom, contentDescription = "Go To Bottom")
                 }
                 searchButtons.forEach {
                     IconButton(onClick = {

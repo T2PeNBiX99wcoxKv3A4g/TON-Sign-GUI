@@ -12,7 +12,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountBox
+import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -29,19 +29,20 @@ import androidx.compose.ui.window.TrayState
 import androidx.navigation.NavHostController
 import io.github.t2penbix99wcoxkv3a4g.tonsign.api.ApiClient
 import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.i18n
+import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.i18nState
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.view.labeledCheckbox
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.view.loginField
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.view.passwordField
 
 class TabBodyLogin : TabBodyBase() {
     override val title: String
-        get() = "Login"
+        get() = "gui.tab.title.login"
     override val id: String
         get() = "login"
 
     @Composable
     override fun icon() {
-        Icon(Icons.Default.AccountBox, contentDescription = title.i18n())
+        Icon(Icons.Default.AccountCircle, contentDescription = title.i18n())
     }
 
     @Composable
@@ -56,7 +57,15 @@ class TabBodyLogin : TabBodyBase() {
         var username by remember { mutableStateOf("") }
         var password by remember { mutableStateOf("") }
         var rememberMe by remember { mutableStateOf(false) }
-        val api = ApiClient()
+
+        val usernameText by "gui.text.login.username".i18nState()
+        val enterUserNameText by "gui.text.login.enter_username".i18nState()
+        val passwordText by "gui.text.login.password".i18nState()
+        val enterPasswordText by "gui.text.login.enter_password".i18nState()
+        val rememberMeText by "gui.text.login.remember_me".i18nState()
+        val loginText by "gui.text.login.login".i18nState()
+
+        val api by remember { mutableStateOf(ApiClient()) }
 
         Column(
             modifier = Modifier.fillMaxSize()
@@ -68,18 +77,20 @@ class TabBodyLogin : TabBodyBase() {
             loginField(
                 value = username,
                 onValueChange = { username = it },
-                label = { Text("Username") },
-                placeholder = { Text("Enter your Username") }
+                label = { Text(usernameText) },
+                placeholder = { Text(enterUserNameText) }
             )
             passwordField(
                 value = password,
                 onValueChange = { password = it },
                 submit = {},
+                label = { Text(passwordText) },
+                placeholder = { Text(enterPasswordText) }
             )
             Spacer(modifier = Modifier.height(10.dp))
             labeledCheckbox(
-                label = "Remember Me",
-                onCheckChanged = {},
+                label = rememberMeText,
+                onCheckChanged = { rememberMe = !rememberMe },
                 onCheckedChange = {
                     rememberMe = it
                 },
@@ -91,7 +102,7 @@ class TabBodyLogin : TabBodyBase() {
                 shape = RoundedCornerShape(5.dp),
                 modifier = Modifier.fillMaxWidth(0.5f)
             ) {
-                Text("Login")
+                Text(loginText)
             }
         }
     }
