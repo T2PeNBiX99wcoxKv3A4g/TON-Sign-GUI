@@ -7,7 +7,10 @@ data class Config(
     var language: String,
     var maxRecentRounds: Int,
     var autoSaveMinutes: Float,
-    var onlySpecial: Boolean,
+    var roundNotify: Boolean,
+    var roundNotifyOnlySpecial: Boolean,
+    var playerJoinedNotify: Boolean,
+    var playerLeftNotify: Boolean,
     var autoScrollToDown: Boolean,
     var onTop: Boolean
 )

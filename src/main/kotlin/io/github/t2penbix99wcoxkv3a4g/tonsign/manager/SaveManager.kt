@@ -14,12 +14,15 @@ import java.io.File
 import kotlin.io.path.Path
 
 object SaveManager {
-    private const val fileName = "save.yml"
+    private const val FILE_NAME = "save.yml"
     private val scope = SaveScope()
-    private val filePath = Path(Utils.currentWorkingDirectory, fileName)
-    private val fileBakPath = Path(Utils.currentWorkingDirectory, "$fileName.bak")
+    private val filePath = Path(Utils.currentWorkingDirectory, FILE_NAME)
+    private val fileBakPath = Path(Utils.currentWorkingDirectory, "$FILE_NAME.bak")
 
-    val Default = Save(listOf<RoundData>())
+    val Default = Save(
+        roundHistories = listOf<RoundData>()
+    )
+    
     val onLoadedSaveEvent = EventArg<Save>()
     val onStartSaveEvent = EventArg<Save>()
 
@@ -76,7 +79,7 @@ object SaveManager {
             fileBakFile.renameTo(
                 Path(
                     Utils.currentWorkingDirectory,
-                    "${fileName}.${Utils.timeNowForFile}.bak"
+                    "${FILE_NAME}.${Utils.timeNowForFile}.bak"
                 ).toFile()
             )
 

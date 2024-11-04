@@ -15,6 +15,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -50,9 +51,12 @@ class TabBodySetting : TabBodyBase() {
     ) {
         var needRefreshSet by needRefresh
         var needRestartSet by needRestart
-        var onlySpecial by mutableStateOf(ConfigManager.config.onlySpecial)
-        var autoScrollToDown by mutableStateOf(ConfigManager.config.autoScrollToDown)
-        var onTop by mutableStateOf(ConfigManager.config.onTop)
+        var roundNotify by remember { mutableStateOf(ConfigManager.config.roundNotify) }
+        var roundNotifyOnlySpecial by remember { mutableStateOf(ConfigManager.config.roundNotifyOnlySpecial) }
+        var playerJoinedNotify by remember { mutableStateOf(ConfigManager.config.playerJoinedNotify) }
+        var playerLeftNotify by remember { mutableStateOf(ConfigManager.config.playerLeftNotify) }
+        var autoScrollToDown by remember { mutableStateOf(ConfigManager.config.autoScrollToDown) }
+        var onTop by remember { mutableStateOf(ConfigManager.config.onTop) }
         val forceSendTrue by "gui.button.setting.force_send_true".i18nState()
         val forceSendFalse by "gui.button.setting.force_send_false".i18nState()
         val refresh by "gui.button.setting.refresh".i18nState()
@@ -114,9 +118,25 @@ class TabBodySetting : TabBodyBase() {
             ) {
                 Text("Save data")
             }
-            switchWithText("Only send notification when round is special", onlySpecial) {
-                onlySpecial = it
-                ConfigManager.config.onlySpecial = it
+            // TODO: Can't click
+            switchWithText("Send next round notification when round is over", roundNotify) {
+                roundNotify = it
+                ConfigManager.config.roundNotify = it
+            }
+            if (roundNotify) {
+                // TODO: Can't click
+                switchWithText("Only send notification when round is special", roundNotifyOnlySpecial) {
+                    roundNotifyOnlySpecial = it
+                    ConfigManager.config.roundNotifyOnlySpecial = it
+                }
+            }
+            switchWithText("Send player joined notification", playerJoinedNotify) {
+                playerJoinedNotify = it
+                ConfigManager.config.playerJoinedNotify = it
+            }
+            switchWithText("Send player left notification", playerLeftNotify) {
+                playerLeftNotify = it
+                ConfigManager.config.playerLeftNotify = it
             }
             switchWithText("Auto scroll to down in logs", autoScrollToDown) {
                 autoScrollToDown = it

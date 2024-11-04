@@ -12,12 +12,23 @@ import java.io.File
 import kotlin.io.path.Path
 
 object ConfigManager {
-    private const val fileName = "config.yml"
+    private const val FILE_NAME = "config.yml"
     private val scope = ConfigScope()
-    private val filePath = Path(Utils.currentWorkingDirectory, fileName)
-    private val fileBakPath = Path(Utils.currentWorkingDirectory, "$fileName.bak")
+    private val filePath = Path(Utils.currentWorkingDirectory, FILE_NAME)
+    private val fileBakPath = Path(Utils.currentWorkingDirectory, "$FILE_NAME.bak")
 
-    val Default = Config("en", 7, 30f, true, true, false)
+    val Default = Config(
+        language = "en",
+        maxRecentRounds = 7,
+        autoSaveMinutes = 30f,
+        roundNotify = true,
+        roundNotifyOnlySpecial = true,
+        playerJoinedNotify = true,
+        playerLeftNotify = true,
+        autoScrollToDown = true,
+        onTop = false
+    )
+
     val onConfigLoaded = EventArg<Config>()
 
     private var _config: Config? = null
@@ -65,7 +76,7 @@ object ConfigManager {
         val fileBakFile = fileBakPath.toFile()
 
         if (fileBakFile.exists())
-            fileBakFile.renameTo(Path(Utils.currentWorkingDirectory, "$fileName.${Utils.timeNowForFile}.bak").toFile())
+            fileBakFile.renameTo(Path(Utils.currentWorkingDirectory, "$FILE_NAME.${Utils.timeNowForFile}.bak").toFile())
 
         file.renameTo(fileBakFile)
     }

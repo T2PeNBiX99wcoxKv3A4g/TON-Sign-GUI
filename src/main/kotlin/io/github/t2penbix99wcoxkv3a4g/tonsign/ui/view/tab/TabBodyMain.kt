@@ -74,7 +74,10 @@ class TabBodyMain : TabBodyBase() {
                     isWaitingVRChat -> textBox(isNotRunning)
                     delayToLoadingLog -> textBox(waitUntilJoin)
                     logWatcher != null -> {
-                        if (logWatcher!!.isInTON.value) {
+                        val logWatcher = logWatcher!!
+                        val isInTON by logWatcher.isInTON
+                        
+                        if (isInTON) {
                             val special = roundSpecial
                             val classic = roundClassic
 
@@ -83,7 +86,7 @@ class TabBodyMain : TabBodyBase() {
                                 textBox(nextPrediction)
                             }
 
-                            val recentRounds by logWatcher!!.getRecentRoundsLogState
+                            val recentRounds by logWatcher.getRecentRoundsLogState
 
                             if (!recentRounds.isBlank()) {
                                 textBox("gui.text.main.recent_rounds".i18n(recentRounds))

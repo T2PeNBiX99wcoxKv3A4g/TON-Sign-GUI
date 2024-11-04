@@ -61,6 +61,12 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:${property("kotlinx-coroutines.version")}")
     implementation("javassist:javassist:${property("javassist.version")}")
     implementation("com.github.vrchatapi:vrchatapi-java:${property("vrchatapi.version")}")
+    // define a BOM and its version
+    implementation(platform("com.squareup.okhttp3:okhttp-bom:${property("okhttp.version")}"))
+
+    // define any required OkHttp artifacts without version
+    implementation("com.squareup.okhttp3:okhttp")
+    implementation("com.squareup.okhttp3:logging-interceptor")
 }
 
 sourceSets {

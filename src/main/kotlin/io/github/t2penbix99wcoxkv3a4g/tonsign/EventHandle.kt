@@ -13,6 +13,7 @@ import io.github.t2penbix99wcoxkv3a4g.tonsign.interpreter.LogEvent
 import io.github.t2penbix99wcoxkv3a4g.tonsign.interpreter.LogLevel
 import io.github.t2penbix99wcoxkv3a4g.tonsign.interpreter.LogLevel.*
 import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.ConfigManager
+import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.TimerManager
 import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.i18n
 import io.github.t2penbix99wcoxkv3a4g.tonsign.roundType.GuessRoundType
 import io.github.t2penbix99wcoxkv3a4g.tonsign.roundType.RoundType
@@ -26,6 +27,8 @@ import io.github.t2penbix99wcoxkv3a4g.tonsign.watcher.LogWatcher
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 
+internal const val RoundTimerID = "RoundTimer"
+
 internal val roundDatas = mutableStateMapOf<Long, RoundData>()
 internal val logs = mutableStateListOf<AnnotatedString>()
 internal val players = mutableStateListOf<PlayerData>()
@@ -34,6 +37,7 @@ internal var isInWorld = mutableStateOf(false)
 internal var lastTime = 0L
 
 private var isRoundStart = false
+private var roundSkip = false
 
 private fun onNextPrediction(guessRound: GuessRoundType) {
     nextPrediction.value = guessRound
@@ -48,7 +52,9 @@ private fun onLeftTON() {
     nextPrediction.value = GuessRoundType.NIL
     if (lastTime !in roundDatas) return
     val roundData = roundDatas[lastTime]!!
-    roundData.roundDetail = roundData.roundDetail.copy(isWon = WonOrLost.Left)
+    if (roundData.roundDetail.isWon == WonOrLost.InProgress)
+        roundData.roundDetail = roundData.roundDetail.copy(isWon = WonOrLost.Left)
+    roundData.roundDetail = roundData.roundDetail.copy(time = TimerManager.get(RoundTimerID))
 }
 
 private fun onLeftRoom() {
@@ -56,17 +62,15 @@ private fun onLeftRoom() {
     isInWorld.value = false
     nowWorldID.value = ""
     isRoundStart = false
-
-    if (lastTime !in roundDatas) return
-    val roundData = roundDatas[lastTime]!!
-    if (roundData.roundDetail.isWon == WonOrLost.InProgress)
-        roundData.roundDetail = roundData.roundDetail.copy(isWon = WonOrLost.UnKnown)
 }
 
 private fun onRoundStart(time: ZonedDateTime, round: RoundType, map: String, id: Int) {
+    TimerManager.set(RoundTimerID)
+
     val detail = RoundDataDetail(
         map,
         id,
+        -1L,
         players.toMutableList(),
         arrayListOf(-1, -1, -1),
         false,
@@ -79,14 +83,20 @@ private fun onRoundStart(time: ZonedDateTime, round: RoundType, map: String, id:
             roundData.roundDetail = roundData.roundDetail.copy(isWon = WonOrLost.UnKnown)
     }
 
-    roundDatas[time.toInstant().epochSecond] = RoundData(time.toInstant().epochSecond, round, detail)
+    if (time.toInstant().epochSecond in roundDatas)
+        roundSkip = true
+
+    if (!roundSkip)
+        roundDatas[time.toInstant().epochSecond] = RoundData(time.toInstant().epochSecond, round, detail)
+
     lastTime = time.toInstant().epochSecond
     isRoundStart = true
 }
 
-private fun onRoundOver(guessRound: GuessRoundType) {
+private fun sendNotificationOnRoundOver(guessRound: GuessRoundType) {
+    if (roundSkip || !ConfigManager.config.roundNotify) return
     if (guessRound == GuessRoundType.NIL || guessRound == GuessRoundType.Exempt) return
-    if (ConfigManager.config.onlySpecial && guessRound == GuessRoundType.Classic) return
+    if (ConfigManager.config.roundNotifyOnlySpecial && guessRound != GuessRoundType.Special) return
 
     val special = "gui.text.main.round_special".i18n()
     val classic = "gui.text.main.round_classic".i18n()
@@ -97,18 +107,29 @@ private fun onRoundOver(guessRound: GuessRoundType) {
     )
 
     trayState.sendNotification(nextPredictionNotification)
+}
+
+private fun setRoundDataOnRoundOver() {
+    if (!isRoundStart) return
     isRoundStart = false
 
     if (lastTime !in roundDatas) return
+    if (roundSkip) return
+
     val roundData = roundDatas[lastTime]!!
     if (roundData.roundDetail.isWon == WonOrLost.InProgress)
         roundData.roundDetail = roundData.roundDetail.copy(isWon = WonOrLost.UnKnown)
+    roundData.roundDetail = roundData.roundDetail.copy(time = TimerManager.get(RoundTimerID))
 }
 
-private fun onPlayerJoinedRoom(player: PlayerData) {
-    players.add(player)
+private fun onRoundOver(guessRound: GuessRoundType) {
+    sendNotificationOnRoundOver(guessRound)
+    setRoundDataOnRoundOver()
+    roundSkip = false
+}
 
-    if (!isInWorld.value) return
+private fun sendNotificationOnPlayerJoinedRoom(player: PlayerData) {
+    if (!isInWorld.value || roundSkip || !ConfigManager.config.playerJoinedNotify) return
 
     val newPlayerNotification = Notification(
         "gui.notification.player_join_world_title".i18n(),
@@ -118,23 +139,31 @@ private fun onPlayerJoinedRoom(player: PlayerData) {
     trayState.sendNotification(newPlayerNotification)
 }
 
+private fun onPlayerJoinedRoom(player: PlayerData) {
+    players.add(player)
+    sendNotificationOnPlayerJoinedRoom(player)
+}
+
+private fun sendNotificationOnPlayerLeftRoom(player: PlayerData) {
+    if (!isInWorld.value || roundSkip || !ConfigManager.config.playerLeftNotify) return
+
+    val playerLeftNotification = Notification(
+        "gui.notification.player_left_world_title".i18n(),
+        "gui.notification.player_left_world_message".i18n(player.name)
+    )
+
+    trayState.sendNotification(playerLeftNotification)
+}
+
 private fun onPlayerLeftRoom(player: PlayerData) {
     players.removeAll { it.id == player.id }
-    if (lastTime !in roundDatas) return
+    sendNotificationOnPlayerLeftRoom(player)
+
+    if (lastTime !in roundDatas || roundSkip) return
     val roundData = roundDatas[lastTime]!!
     val players = roundData.roundDetail.players
     val data = players.find { it.id == player.id }
     if (data == null) return
-
-    if (isInWorld.value) {
-        val playerLeftNotification = Notification(
-            "gui.notification.player_left_world_title".i18n(),
-            "gui.notification.player_left_world_message".i18n(player.name)
-        )
-
-        trayState.sendNotification(playerLeftNotification)
-    }
-
     val i = players.indexOf(data)
     if (players[i].status == PlayerStatus.Death) return
     if (isInWorld.value)
@@ -144,7 +173,7 @@ private fun onPlayerLeftRoom(player: PlayerData) {
 }
 
 private fun onPlayerDeath(player: PlayerData) {
-    if (lastTime !in roundDatas) return
+    if (lastTime !in roundDatas || roundSkip) return
     val roundData = roundDatas[lastTime]!!
     val players = roundData.roundDetail.players
     val data = players.find { it.name == player.name }
@@ -157,31 +186,31 @@ private fun onPlayerDeath(player: PlayerData) {
 }
 
 private fun onRoundWon() {
-    if (lastTime !in roundDatas) return
+    if (lastTime !in roundDatas || roundSkip) return
     val roundData = roundDatas[lastTime]!!
     roundData.roundDetail = roundData.roundDetail.copy(isWon = WonOrLost.Won)
 }
 
 private fun onRoundLost() {
-    if (lastTime !in roundDatas) return
+    if (lastTime !in roundDatas || roundSkip) return
     val roundData = roundDatas[lastTime]!!
     roundData.roundDetail = roundData.roundDetail.copy(isWon = WonOrLost.Lost)
 }
 
 private fun onRoundDeath() {
-    if (lastTime !in roundDatas) return
+    if (lastTime !in roundDatas || roundSkip) return
     val roundData = roundDatas[lastTime]!!
     roundData.roundDetail = roundData.roundDetail.copy(isDeath = true)
 }
 
 private fun onKillerSet(terrors: ArrayList<Int>) {
-    if (lastTime !in roundDatas) return
+    if (lastTime !in roundDatas || roundSkip) return
     val roundData = roundDatas[lastTime]!!
     roundData.roundDetail = roundData.roundDetail.copy(terrors = terrors)
 }
 
 private fun onHideTerrorShowUp(terrorId: Int) {
-    if (lastTime !in roundDatas) return
+    if (lastTime !in roundDatas || roundSkip) return
     val roundData = roundDatas[lastTime]!!
     roundData.roundDetail.terrors[0] = terrorId
 }

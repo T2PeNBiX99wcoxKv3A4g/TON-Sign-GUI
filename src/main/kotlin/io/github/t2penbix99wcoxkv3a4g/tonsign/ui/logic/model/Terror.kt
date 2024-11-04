@@ -121,11 +121,11 @@ class Terror(val id: Int, val terrorId: Int, val roundType: RoundType) {
             "ghost_girl",// 110
             "cubor_s_revenge",// 111
             "poly",// 112
-            "fox_squad",// 113 TODO: Not sure
+            "dog_mimic",// 113 TODO: Not sure
             "warden",// 114
-            "deleted",// 115
+            "fox_squad",// 115
             "express_train_to_hell",// 116
-            "dog_mimic",// 117
+            "deleted",// 117
             "killer_fish",// 118
             "terror_of_nowhere",// 119
             "beyond",// 120
@@ -214,17 +214,30 @@ class Terror(val id: Int, val terrorId: Int, val roundType: RoundType) {
             roundType == RoundType.Midnight && id == 3 -> return "A"
         }
 
+        if (isHideTerror()) {
+            return when (roundType) {
+                RoundType.Alternate -> "HIDE-A"
+                RoundType.Fog -> {
+                    if (terrorId >= alternates.size) return "HIDE-T"
+                    "HIDE-T-A"
+                }
+
+                else -> "HIDE-T"
+            }
+        }
+
         return when (roundType) {
             RoundType.Alternate -> "A"
             RoundType.Fog -> {
                 if (terrorId >= alternates.size) return "T"
                 "T-A"
             }
+
             else -> "T"
         }
     }
 
-    private fun isHideTerror(): Boolean {
+    fun isHideTerror(): Boolean {
         return terrorId >= HIDE
     }
 
@@ -242,7 +255,7 @@ class Terror(val id: Int, val terrorId: Int, val roundType: RoundType) {
     private fun nameFromID(): String {
         val notFound = "gui.terror.name.not_found".i18nWithEn()
 
-        if (terrorId < 0) return "gui.terror.name.still_in_loading".i18nWithEn()
+        if (terrorId < 0 && roundType != RoundType.Run) return "gui.terror.name.still_in_loading".i18nWithEn()
         if (terrorId == UNKNOWN) return "gui.terror.name.unknown".i18nWithEn()
 
         if (isHideTerror()) {
@@ -251,12 +264,12 @@ class Terror(val id: Int, val terrorId: Int, val roundType: RoundType) {
             return when (roundType) {
                 RoundType.Unbound -> {
                     if (newId >= hideUnbounds.size) return notFound
-                    return "gui.terror.name.hide_unbound.${hideNormals[newId]}".i18nWithEn()
+                    return "gui.terror.name.hide_unbound.${hideUnbounds[newId]}".i18nWithEn()
                 }
 
                 RoundType.EightPages -> {
                     if (newId >= hide8Pages.size) return notFound
-                    return "gui.terror.name.hide_8_pages.${hideNormals[newId]}".i18nWithEn()
+                    return "gui.terror.name.hide_8_pages.${hide8Pages[newId]}".i18nWithEn()
                 }
 
                 else -> {
@@ -287,7 +300,7 @@ class Terror(val id: Int, val terrorId: Int, val roundType: RoundType) {
 
             RoundType.Fog -> {
                 if (terrorId >= normals.size) return notFound
-                
+
                 var orName = ""
 
                 if (terrorId < alternates.size)

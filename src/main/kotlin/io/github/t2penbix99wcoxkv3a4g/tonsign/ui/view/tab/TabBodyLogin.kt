@@ -44,6 +44,8 @@ class TabBodyLogin : TabBodyBase() {
     override fun icon() {
         Icon(Icons.Default.AccountCircle, contentDescription = title.i18n())
     }
+    
+    private val apiClient = ApiClient()
 
     @Composable
     override fun view(
@@ -64,8 +66,6 @@ class TabBodyLogin : TabBodyBase() {
         val enterPasswordText by "gui.text.login.enter_password".i18nState()
         val rememberMeText by "gui.text.login.remember_me".i18nState()
         val loginText by "gui.text.login.login".i18nState()
-
-        val api by remember { mutableStateOf(ApiClient()) }
 
         Column(
             modifier = Modifier.fillMaxSize()
@@ -97,7 +97,7 @@ class TabBodyLogin : TabBodyBase() {
                 isChecked = rememberMe
             )
             Button(
-                onClick = { api.login(username, password) },
+                onClick = { apiClient.login(username, password) },
                 enabled = true,
                 shape = RoundedCornerShape(5.dp),
                 modifier = Modifier.fillMaxWidth(0.5f)

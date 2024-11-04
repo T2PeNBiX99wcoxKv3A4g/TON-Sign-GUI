@@ -37,6 +37,9 @@ class Terrors {
             val list = mutableListOf<String>()
 
             list.add(terrors[0].name)
+            
+            if (roundType == RoundType.EightPages && terrors[0].isHideTerror())
+                return list.toList()
 
             if (terrors[0].terrorId != Terror.UNKNOWN && roundType != RoundType.MysticMoon && roundType != RoundType.BloodMoon && roundType != RoundType.Twilight && roundType != RoundType.Solstice && roundType != RoundType.Run) {
                 if (terrors[1].terrorId > 0 || roundType in specialRounds) list.add(terrors[1].name)

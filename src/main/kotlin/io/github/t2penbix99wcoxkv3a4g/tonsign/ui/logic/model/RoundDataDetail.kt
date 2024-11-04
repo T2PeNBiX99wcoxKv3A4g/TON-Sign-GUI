@@ -6,6 +6,7 @@ import kotlinx.serialization.Serializable
 data class RoundDataDetail(
     val map: String,
     val mapId: Int,
+    val time: Long,
     val players: MutableList<PlayerData>,
     val terrors: ArrayList<Int>,
     val isDeath: Boolean,

@@ -34,8 +34,10 @@ import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.WindowPosition.Aligned
 import androidx.compose.ui.window.rememberWindowState
 import androidx.navigation.NavHostController
+import io.github.t2penbix99wcoxkv3a4g.tonsign.RoundTimerID
 import io.github.t2penbix99wcoxkv3a4g.tonsign.isInWorld
 import io.github.t2penbix99wcoxkv3a4g.tonsign.lastTime
+import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.TimerManager
 import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.i18n
 import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.i18nState
 import io.github.t2penbix99wcoxkv3a4g.tonsign.roundDatas
@@ -51,6 +53,8 @@ import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.view.playerUrl
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.view.tab.tray.TrayItem
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.view.tab.tray.TrayRoundDatas
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.view.tableView
+import kotlin.time.DurationUnit
+import kotlin.time.toDuration
 
 class TabBodyRoundDatas : TabBodyBase() {
     override val title: String
@@ -124,6 +128,19 @@ class TabBodyRoundDatas : TabBodyBase() {
         val scrollState = rememberScrollState()
         val youDeath by "gui.text.round_datas.you_death".i18nState()
         val youAlive by "gui.text.round_datas.you_alive".i18nState()
+        
+        val textTime by mutableStateOf(roundDetail.time)
+        val realTime by mutableStateOf(TimerManager.get(RoundTimerID))
+        val time = if (textTime < 0) realTime else textTime
+        val duration = time.toDuration(DurationUnit.MILLISECONDS)
+        val hours = duration.inWholeHours
+        val minutes = duration.minus(hours.toDuration(DurationUnit.HOURS)).inWholeMinutes
+        val seconds = duration.minus(minutes.toDuration(DurationUnit.MINUTES)).inWholeSeconds
+        val milliSeconds = duration.minus(seconds.toDuration(DurationUnit.SECONDS)).inWholeMilliseconds
+        val hoursText = hours.toString().padStart(2, '0')
+        val minutesText = minutes.toString().padStart(2, '0')
+        val secondsText = seconds.toString().padStart(2, '0')
+        val milliSecondsText = milliSeconds.toString().padStart(2, '0')
 
         SelectionContainer {
             Column(
@@ -144,6 +161,22 @@ class TabBodyRoundDatas : TabBodyBase() {
                     WonOrLost.Lost -> Text("gui.text.round_datas.player_lost".i18n())
                     WonOrLost.Left -> Text("gui.text.round_datas.left".i18n())
                     WonOrLost.InProgress -> Text("gui.text.round_datas.round_is_still_in_progress".i18n())
+                }
+                
+                Text("$hoursText:$minutesText:$secondsText.$milliSecondsText")
+
+                if (terrors.names.isNotEmpty())
+                    Text("gui.text.round_datas.terrors".i18n(terrors.names.size))
+                Column(Modifier.padding(10.dp)) {
+                    terrors.names.forEach {
+                        Box(
+                            Modifier.fillMaxWidth()
+                                .background(Color(0, 0, 0, 40))
+                                .padding(5.dp)
+                        ) {
+                            Text(it)
+                        }
+                    }
                 }
 
                 if (roundDetail.players.isNotEmpty())
@@ -169,20 +202,6 @@ class TabBodyRoundDatas : TabBodyBase() {
                                 if (it.deathMsg != null)
                                     Text(it.deathMsg!!)
                             }
-                        }
-                    }
-                }
-
-                if (terrors.names.isNotEmpty())
-                    Text("gui.text.round_datas.terrors".i18n(terrors.names.size))
-                Column(Modifier.padding(10.dp)) {
-                    terrors.names.forEach {
-                        Box(
-                            Modifier.fillMaxWidth()
-                                .background(Color(0, 0, 0, 40))
-                                .padding(5.dp)
-                        ) {
-                            Text(it)
                         }
                     }
                 }
@@ -238,6 +257,19 @@ class TabBodyRoundDatas : TabBodyBase() {
         val terrorsText by "gui.text.round_datas.terrors".i18nState(terrorsNames.size)
         val notInTon by "gui.text.round_datas.not_in_ton".i18nState(terrorsNames.size)
 
+        val textTime by mutableStateOf(roundDetail.time)
+        val realTime by mutableStateOf(TimerManager.get(RoundTimerID))
+        val time = if (textTime < 0) realTime else textTime
+        val duration = time.toDuration(DurationUnit.MILLISECONDS)
+        val hours = duration.inWholeHours
+        val minutes = duration.minus(hours.toDuration(DurationUnit.HOURS)).inWholeMinutes
+        val seconds = duration.minus(minutes.toDuration(DurationUnit.MINUTES)).inWholeSeconds
+        val milliSeconds = duration.minus(seconds.toDuration(DurationUnit.SECONDS)).inWholeMilliseconds
+        val hoursText = hours.toString().padStart(2, '0')
+        val minutesText = minutes.toString().padStart(2, '0')
+        val secondsText = seconds.toString().padStart(2, '0')
+        val milliSecondsText = milliSeconds.toString().padStart(2, '0')
+
         Window(
             onCloseRequest = { isOnTop = false },
             visible = true,
@@ -246,64 +278,68 @@ class TabBodyRoundDatas : TabBodyBase() {
             alwaysOnTop = true
         ) {
             CupcakeEXTheme {
-                Column(
-                    Modifier.fillMaxWidth().padding(10.dp).verticalScroll(scrollState),
-                    verticalArrangement = Arrangement.Top
-                ) {
-                    if (!isInWorld || logWatcher == null) return@Column
-                    if (!logWatcher!!.isInTON.value) {
-                        Text(notInTon)
-                        return@Column
-                    }
+                SelectionContainer {
+                    Column(
+                        Modifier.fillMaxWidth().padding(10.dp).verticalScroll(scrollState),
+                        verticalArrangement = Arrangement.Top
+                    ) {
+                        if (!isInWorld || logWatcher == null) return@Column
+                        if (!logWatcher!!.isInTON.value) {
+                            Text(notInTon)
+                            return@Column
+                        }
 
-                    Text(map)
-                    Text(roundTypeText)
+                        Text(map)
+                        Text(roundTypeText)
 
-                    if (isDeath)
-                        Text(youDeath)
-                    else
-                        Text(youAlive)
+                        if (isDeath)
+                            Text(youDeath)
+                        else
+                            Text(youAlive)
 
-                    when (isWon) {
-                        WonOrLost.UnKnown -> Text(unknown)
-                        WonOrLost.Won -> Text(playerWon)
-                        WonOrLost.Lost -> Text(playerLost)
-                        WonOrLost.Left -> Text(left)
-                        WonOrLost.InProgress -> Text(roundIsStillInProgress)
-                    }
+                        when (isWon) {
+                            WonOrLost.UnKnown -> Text(unknown)
+                            WonOrLost.Won -> Text(playerWon)
+                            WonOrLost.Lost -> Text(playerLost)
+                            WonOrLost.Left -> Text(left)
+                            WonOrLost.InProgress -> Text(roundIsStillInProgress)
+                        }
 
-                    if (players.isNotEmpty())
-                        Text(playersText)
-                    Column(Modifier.padding(10.dp)) {
-                        players.forEach {
-                            Box(
-                                Modifier.fillMaxWidth()
-                                    .background(Color(0, 0, 0, 40))
-                                    .padding(5.dp)
-                            ) {
-                                Column {
-                                    Text(text = buildAnnotatedString {
-                                        append("${it.name} - ${playerStatus(it.status)}")
-                                        addLink(LinkAnnotation.Url(playerUrl(it)), 0, it.name.length)
-                                    })
+                        Text("$hoursText:$minutesText:$secondsText.$milliSecondsText")
 
-                                    if (it.deathMsg != null)
-                                        Text(it.deathMsg!!)
+                        if (terrorsNames.isNotEmpty())
+                            Text(terrorsText)
+                        Column(Modifier.padding(10.dp)) {
+                            terrorsNames.forEach {
+                                Box(
+                                    Modifier.fillMaxWidth()
+                                        .background(Color(0, 0, 0, 40))
+                                        .padding(5.dp)
+                                ) {
+                                    Text(it)
                                 }
                             }
                         }
-                    }
 
-                    if (terrorsNames.isNotEmpty())
-                        Text(terrorsText)
-                    Column(Modifier.padding(10.dp)) {
-                        terrorsNames.forEach {
-                            Box(
-                                Modifier.fillMaxWidth()
-                                    .background(Color(0, 0, 0, 40))
-                                    .padding(5.dp)
-                            ) {
-                                Text(it)
+                        if (players.isNotEmpty())
+                            Text(playersText)
+                        Column(Modifier.padding(10.dp)) {
+                            players.forEach {
+                                Box(
+                                    Modifier.fillMaxWidth()
+                                        .background(Color(0, 0, 0, 40))
+                                        .padding(5.dp)
+                                ) {
+                                    Column {
+                                        Text(text = buildAnnotatedString {
+                                            append("${it.name} - ${playerStatus(it.status)}")
+                                            addLink(LinkAnnotation.Url(playerUrl(it)), 0, it.name.length)
+                                        })
+
+                                        if (it.deathMsg != null)
+                                            Text(it.deathMsg!!)
+                                    }
+                                }
                             }
                         }
                     }
