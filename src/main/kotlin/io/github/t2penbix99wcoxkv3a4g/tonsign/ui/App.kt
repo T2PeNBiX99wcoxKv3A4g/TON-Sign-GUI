@@ -8,6 +8,7 @@ import androidx.compose.ui.window.TrayState
 import io.github.t2penbix99wcoxkv3a4g.tonsign.event.Event
 import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.ConfigManager
 import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.SaveManager
+import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.SecretsManager
 import io.github.t2penbix99wcoxkv3a4g.tonsign.roundType.GuessRoundType
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.theme.CupcakeEXTheme
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.view.tableSelection
@@ -29,4 +30,5 @@ internal fun onExit() {
     onExitEvent()
     ConfigManager.save()
     SaveManager.save()
+    SecretsManager.save()
 }

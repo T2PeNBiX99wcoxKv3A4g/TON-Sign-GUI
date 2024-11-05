@@ -165,7 +165,7 @@ class TabBodyRoundDatas : TabBodyBase() {
                 verticalArrangement = Arrangement.Top
             ) {
                 Text(roundDetail.map)
-                Text("gui.text.round_datas.round_type".i18n(RoundTypeConvert.getTextOfRound(roundDataGet.roundType)))
+                Text(RoundTypeConvert.getTextOfRound(roundDataGet.roundType))
 
                 if (roundDetail.isDeath)
                     Text(youDeath)
@@ -269,7 +269,6 @@ class TabBodyRoundDatas : TabBodyBase() {
         val playerLost by "gui.text.round_datas.player_lost".i18nState()
         val left by "gui.text.round_datas.left".i18nState()
         val roundIsStillInProgress by "gui.text.round_datas.round_is_still_in_progress".i18nState()
-        val roundTypeText by "gui.text.round_datas.round_type".i18nState(RoundTypeConvert.getTextOfRound(roundType))
         val playersText by "gui.text.round_datas.players".i18nState(
             players.filter { it.status == PlayerStatus.Alive }.size,
             players.size
@@ -327,7 +326,7 @@ class TabBodyRoundDatas : TabBodyBase() {
                         }
 
                         Text(map)
-                        Text(roundTypeText)
+                        Text(RoundTypeConvert.getTextOfRound(roundType))
 
                         if (isDeath)
                             Text(youDeath)

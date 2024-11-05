@@ -18,23 +18,22 @@ import kotlinx.serialization.json.jsonPrimitive
 import okhttp3.Call
 import okhttp3.Callback
 import okhttp3.Credentials
-import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
 import java.io.IOException
-import java.net.CookieManager
 
 class ApiClient() {
     private companion object {
-        private const val BASE_URL = "https://api.vrchat.cloud/api/1"
-        private const val BASE_URL_WITHOUT_HTTP = "api.vrchat.cloud/api/1"
+        private const val BASE_URL = "https://vrchat.com/api/1"
+        private const val BASE_URL_WITHOUT_HTTP = "vrchat.com/api/1"
+        private const val BASE_URL_HOST = "vrchat.com"
         private val userAgent = "${Utils.ID}/${Utils.version}"
     }
 
-    private val cookieHandler = CookieManager()
     private val client = OkHttpClient.Builder()
         .addInterceptor(ApiInterceptor { clientApiKey })
+        .cookieJar(ApiCookieHelper.cookieJar)
         .build()
 
     private val apiClient = Configuration.getDefaultApiClient()
@@ -48,10 +47,17 @@ class ApiClient() {
     private var _config: JsonObject? = null
 
     val config: JsonObject?
-        get() = _config
+        get() {
+            if (_config == null)
+                getConfig {
+                    _config = it
+                    authCookie.apiKey = clientApiKey
+                }
+            return _config
+        }
 
     private val clientApiKey: String?
-        get() = _config?.get("clientApiKey")?.jsonPrimitive?.content
+        get() = config?.get("clientApiKey")?.jsonPrimitive?.content
 
     init {
         apiClient.setUserAgent(userAgent)
@@ -135,18 +141,13 @@ class ApiClient() {
         if (clientApiKey.isNullOrEmpty()) return
         scope.launch {
             val credential = Credentials.basic(username, password)
-
-            val url = HttpUrl.Builder()
-                .scheme("https")
-                .host("$BASE_URL_WITHOUT_HTTP/auth/user")
-                .username(username)
-                .password(password)
-                .addQueryParameter("apiKey",clientApiKey)
-                .build()
-            
+            val url = "$BASE_URL/auth/user"
+//            ApiCookieHelper.setCookie(url, "auth", clientApiKey!!)
             val request = Request.Builder()
                 .url(url)
-                .header("Authorization", credential)
+                .header("Authorization", credential) // TODO: Maybe base64 is wrong?
+                .header("Content-Type", "application/json")
+                .get()
                 .build()
 
             tryRequest(request, 1) {

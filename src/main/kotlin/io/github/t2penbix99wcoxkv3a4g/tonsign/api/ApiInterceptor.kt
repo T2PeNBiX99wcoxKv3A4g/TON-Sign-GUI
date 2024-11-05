@@ -16,7 +16,7 @@ class ApiInterceptor(val apiKey: () -> String?) : Interceptor {
         val url = request.url
         
         val newUrl = url.newBuilder()
-            .addQueryParameter("apiKey", apiKey())
+//            .addQueryParameter("apiKey", apiKey()) TODO: apikey
             .build()
 
         val newRequest = request.newBuilder()

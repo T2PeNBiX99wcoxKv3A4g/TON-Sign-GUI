@@ -13,6 +13,7 @@ import kotlinx.coroutines.launch
 import java.io.File
 import kotlin.io.path.Path
 
+// TODO: sqlite3
 object SaveManager {
     private const val FILE_NAME = "save.yml"
     private val scope = SaveScope()
@@ -23,7 +24,7 @@ object SaveManager {
         roundHistories = listOf<RoundData>()
     )
     
-    val onLoadedSaveEvent = EventArg<Save>()
+    val onLoadedEvent = EventArg<Save>()
     val onStartSaveEvent = EventArg<Save>()
 
     private var _save: Save? = null
@@ -63,7 +64,7 @@ object SaveManager {
         }
         save()
         onLoadedSave(save)
-        onLoadedSaveEvent(save)
+        onLoadedEvent(save)
     }
 
     fun save() {

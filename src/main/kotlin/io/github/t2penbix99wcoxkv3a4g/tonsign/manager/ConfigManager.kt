@@ -29,7 +29,8 @@ object ConfigManager {
         onTop = false
     )
 
-    val onConfigLoaded = EventArg<Config>()
+    val onLoadedEvent = EventArg<Config>()
+    val onStartSaveEvent = EventArg<Config>()
 
     private var _config: Config? = null
     val config: Config
@@ -64,10 +65,11 @@ object ConfigManager {
             renameFile()
         }
         save()
-        onConfigLoaded(config)
+        onLoadedEvent(config)
     }
 
     fun save() {
+        onStartSaveEvent(config)
         file.writeText(Yaml.default.encodeToString(Config.serializer(), config))
     }
 

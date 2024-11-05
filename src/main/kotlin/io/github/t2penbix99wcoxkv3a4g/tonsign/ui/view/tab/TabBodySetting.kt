@@ -25,6 +25,7 @@ import io.github.t2penbix99wcoxkv3a4g.tonsign.OSCSender
 import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.ConfigManager
 import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.LanguageManager
 import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.SaveManager
+import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.SecretsManager
 import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.i18n
 import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.i18nState
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.view.switchWithText
@@ -117,6 +118,13 @@ class TabBodySetting : TabBodyBase() {
                 }
             ) {
                 Text("Save data")
+            }
+            Button(
+                onClick = {
+                    SecretsManager.save()
+                }
+            ) {
+                Text("Save secrets")
             }
             // TODO: Can't click
             switchWithText("Send next round notification when round is over", roundNotify) {
