@@ -31,7 +31,7 @@ object TimerManager {
 
     fun get(name: String): Long {
         if (name !in times)
-            return -1L
+            return 0
         return mainTime - times[name]!!
     }
 }

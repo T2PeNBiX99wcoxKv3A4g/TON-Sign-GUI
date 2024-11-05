@@ -23,6 +23,7 @@ import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.logic.model.RoundData
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.logic.model.RoundDataDetail
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.logic.model.WonOrLost
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.nextPrediction
+import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.onExitEvent
 import io.github.t2penbix99wcoxkv3a4g.tonsign.watcher.LogWatcher
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
@@ -37,7 +38,17 @@ internal var isInWorld = mutableStateOf(false)
 internal var lastTime = 0L
 
 private var isRoundStart = false
+private var isTimerSet = false
 private var roundSkip = false
+
+private fun onExit() {
+    nextPrediction.value = GuessRoundType.NIL
+    if (lastTime !in roundDatas) return
+    val roundData = roundDatas[lastTime]!!
+    if (roundData.roundDetail.isWon == WonOrLost.InProgress)
+        roundData.roundDetail = roundData.roundDetail.copy(isWon = WonOrLost.UnKnown)
+    roundData.roundDetail = roundData.roundDetail.copy(time = TimerManager.get(RoundTimerID))
+}
 
 private fun onNextPrediction(guessRound: GuessRoundType) {
     nextPrediction.value = guessRound
@@ -62,11 +73,10 @@ private fun onLeftRoom() {
     isInWorld.value = false
     nowWorldID.value = ""
     isRoundStart = false
+    isTimerSet = false
 }
 
 private fun onRoundStart(time: ZonedDateTime, round: RoundType, map: String, id: Int) {
-    TimerManager.set(RoundTimerID)
-
     val detail = RoundDataDetail(
         map,
         id,
@@ -83,11 +93,10 @@ private fun onRoundStart(time: ZonedDateTime, round: RoundType, map: String, id:
             roundData.roundDetail = roundData.roundDetail.copy(isWon = WonOrLost.UnKnown)
     }
 
-    if (time.toInstant().epochSecond in roundDatas)
-        roundSkip = true
-
-    if (!roundSkip)
+    if (time.toInstant().epochSecond !in roundDatas)
         roundDatas[time.toInstant().epochSecond] = RoundData(time.toInstant().epochSecond, round, detail)
+    else
+        roundSkip = true
 
     lastTime = time.toInstant().epochSecond
     isRoundStart = true
@@ -126,6 +135,7 @@ private fun onRoundOver(guessRound: GuessRoundType) {
     sendNotificationOnRoundOver(guessRound)
     setRoundDataOnRoundOver()
     roundSkip = false
+    isTimerSet = false
 }
 
 private fun sendNotificationOnPlayerJoinedRoom(player: PlayerData) {
@@ -204,6 +214,10 @@ private fun onRoundDeath() {
 }
 
 private fun onKillerSet(terrors: ArrayList<Int>) {
+    if (!isTimerSet) {
+        TimerManager.set(RoundTimerID)
+        isTimerSet = true
+    }
     if (lastTime !in roundDatas || roundSkip) return
     val roundData = roundDatas[lastTime]!!
     roundData.roundDetail = roundData.roundDetail.copy(terrors = terrors)
@@ -256,6 +270,8 @@ private fun onReadLog(log: LogEvent) {
     })
 }
 
+private var init = false
+
 internal fun handleEvent(logWatcher: LogWatcher) {
     logWatcher.onReadLogEvent += ::onReadLog
     logWatcher.onNextPredictionEvent += ::onNextPrediction
@@ -272,4 +288,8 @@ internal fun handleEvent(logWatcher: LogWatcher) {
     logWatcher.onPlayerDeathEvent += ::onPlayerDeath
     logWatcher.onKillerSetEvent += ::onKillerSet
     logWatcher.onHideTerrorShowUpEvent += ::onHideTerrorShowUp
+
+    if (init) return
+    init = true
+    onExitEvent += ::onExit
 }

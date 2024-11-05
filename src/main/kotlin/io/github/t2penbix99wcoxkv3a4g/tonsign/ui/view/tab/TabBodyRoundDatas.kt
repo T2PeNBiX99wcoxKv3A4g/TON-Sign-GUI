@@ -128,7 +128,7 @@ class TabBodyRoundDatas : TabBodyBase() {
         val scrollState = rememberScrollState()
         val youDeath by "gui.text.round_datas.you_death".i18nState()
         val youAlive by "gui.text.round_datas.you_alive".i18nState()
-        
+
         val textTime by mutableStateOf(roundDetail.time)
         val realTime by mutableStateOf(TimerManager.get(RoundTimerID))
         val time = if (textTime < 0) realTime else textTime
@@ -162,7 +162,7 @@ class TabBodyRoundDatas : TabBodyBase() {
                     WonOrLost.Left -> Text("gui.text.round_datas.left".i18n())
                     WonOrLost.InProgress -> Text("gui.text.round_datas.round_is_still_in_progress".i18n())
                 }
-                
+
                 Text("$hoursText:$minutesText:$secondsText.$milliSecondsText")
 
                 if (terrors.names.isNotEmpty())
@@ -215,7 +215,7 @@ class TabBodyRoundDatas : TabBodyBase() {
             rememberWindowState(position = Aligned(alignment = Alignment.Center), size = DpSize(500.dp, 350.dp))
         var isOnTop by remember { internalIsOnTop }
 
-        if (!isOnTop || roundDatas.isEmpty()) return
+        if (!isOnTop || roundDatas.isEmpty() || lastTime !in roundDatas) return
 
         val isInWorld by isInWorld
         val lastTime by mutableStateOf(lastTime)
