@@ -135,12 +135,29 @@ class TabBodyRoundDatas : TabBodyBase() {
         val duration = time.toDuration(DurationUnit.MILLISECONDS)
         val hours = duration.inWholeHours
         val minutes = duration.minus(hours.toDuration(DurationUnit.HOURS)).inWholeMinutes
-        val seconds = duration.minus(minutes.toDuration(DurationUnit.MINUTES)).inWholeSeconds
-        val milliSeconds = duration.minus(seconds.toDuration(DurationUnit.SECONDS)).inWholeMilliseconds
+        val seconds = duration.minus(hours.toDuration(DurationUnit.HOURS))
+            .minus(minutes.toDuration(DurationUnit.MINUTES)).inWholeSeconds
+        val milliSeconds =
+            duration.minus(hours.toDuration(DurationUnit.HOURS)).minus(minutes.toDuration(DurationUnit.MINUTES))
+                .minus(seconds.toDuration(DurationUnit.SECONDS)).inWholeMilliseconds
         val hoursText = hours.toString().padStart(2, '0')
         val minutesText = minutes.toString().padStart(2, '0')
         val secondsText = seconds.toString().padStart(2, '0')
         val milliSecondsText = milliSeconds.toString().padStart(2, '0')
+
+        val playerTime by mutableStateOf(roundDetail.playerTime)
+        val playerDuration = playerTime.toDuration(DurationUnit.MILLISECONDS)
+        val playerHours = playerDuration.inWholeHours
+        val playerMinutes = playerDuration.minus(playerHours.toDuration(DurationUnit.HOURS)).inWholeMinutes
+        val playerSeconds = playerDuration.minus(playerHours.toDuration(DurationUnit.HOURS))
+            .minus(playerMinutes.toDuration(DurationUnit.MINUTES)).inWholeSeconds
+        val playerMilliSeconds = playerDuration.minus(playerHours.toDuration(DurationUnit.HOURS))
+            .minus(playerMinutes.toDuration(DurationUnit.MINUTES))
+            .minus(playerSeconds.toDuration(DurationUnit.SECONDS)).inWholeMilliseconds
+        val playerHoursText = playerHours.toString().padStart(2, '0')
+        val playerMinutesText = playerMinutes.toString().padStart(2, '0')
+        val playerSecondsText = playerSeconds.toString().padStart(2, '0')
+        val playerMilliSecondsText = playerMilliSeconds.toString().padStart(2, '0')
 
         SelectionContainer {
             Column(
@@ -163,7 +180,10 @@ class TabBodyRoundDatas : TabBodyBase() {
                     WonOrLost.InProgress -> Text("gui.text.round_datas.round_is_still_in_progress".i18n())
                 }
 
-                Text("$hoursText:$minutesText:$secondsText.$milliSecondsText")
+                if (playerTime > 0)
+                    Text("$playerHoursText:$playerMinutesText:$playerSecondsText.$playerMilliSecondsText / $hoursText:$minutesText:$secondsText.$milliSecondsText")
+                else
+                    Text("$hoursText:$minutesText:$secondsText.$milliSecondsText")
 
                 if (terrors.names.isNotEmpty())
                     Text("gui.text.round_datas.terrors".i18n(terrors.names.size))
@@ -263,12 +283,29 @@ class TabBodyRoundDatas : TabBodyBase() {
         val duration = time.toDuration(DurationUnit.MILLISECONDS)
         val hours = duration.inWholeHours
         val minutes = duration.minus(hours.toDuration(DurationUnit.HOURS)).inWholeMinutes
-        val seconds = duration.minus(minutes.toDuration(DurationUnit.MINUTES)).inWholeSeconds
-        val milliSeconds = duration.minus(seconds.toDuration(DurationUnit.SECONDS)).inWholeMilliseconds
+        val seconds = duration.minus(hours.toDuration(DurationUnit.HOURS))
+            .minus(minutes.toDuration(DurationUnit.MINUTES)).inWholeSeconds
+        val milliSeconds =
+            duration.minus(hours.toDuration(DurationUnit.HOURS)).minus(minutes.toDuration(DurationUnit.MINUTES))
+                .minus(seconds.toDuration(DurationUnit.SECONDS)).inWholeMilliseconds
         val hoursText = hours.toString().padStart(2, '0')
         val minutesText = minutes.toString().padStart(2, '0')
         val secondsText = seconds.toString().padStart(2, '0')
         val milliSecondsText = milliSeconds.toString().padStart(2, '0')
+
+        val playerTime by mutableStateOf(roundDetail.playerTime)
+        val playerDuration = playerTime.toDuration(DurationUnit.MILLISECONDS)
+        val playerHours = playerDuration.inWholeHours
+        val playerMinutes = playerDuration.minus(playerHours.toDuration(DurationUnit.HOURS)).inWholeMinutes
+        val playerSeconds = playerDuration.minus(playerHours.toDuration(DurationUnit.HOURS))
+            .minus(playerMinutes.toDuration(DurationUnit.MINUTES)).inWholeSeconds
+        val playerMilliSeconds = playerDuration.minus(playerHours.toDuration(DurationUnit.HOURS))
+            .minus(playerMinutes.toDuration(DurationUnit.MINUTES))
+            .minus(playerSeconds.toDuration(DurationUnit.SECONDS)).inWholeMilliseconds
+        val playerHoursText = playerHours.toString().padStart(2, '0')
+        val playerMinutesText = playerMinutes.toString().padStart(2, '0')
+        val playerSecondsText = playerSeconds.toString().padStart(2, '0')
+        val playerMilliSecondsText = playerMilliSeconds.toString().padStart(2, '0')
 
         Window(
             onCloseRequest = { isOnTop = false },
@@ -305,7 +342,10 @@ class TabBodyRoundDatas : TabBodyBase() {
                             WonOrLost.InProgress -> Text(roundIsStillInProgress)
                         }
 
-                        Text("$hoursText:$minutesText:$secondsText.$milliSecondsText")
+                        if (playerTime > 0)
+                            Text("$playerHoursText:$playerMinutesText:$playerSecondsText.$playerMilliSecondsText / $hoursText:$minutesText:$secondsText.$milliSecondsText")
+                        else
+                            Text("$hoursText:$minutesText:$secondsText.$milliSecondsText")
 
                         if (terrorsNames.isNotEmpty())
                             Text(terrorsText)

@@ -81,6 +81,7 @@ private fun onRoundStart(time: ZonedDateTime, round: RoundType, map: String, id:
         map,
         id,
         -1L,
+        -1L,
         players.toMutableList(),
         arrayListOf(-1, -1, -1),
         false,
@@ -210,11 +211,12 @@ private fun onRoundLost() {
 private fun onRoundDeath() {
     if (lastTime !in roundDatas || roundSkip) return
     val roundData = roundDatas[lastTime]!!
+    roundData.roundDetail = roundData.roundDetail.copy(playerTime = TimerManager.get(RoundTimerID))
     roundData.roundDetail = roundData.roundDetail.copy(isDeath = true)
 }
 
 private fun onKillerSet(terrors: ArrayList<Int>) {
-    if (!isTimerSet) {
+    if (!isTimerSet && terrors[0] > -1) {
         TimerManager.set(RoundTimerID)
         isTimerSet = true
     }
