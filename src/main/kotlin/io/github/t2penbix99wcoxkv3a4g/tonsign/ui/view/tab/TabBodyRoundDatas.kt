@@ -250,7 +250,10 @@ class TabBodyRoundDatas : TabBodyBase() {
         if (!isOnTop) return
 
         val isInWorld by isInWorld
-        val lastTime by mutableStateOf(lastTime)
+        var lastTime by mutableStateOf(lastTime) 
+
+        if (lastTime !in roundDatas && roundDatas.isNotEmpty())
+            lastTime = roundDatas.maxOf { it.key }
 
         Window(
             onCloseRequest = { isOnTop = false },
@@ -328,7 +331,7 @@ class TabBodyRoundDatas : TabBodyBase() {
                 val playerMinutesText = playerMinutes.toString().padStart(2, '0')
                 val playerSecondsText = playerSeconds.toString().padStart(2, '0')
                 val playerMilliSecondsText = playerMilliSeconds.toString().padStart(2, '0')
-
+                
                 SelectionContainer {
                     Column(
                         Modifier.fillMaxWidth().padding(10.dp).verticalScroll(scrollState),
