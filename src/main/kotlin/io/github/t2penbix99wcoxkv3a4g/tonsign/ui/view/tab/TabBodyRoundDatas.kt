@@ -12,6 +12,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.OpenInNew
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -49,6 +50,7 @@ import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.logic.model.RoundData
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.logic.model.Terrors
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.logic.model.WonOrLost
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.theme.CupcakeEXTheme
+import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.view.SearchButton
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.view.playerUrl
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.view.tab.tray.TrayItem
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.view.tab.tray.TrayRoundDatas
@@ -90,10 +92,20 @@ class TabBodyRoundDatas : TabBodyBase() {
         needRefresh: MutableState<Boolean>
     ) {
         val roundData: MutableState<RoundData?> = remember { roundData }
+        var isOnTop by remember { internalIsOnTop }
 
-        tableView(roundData, roundDatas, onRowSelection = {
-            roundData.value = it
-        })
+        val searchButtons = listOf(
+            SearchButton({
+                isOnTop = true
+            }, Icons.AutoMirrored.Filled.OpenInNew, "IsOnTop")
+        )
+
+        tableView(
+            roundData, roundDatas, searchButtons,
+            onRowSelection = {
+                roundData.value = it
+            },
+        )
     }
 
     private fun playerStatus(status: PlayerStatus): String {
@@ -235,76 +247,10 @@ class TabBodyRoundDatas : TabBodyBase() {
             rememberWindowState(position = Aligned(alignment = Alignment.Center), size = DpSize(500.dp, 350.dp))
         var isOnTop by remember { internalIsOnTop }
 
-        if (!isOnTop || roundDatas.isEmpty() || lastTime !in roundDatas) return
+        if (!isOnTop) return
 
         val isInWorld by isInWorld
         val lastTime by mutableStateOf(lastTime)
-        val roundData by mutableStateOf(roundDatas[lastTime]!!)
-        val roundDetail by mutableStateOf(roundData.roundDetail)
-        val players = remember { mutableStateListOf<PlayerData>() }
-
-        players.clear()
-        players.addAll(roundDetail.players)
-
-        val terrorsList = remember { mutableStateListOf<Int>() }
-
-        terrorsList.clear()
-        terrorsList.addAll(roundDetail.terrors)
-
-        val roundType by mutableStateOf(roundData.roundType)
-        val terrors by mutableStateOf(Terrors(terrorsList, roundType))
-        val scrollState = rememberScrollState()
-        val youDeath by "gui.text.round_datas.you_death".i18nState()
-        val youAlive by "gui.text.round_datas.you_alive".i18nState()
-        val map by mutableStateOf(roundDetail.map)
-        val isDeath by mutableStateOf(roundDetail.isDeath)
-        val isWon by mutableStateOf(roundDetail.isWon)
-        val terrorsNames = remember { mutableStateListOf<String>() }
-
-        terrorsNames.clear()
-        terrorsNames.addAll(terrors.names)
-
-        val unknown by "gui.text.round_datas.unknown".i18nState()
-        val playerWon by "gui.text.round_datas.player_won".i18nState()
-        val playerLost by "gui.text.round_datas.player_lost".i18nState()
-        val left by "gui.text.round_datas.left".i18nState()
-        val roundIsStillInProgress by "gui.text.round_datas.round_is_still_in_progress".i18nState()
-        val playersText by "gui.text.round_datas.players".i18nState(
-            players.filter { it.status == PlayerStatus.Alive }.size,
-            players.size
-        )
-        val terrorsText by "gui.text.round_datas.terrors".i18nState(terrorsNames.size)
-        val notInTon by "gui.text.round_datas.not_in_ton".i18nState(terrorsNames.size)
-
-        val textTime by mutableStateOf(roundDetail.time)
-        val realTime by mutableStateOf(TimerManager.get(RoundTimerID))
-        val time = if (textTime < 0) realTime else textTime
-        val duration = time.toDuration(DurationUnit.MILLISECONDS)
-        val hours = duration.inWholeHours
-        val minutes = duration.minus(hours.toDuration(DurationUnit.HOURS)).inWholeMinutes
-        val seconds = duration.minus(hours.toDuration(DurationUnit.HOURS))
-            .minus(minutes.toDuration(DurationUnit.MINUTES)).inWholeSeconds
-        val milliSeconds =
-            duration.minus(hours.toDuration(DurationUnit.HOURS)).minus(minutes.toDuration(DurationUnit.MINUTES))
-                .minus(seconds.toDuration(DurationUnit.SECONDS)).inWholeMilliseconds
-        val hoursText = hours.toString().padStart(2, '0')
-        val minutesText = minutes.toString().padStart(2, '0')
-        val secondsText = seconds.toString().padStart(2, '0')
-        val milliSecondsText = milliSeconds.toString().padStart(2, '0')
-
-        val playerTime by mutableStateOf(roundDetail.playerTime)
-        val playerDuration = playerTime.toDuration(DurationUnit.MILLISECONDS)
-        val playerHours = playerDuration.inWholeHours
-        val playerMinutes = playerDuration.minus(playerHours.toDuration(DurationUnit.HOURS)).inWholeMinutes
-        val playerSeconds = playerDuration.minus(playerHours.toDuration(DurationUnit.HOURS))
-            .minus(playerMinutes.toDuration(DurationUnit.MINUTES)).inWholeSeconds
-        val playerMilliSeconds = playerDuration.minus(playerHours.toDuration(DurationUnit.HOURS))
-            .minus(playerMinutes.toDuration(DurationUnit.MINUTES))
-            .minus(playerSeconds.toDuration(DurationUnit.SECONDS)).inWholeMilliseconds
-        val playerHoursText = playerHours.toString().padStart(2, '0')
-        val playerMinutesText = playerMinutes.toString().padStart(2, '0')
-        val playerSecondsText = playerSeconds.toString().padStart(2, '0')
-        val playerMilliSecondsText = playerMilliSeconds.toString().padStart(2, '0')
 
         Window(
             onCloseRequest = { isOnTop = false },
@@ -314,6 +260,75 @@ class TabBodyRoundDatas : TabBodyBase() {
             alwaysOnTop = true
         ) {
             CupcakeEXTheme {
+                if (roundDatas.isEmpty() || lastTime !in roundDatas) return@CupcakeEXTheme
+
+                val roundData by mutableStateOf(roundDatas[lastTime]!!)
+                val roundDetail by mutableStateOf(roundData.roundDetail)
+                val players = remember { mutableStateListOf<PlayerData>() }
+
+                players.clear()
+                players.addAll(roundDetail.players)
+
+                val terrorsList = remember { mutableStateListOf<Int>() }
+
+                terrorsList.clear()
+                terrorsList.addAll(roundDetail.terrors)
+
+                val roundType by mutableStateOf(roundData.roundType)
+                val terrors by mutableStateOf(Terrors(terrorsList, roundType))
+                val scrollState = rememberScrollState()
+                val youDeath by "gui.text.round_datas.you_death".i18nState()
+                val youAlive by "gui.text.round_datas.you_alive".i18nState()
+                val map by mutableStateOf(roundDetail.map)
+                val isDeath by mutableStateOf(roundDetail.isDeath)
+                val isWon by mutableStateOf(roundDetail.isWon)
+                val terrorsNames = remember { mutableStateListOf<String>() }
+
+                terrorsNames.clear()
+                terrorsNames.addAll(terrors.names)
+
+                val unknown by "gui.text.round_datas.unknown".i18nState()
+                val playerWon by "gui.text.round_datas.player_won".i18nState()
+                val playerLost by "gui.text.round_datas.player_lost".i18nState()
+                val left by "gui.text.round_datas.left".i18nState()
+                val roundIsStillInProgress by "gui.text.round_datas.round_is_still_in_progress".i18nState()
+                val playersText by "gui.text.round_datas.players".i18nState(
+                    players.filter { it.status == PlayerStatus.Alive }.size,
+                    players.size
+                )
+                val terrorsText by "gui.text.round_datas.terrors".i18nState(terrorsNames.size)
+                val notInTon by "gui.text.round_datas.not_in_ton".i18nState(terrorsNames.size)
+
+                val textTime by mutableStateOf(roundDetail.time)
+                val realTime by mutableStateOf(TimerManager.get(RoundTimerID))
+                val time = if (textTime < 0) realTime else textTime
+                val duration = time.toDuration(DurationUnit.MILLISECONDS)
+                val hours = duration.inWholeHours
+                val minutes = duration.minus(hours.toDuration(DurationUnit.HOURS)).inWholeMinutes
+                val seconds = duration.minus(hours.toDuration(DurationUnit.HOURS))
+                    .minus(minutes.toDuration(DurationUnit.MINUTES)).inWholeSeconds
+                val milliSeconds =
+                    duration.minus(hours.toDuration(DurationUnit.HOURS)).minus(minutes.toDuration(DurationUnit.MINUTES))
+                        .minus(seconds.toDuration(DurationUnit.SECONDS)).inWholeMilliseconds
+                val hoursText = hours.toString().padStart(2, '0')
+                val minutesText = minutes.toString().padStart(2, '0')
+                val secondsText = seconds.toString().padStart(2, '0')
+                val milliSecondsText = milliSeconds.toString().padStart(2, '0')
+
+                val playerTime by mutableStateOf(roundDetail.playerTime)
+                val playerDuration = playerTime.toDuration(DurationUnit.MILLISECONDS)
+                val playerHours = playerDuration.inWholeHours
+                val playerMinutes = playerDuration.minus(playerHours.toDuration(DurationUnit.HOURS)).inWholeMinutes
+                val playerSeconds = playerDuration.minus(playerHours.toDuration(DurationUnit.HOURS))
+                    .minus(playerMinutes.toDuration(DurationUnit.MINUTES)).inWholeSeconds
+                val playerMilliSeconds = playerDuration.minus(playerHours.toDuration(DurationUnit.HOURS))
+                    .minus(playerMinutes.toDuration(DurationUnit.MINUTES))
+                    .minus(playerSeconds.toDuration(DurationUnit.SECONDS)).inWholeMilliseconds
+                val playerHoursText = playerHours.toString().padStart(2, '0')
+                val playerMinutesText = playerMinutes.toString().padStart(2, '0')
+                val playerSecondsText = playerSeconds.toString().padStart(2, '0')
+                val playerMilliSecondsText = playerMilliSeconds.toString().padStart(2, '0')
+
                 SelectionContainer {
                     Column(
                         Modifier.fillMaxWidth().padding(10.dp).verticalScroll(scrollState),

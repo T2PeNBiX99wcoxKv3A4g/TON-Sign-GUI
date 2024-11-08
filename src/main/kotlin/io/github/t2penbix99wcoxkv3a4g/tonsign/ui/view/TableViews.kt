@@ -74,6 +74,7 @@ fun <T> searchFilter(
 inline fun <reified T : Any> tableView(
     currentItem: MutableState<T?>,
     content: SnapshotStateList<T>,
+    searchButtons: List<SearchButton>,
     indexColumn: Boolean = false,
     indexColWidth: Dp = 30.dp,
     noinline onRowSelection: (T) -> Unit
@@ -103,7 +104,7 @@ inline fun <reified T : Any> tableView(
     Column(
         Modifier.fillMaxWidth()
     ) {
-        searchField(search.value, onContentUpdate)
+        searchField(search.value, onContentUpdate, searchButtons)
 
         val headerList = fields
             .flatMap { it.annotations }
@@ -144,6 +145,7 @@ inline fun <reified T : Any> tableView(
 inline fun <reified T : Any> tableView(
     currentItem: MutableState<T?>,
     content: SnapshotStateMap<*, T>,
+    searchButtons: List<SearchButton>,
     indexColumn: Boolean = false,
     indexColWidth: Dp = 30.dp,
     noinline onRowSelection: (T) -> Unit
@@ -173,7 +175,7 @@ inline fun <reified T : Any> tableView(
     Column(
         Modifier.fillMaxWidth()
     ) {
-        searchField(search.value, onContentUpdate)
+        searchField(search.value, onContentUpdate, searchButtons)
 
         val headerList = fields
             .flatMap { it.annotations }
@@ -309,6 +311,43 @@ fun searchField(
                     onBottomDo()
                 }) {
                     Icon(imageVector = Icons.Filled.VerticalAlignBottom, contentDescription = "Go To Bottom")
+                }
+                searchButtons.forEach {
+                    IconButton(onClick = {
+                        it.onClick()
+                    }) {
+                        Icon(imageVector = it.imageVector, contentDescription = it.contentDescription)
+                    }
+                }
+            }
+        }
+    )
+}
+
+@Composable
+fun searchField(
+    search: String,
+    onContentUpdate: (String) -> Unit,
+    searchButtons: List<SearchButton>
+) {
+    val searchText by "gui.text.search".i18nState()
+
+    OutlinedTextField(
+        value = search,
+        onValueChange = {
+            onContentUpdate(it)
+        },
+        label = { Text(searchText) },
+        modifier = Modifier.padding(10.dp).fillMaxWidth(),
+        singleLine = true,
+        trailingIcon = {
+            Row {
+                if (search.isNotEmpty()) {
+                    IconButton(onClick = {
+                        onContentUpdate("")
+                    }) {
+                        Icon(imageVector = Icons.Filled.Clear, contentDescription = "Clear")
+                    }
                 }
                 searchButtons.forEach {
                     IconButton(onClick = {

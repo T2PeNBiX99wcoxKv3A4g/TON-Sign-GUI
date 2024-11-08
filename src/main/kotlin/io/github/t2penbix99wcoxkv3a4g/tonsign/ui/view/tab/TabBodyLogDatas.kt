@@ -24,7 +24,7 @@ class TabBodyLogDatas : TabBodyBase() {
         get() = "gui.tab.title.log_datas"
     override val id: String
         get() = "log_datas"
-    
+
     private val logDatas = mutableStateListOf<LogData>()
 
     init {
@@ -61,7 +61,7 @@ class TabBodyLogDatas : TabBodyBase() {
     ) {
         val logData: MutableState<LogData?> = remember { mutableStateOf(null) }
 
-        tableView(logData, logDatas, onRowSelection = {
+        tableView(logData, logDatas, listOf(), onRowSelection = {
             logData.value = it
         })
     }
