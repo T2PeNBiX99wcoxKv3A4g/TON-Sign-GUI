@@ -93,8 +93,8 @@ class Terror(val id: Int, val terrorId: Int, val roundType: RoundType) {
             "snarbolax",// 82
             "all-around－helper",// 83
             "lain",// 84
-            "arrival",// 85
-            "sakuya_izayoi",// 86 TODO: Not sure
+            "sakuya_izayoi",// 85
+            "arrival",// 86 TODO: Not sure
             "miros_birds",// 87
             "bff",// 88 TODO: Not sure
             "scavenger",// 89
