@@ -1,14 +1,7 @@
 package io.github.t2penbix99wcoxkv3a4g.tonsign.ui.view
 
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
@@ -16,19 +9,8 @@ import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.VerticalAlignBottom
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardColors
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.Alignment
@@ -44,8 +26,6 @@ import io.github.t2penbix99wcoxkv3a4g.tonsign.roundType.getTextOfRound
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
-import kotlin.collections.sortedBy
-import kotlin.collections.sortedByDescending
 import kotlin.reflect.KCallable
 
 // https://github.com/olk90/compose-tableView/blob/main/src/main/kotlin/de/olk90/tableview/view/TableViews.kt
@@ -70,6 +50,7 @@ fun <T> searchFilter(
     tabContent.swapList(filteredList)
 }
 
+@Suppress("unused")
 @Composable
 inline fun <reified T : Any> tableView(
     currentItem: MutableState<T?>,
@@ -90,8 +71,7 @@ inline fun <reified T : Any> tableView(
     val tableContent = remember { content }
     val tabContent = remember { mutableStateListOf<T>() }
 
-    tabContent.clear()
-    tabContent.addAll(tableContent)
+    tabContent.swapList(tableContent)
 
     if (search.value.isNotEmpty())
         searchFilter(tabContent, fields, search)
@@ -212,6 +192,7 @@ inline fun <reified T : Any> tableView(
     }
 }
 
+@Suppress("unused")
 @Composable
 fun searchField(
     search: String,
@@ -504,7 +485,8 @@ inline fun <reified T> tableRow(
                 }
                 .map { t -> t.call(item) }
 
-            val headerList = item::class.members
+            @Suppress("UNNECESSARY_NOT_NULL_ASSERTION")
+            val headerList = item!!::class.members
                 .flatMap { it.annotations }
                 .filter { it is TableHeader && it.columnIndex >= 0 }
                 .sortedBy {
@@ -519,16 +501,18 @@ inline fun <reified T> tableRow(
                 Box(modifier = Modifier.fillMaxWidth().weight(1f), contentAlignment = Alignment.Center) {
                     if (rc != null && i < headerList.size) {
                         val header = headerList[i]
-                        
+
                         when {
                             header.isTime && rc is Long -> {
                                 val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
                                 val zone = Instant.ofEpochSecond(rc).atZone(ZoneId.systemDefault())
-                                Text(modifier = Modifier.padding(5.dp), text = "${zone.format(formatter)}")
+                                Text(modifier = Modifier.padding(5.dp), text = zone.format(formatter))
                             }
+
                             rc is RoundType -> {
                                 Text(modifier = Modifier.padding(5.dp), text = rc.getTextOfRound())
                             }
+
                             else -> Text(modifier = Modifier.padding(5.dp), text = "$rc")
                         }
                     } else {

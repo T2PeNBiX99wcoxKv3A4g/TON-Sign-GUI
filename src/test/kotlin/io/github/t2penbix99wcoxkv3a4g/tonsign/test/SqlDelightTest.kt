@@ -33,9 +33,9 @@ fun main() {
 
     val queries = database.saveQueries
 
-    queries.selectAll { time, roundType, map, mapId, roundTime, playerTime, isDeath, isWon ->
-        time
-    }.executeAsList()
+//    queries.selectAll { time, roundType, map, mapId, roundTime, playerTime, isDeath, isWon ->
+//        time
+//    }.executeAsList()
 
     queries.insert(
         RoundData(

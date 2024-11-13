@@ -23,6 +23,7 @@ import androidx.compose.ui.window.WindowPosition.Aligned
 import androidx.compose.ui.window.rememberWindowState
 import androidx.navigation.NavHostController
 import io.github.t2penbix99wcoxkv3a4g.tonsign.RoundTimerID
+import io.github.t2penbix99wcoxkv3a4g.tonsign.ex.swapList
 import io.github.t2penbix99wcoxkv3a4g.tonsign.isInWorld
 import io.github.t2penbix99wcoxkv3a4g.tonsign.lastTime
 import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.TimerManager
@@ -221,7 +222,7 @@ class TabBodyRoundDatas : TabBodyBase() {
         if (!isOnTop) return
 
         val isInWorld by isInWorld
-        var lastTime by mutableStateOf(lastTime) 
+        var lastTime by mutableStateOf(lastTime)
 
         if (lastTime !in roundDatas && roundDatas.isNotEmpty())
             lastTime = roundDatas.maxOf { it.key }
@@ -240,13 +241,11 @@ class TabBodyRoundDatas : TabBodyBase() {
                 val roundDetail by mutableStateOf(roundData.roundDetail)
                 val players = remember { mutableStateListOf<PlayerData>() }
 
-                players.clear()
-                players.addAll(roundDetail.players)
+                players.swapList(roundDetail.players)
 
                 val terrorsList = remember { mutableStateListOf<Int>() }
 
-                terrorsList.clear()
-                terrorsList.addAll(roundDetail.terrors)
+                terrorsList.swapList(roundDetail.terrors)
 
                 val roundType by mutableStateOf(roundData.roundType)
                 val terrors by mutableStateOf(Terrors(terrorsList, roundType))
@@ -258,8 +257,7 @@ class TabBodyRoundDatas : TabBodyBase() {
                 val isWon by mutableStateOf(roundDetail.isWon)
                 val terrorsNames = remember { mutableStateListOf<String>() }
 
-                terrorsNames.clear()
-                terrorsNames.addAll(terrors.names)
+                terrorsNames.swapList(terrors.names)
 
                 val unknown by "gui.text.round_datas.unknown".i18nState()
                 val playerWon by "gui.text.round_datas.player_won".i18nState()
@@ -302,7 +300,7 @@ class TabBodyRoundDatas : TabBodyBase() {
                 val playerMinutesText = playerMinutes.toString().padStart(2, '0')
                 val playerSecondsText = playerSeconds.toString().padStart(2, '0')
                 val playerMilliSecondsText = playerMilliSeconds.toString().padStart(2, '0')
-                
+
                 SelectionContainer {
                     Column(
                         Modifier.fillMaxWidth().padding(10.dp).verticalScroll(scrollState),

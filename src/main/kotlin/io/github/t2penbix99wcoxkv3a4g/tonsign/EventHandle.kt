@@ -17,11 +17,7 @@ import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.TimerManager
 import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.i18n
 import io.github.t2penbix99wcoxkv3a4g.tonsign.roundType.GuessRoundType
 import io.github.t2penbix99wcoxkv3a4g.tonsign.roundType.RoundType
-import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.logic.model.PlayerData
-import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.logic.model.PlayerStatus
-import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.logic.model.RoundData
-import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.logic.model.RoundDataDetail
-import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.logic.model.WonOrLost
+import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.logic.model.*
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.nextPrediction
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.onExitEvent
 import io.github.t2penbix99wcoxkv3a4g.tonsign.watcher.LogWatcher
@@ -190,6 +186,7 @@ private fun onPlayerDeath(player: PlayerData) {
     val data = players.find { it.name == player.name }
     if (data == null) return
     val i = players.indexOf(data)
+    @Suppress("NAME_SHADOWING")
     var player = player
     if (player.id.isNullOrBlank())
         player = player.copy(id = data.id)

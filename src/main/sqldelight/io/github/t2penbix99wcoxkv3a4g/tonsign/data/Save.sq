@@ -11,10 +11,10 @@ CREATE TABLE roundData (
     mapId INTEGER NOT NULL,
     roundTime INTEGER NOT NULL,
     playerTime INTEGER NOT NULL,
---     players
--- terrors
-    isDeath INTEGER AS Boolean NOT NULL,
-    isWon INTEGER AS WonOrLost NOT NULL
+--     players as json
+-- terrors as json
+    isDeath INTEGER AS Boolean DEFAULT 0,
+    isWon INTEGER AS WonOrLost DEFAULT 0
 );
 
 selectAll:
