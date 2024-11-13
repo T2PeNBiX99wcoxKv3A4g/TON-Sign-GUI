@@ -16,11 +16,9 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.TrayState
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -33,11 +31,7 @@ import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.i18n
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-internal fun tableSelection(
-    trayState: TrayState,
-    needRestart: MutableState<Boolean>,
-    needRefresh: MutableState<Boolean>
-) {
+internal fun tableSelection() {
     val navController = rememberNavController()
 
     Column {
@@ -62,20 +56,14 @@ internal fun tableSelection(
                 }
             },
             content = {
-                screenNavigation(navController, it, trayState, needRestart, needRefresh)
+                screenNavigation(navController, it)
             }
         )
     }
 }
 
 @Composable
-fun screenNavigation(
-    navController: NavHostController,
-    padding: PaddingValues,
-    trayState: TrayState,
-    needRestart: MutableState<Boolean>,
-    needRefresh: MutableState<Boolean>
-) {
+fun screenNavigation(navController: NavHostController, padding: PaddingValues) {
     NavHost(navController = navController, startDestination = SelectionState.Main.gui.id) {
         SelectionState.entries.forEach { state ->
             composable(state.gui.id) {
@@ -83,9 +71,9 @@ fun screenNavigation(
                     modifier = Modifier.padding(padding)
                 ) {
                     Column(Modifier.fillMaxWidth(state.gui.maxWidth)) {
-                        state.gui.view(navController, padding, trayState, needRestart, needRefresh)
+                        state.gui.view(navController, padding)
                     }
-                    state.gui.detailView(navController, padding, trayState, needRestart, needRefresh)
+                    state.gui.detailView(navController, padding)
                 }
             }
         }

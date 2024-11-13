@@ -30,7 +30,6 @@ import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.TrayState
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.WindowPosition.Aligned
 import androidx.compose.ui.window.rememberWindowState
@@ -84,13 +83,7 @@ class TabBodyRoundDatas : TabBodyBase() {
     }
 
     @Composable
-    override fun view(
-        navController: NavHostController,
-        padding: PaddingValues,
-        trayState: TrayState,
-        needRestart: MutableState<Boolean>,
-        needRefresh: MutableState<Boolean>
-    ) {
+    override fun view(navController: NavHostController, padding: PaddingValues) {
         val roundData: MutableState<RoundData?> = remember { roundData }
         var isOnTop by remember { internalIsOnTop }
 
@@ -123,13 +116,7 @@ class TabBodyRoundDatas : TabBodyBase() {
     }
 
     @Composable
-    override fun detailView(
-        navController: NavHostController,
-        padding: PaddingValues,
-        trayState: TrayState,
-        needRestart: MutableState<Boolean>,
-        needRefresh: MutableState<Boolean>
-    ) {
+    override fun detailView(navController: NavHostController, padding: PaddingValues) {
         val roundData: MutableState<RoundData?> = remember { roundData }
         if (roundData.value == null)
             return
@@ -242,7 +229,7 @@ class TabBodyRoundDatas : TabBodyBase() {
     }
 
     @Composable
-    override fun topMenu(trayState: TrayState, needRestart: MutableState<Boolean>, needRefresh: MutableState<Boolean>) {
+    override fun topMenu() {
         val windowState =
             rememberWindowState(position = Aligned(alignment = Alignment.Center), size = DpSize(500.dp, 350.dp))
         var isOnTop by remember { internalIsOnTop }

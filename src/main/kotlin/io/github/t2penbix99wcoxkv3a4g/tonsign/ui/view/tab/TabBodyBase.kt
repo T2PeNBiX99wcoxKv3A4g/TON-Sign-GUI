@@ -4,7 +4,6 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.ui.window.TrayState
 import androidx.navigation.NavHostController
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.view.tab.tray.TrayItem
 
@@ -25,25 +24,13 @@ abstract class TabBodyBase {
     abstract fun icon()
 
     @Composable
-    abstract fun view(
-        navController: NavHostController,
-        padding: PaddingValues,
-        trayState: TrayState,
-        needRestart: MutableState<Boolean>,
-        needRefresh: MutableState<Boolean>
-    )
+    abstract fun view(navController: NavHostController, padding: PaddingValues)
 
     @Composable
-    open fun detailView(
-        navController: NavHostController,
-        padding: PaddingValues,
-        trayState: TrayState,
-        needRestart: MutableState<Boolean>,
-        needRefresh: MutableState<Boolean>
-    ) {
+    open fun detailView(navController: NavHostController, padding: PaddingValues) {
     }
 
     @Composable
-    open fun topMenu(trayState: TrayState, needRestart: MutableState<Boolean>, needRefresh: MutableState<Boolean>) {
+    open fun topMenu() {
     }
 }

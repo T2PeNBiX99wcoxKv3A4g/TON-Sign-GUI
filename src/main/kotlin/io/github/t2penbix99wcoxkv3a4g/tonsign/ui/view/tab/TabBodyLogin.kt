@@ -17,7 +17,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -25,7 +24,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.TrayState
 import androidx.navigation.NavHostController
 import io.github.t2penbix99wcoxkv3a4g.tonsign.api.ApiClient
 import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.i18n
@@ -48,13 +46,7 @@ class TabBodyLogin : TabBodyBase() {
     private val apiClient = ApiClient()
 
     @Composable
-    override fun view(
-        navController: NavHostController,
-        padding: PaddingValues,
-        trayState: TrayState,
-        needRestart: MutableState<Boolean>,
-        needRefresh: MutableState<Boolean>
-    ) {
+    override fun view(navController: NavHostController, padding: PaddingValues) {
         val scrollState = rememberScrollState()
         var username by remember { mutableStateOf("") }
         var password by remember { mutableStateOf("") }

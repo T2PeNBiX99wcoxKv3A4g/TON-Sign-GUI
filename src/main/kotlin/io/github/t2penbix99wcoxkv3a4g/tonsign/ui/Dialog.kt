@@ -10,8 +10,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -20,7 +20,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogWindow
 import androidx.compose.ui.window.WindowPosition.Aligned
 import androidx.compose.ui.window.rememberDialogState
+import io.github.t2penbix99wcoxkv3a4g.tonsign.isAskingToClose
+import io.github.t2penbix99wcoxkv3a4g.tonsign.isOpen
 import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.i18nState
+import io.github.t2penbix99wcoxkv3a4g.tonsign.needRestart
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.theme.CupcakeEXTheme
 
 private val dialogSize = DpSize(280.dp, 180.dp)
@@ -88,9 +91,9 @@ fun openDialogWindow(title: String, msg: String, yesDo: () -> Unit, noDo: () -> 
 }
 
 @Composable
-fun showConfirmExitWindow(isAskingToClose: MutableState<Boolean>, isOpen: MutableState<Boolean>) {
-    var isAskingToCloseSet by isAskingToClose
-    var isOpenSet by isOpen
+fun showConfirmExitWindow() {
+    var isAskingToClose by remember { isAskingToClose }
+    var isOpen by remember { isOpen }
     val confirmExitTitle by "gui.title.dialog.confirm_exit".i18nState()
     val confirmExitText by "gui.text.dialog.confirm_exit".i18nState()
 
@@ -99,18 +102,18 @@ fun showConfirmExitWindow(isAskingToClose: MutableState<Boolean>, isOpen: Mutabl
         msg = confirmExitText,
         yesDo = {
             onExit()
-            isOpenSet = false
+            isOpen = false
         },
         noDo = {
-            isAskingToCloseSet = false
+            isAskingToClose = false
         }
     )
 }
 
 @Composable
-fun showNeedRestartWindows(needRestart: MutableState<Boolean>, isOpen: MutableState<Boolean>) {
-    var needRestartSet by needRestart
-    var isOpenSet by isOpen
+fun showNeedRestartWindows() {
+    var needRestart by remember { needRestart }
+    var isOpen by remember { isOpen }
     val needRestartTitle by "gui.title.dialog.need_restart".i18nState()
     val needRestartText by "gui.text.dialog.need_restart".i18nState()
 
@@ -119,10 +122,10 @@ fun showNeedRestartWindows(needRestart: MutableState<Boolean>, isOpen: MutableSt
         msg = needRestartText,
         yesDo = {
             onExit()
-            isOpenSet = false
+            isOpen = false
         },
         noDo = {
-            needRestartSet = false
+            needRestart = false
         }
     )
 }

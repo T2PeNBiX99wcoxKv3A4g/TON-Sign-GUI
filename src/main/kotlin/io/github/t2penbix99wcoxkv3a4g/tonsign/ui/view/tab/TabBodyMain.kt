@@ -10,12 +10,10 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.TrayState
 import androidx.navigation.NavHostController
 import io.github.t2penbix99wcoxkv3a4g.tonsign.delayToLoadingLog
 import io.github.t2penbix99wcoxkv3a4g.tonsign.isInWorld
@@ -45,13 +43,7 @@ class TabBodyMain : TabBodyBase() {
     }
 
     @Composable
-    override fun view(
-        navController: NavHostController,
-        padding: PaddingValues,
-        trayState: TrayState,
-        needRestart: MutableState<Boolean>,
-        needRefresh: MutableState<Boolean>
-    ) {
+    override fun view(navController: NavHostController, padding: PaddingValues) {
         var isWaitingVRChat by VRChatWatcher.isWaitingVRChat
         var nextPredictionSet by nextPrediction
         var delayToLoadingLog by delayToLoadingLog

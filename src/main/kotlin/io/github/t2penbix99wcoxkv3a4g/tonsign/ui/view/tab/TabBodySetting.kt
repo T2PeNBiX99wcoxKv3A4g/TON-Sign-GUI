@@ -12,14 +12,12 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.TrayState
 import androidx.navigation.NavHostController
 import io.github.t2penbix99wcoxkv3a4g.tonsign.OSCSender
 import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.ConfigManager
@@ -28,6 +26,8 @@ import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.SaveManager
 import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.SecretsManager
 import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.i18n
 import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.i18nState
+import io.github.t2penbix99wcoxkv3a4g.tonsign.needRefresh
+import io.github.t2penbix99wcoxkv3a4g.tonsign.needRestart
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.view.switchWithText
 
 class TabBodySetting : TabBodyBase() {
@@ -43,15 +43,9 @@ class TabBodySetting : TabBodyBase() {
     }
 
     @Composable
-    override fun view(
-        navController: NavHostController,
-        padding: PaddingValues,
-        trayState: TrayState,
-        needRestart: MutableState<Boolean>,
-        needRefresh: MutableState<Boolean>
-    ) {
-        var needRefreshSet by needRefresh
-        var needRestartSet by needRestart
+    override fun view(navController: NavHostController, padding: PaddingValues) {
+        var needRefresh by remember { needRefresh }
+        var needRestart by remember { needRestart }
         var roundNotify by remember { mutableStateOf(ConfigManager.config.roundNotify) }
         var roundNotifyOnlySpecial by remember { mutableStateOf(ConfigManager.config.roundNotifyOnlySpecial) }
         var playerJoinedNotify by remember { mutableStateOf(ConfigManager.config.playerJoinedNotify) }
@@ -85,7 +79,7 @@ class TabBodySetting : TabBodyBase() {
             Button(
                 onClick = {
                     LanguageManager.setLanguage("jp")
-                    needRefreshSet = true
+                    needRefresh = true
                 }
             ) {
                 Text("日本語")
@@ -93,14 +87,14 @@ class TabBodySetting : TabBodyBase() {
             Button(
                 onClick = {
                     LanguageManager.setLanguage("en")
-                    needRefreshSet = true
+                    needRefresh = true
                 }
             ) {
                 Text("English")
             }
             Button(
                 onClick = {
-                    needRefreshSet = true
+                    needRefresh = true
                 }
             ) {
                 Text(refresh)
@@ -153,7 +147,7 @@ class TabBodySetting : TabBodyBase() {
             switchWithText("Always On Top", onTop) {
                 onTop = it
                 ConfigManager.config.onTop = it
-                needRestartSet = true
+                needRestart = true
             }
         }
     }

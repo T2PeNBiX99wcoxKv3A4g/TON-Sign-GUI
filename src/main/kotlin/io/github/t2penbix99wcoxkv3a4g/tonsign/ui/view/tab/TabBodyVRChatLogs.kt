@@ -30,7 +30,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.TrayState
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.WindowPosition.Aligned
 import androidx.compose.ui.window.rememberWindowState
@@ -68,12 +67,7 @@ class TabBodyVRChatLogs : TabBodyBase() {
 
     @Suppress("unused")
     @Composable
-    private fun viewAll(
-        trayState: TrayState,
-        needRestart: MutableState<Boolean>,
-        needRefresh: MutableState<Boolean>,
-        isTopWindow: Boolean
-    ) {
+    private fun viewAll(isTopWindow: Boolean) {
         val scope = rememberCoroutineScope()
         val scrollState = rememberLazyListState()
         val logs = remember { logs }
@@ -145,18 +139,12 @@ class TabBodyVRChatLogs : TabBodyBase() {
     }
 
     @Composable
-    override fun view(
-        navController: NavHostController,
-        padding: PaddingValues,
-        trayState: TrayState,
-        needRestart: MutableState<Boolean>,
-        needRefresh: MutableState<Boolean>
-    ) {
-        viewAll(trayState, needRestart, needRefresh, false)
+    override fun view(navController: NavHostController, padding: PaddingValues) {
+        viewAll(false)
     }
 
     @Composable
-    override fun topMenu(trayState: TrayState, needRestart: MutableState<Boolean>, needRefresh: MutableState<Boolean>) {
+    override fun topMenu() {
         val windowState =
             rememberWindowState(position = Aligned(alignment = Alignment.Center), size = DpSize(500.dp, 350.dp))
         var isOnTop by remember { internalIsOnTop }
@@ -172,7 +160,7 @@ class TabBodyVRChatLogs : TabBodyBase() {
         ) {
             CupcakeEXTheme {
                 Column(Modifier.fillMaxWidth()) {
-                    viewAll(trayState, needRestart, needRefresh, true)
+                    viewAll(true)
                 }
             }
         }

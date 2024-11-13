@@ -27,34 +27,32 @@ import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.theme.CupcakeEXTheme
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.view.SelectionState
 
 internal val trayState = TrayState()
+internal val isOpen = mutableStateOf(true)
+internal val isAskingToClose = mutableStateOf(false)
+internal val needRefresh = mutableStateOf(false)
+internal val needRestart = mutableStateOf(false)
 
 fun main() = application {
-    var isOpen = remember { mutableStateOf(true) }
-    var isOpenSet by isOpen
-    val isAskingToClose = remember { mutableStateOf(false) }
-    var isAskingToCloseSet by isAskingToClose
+    var isOpen by remember { isOpen }
+    var isAskingToClose by remember { isAskingToClose }
     var isVisible by remember { mutableStateOf(true) }
-    val needRefresh = remember { mutableStateOf(false) }
-    val needRestart = remember { mutableStateOf(false) }
+    var needRefresh by remember { needRefresh }
+    var needRestart by remember { needRestart }
     val windowState =
         rememberWindowState(position = Aligned(alignment = Alignment.Center), size = DpSize(800.dp, 600.dp))
     val refreshWindowState =
         rememberWindowState(position = Aligned(alignment = Alignment.Center), size = DpSize(300.dp, 260.dp))
-    var needRestartSet by needRestart
-    var needRefreshSet by needRefresh
-    val trayState by remember { mutableStateOf(trayState) }
     val onTop by remember { mutableStateOf(ConfigManager.config.onTop) }
-    var testWindow by remember { mutableStateOf(false) }
 
     startWatcher()
 
-    if (isAskingToCloseSet && !isVisible)
+    if (isAskingToClose && !isVisible)
         isVisible = true
 
-    if (needRestartSet && !isVisible)
+    if (needRestart && !isVisible)
         isVisible = true
 
-    if (isOpenSet) {
+    if (isOpen) {
         Tray(
             state = trayState,
             icon = TrayIcon,
@@ -62,8 +60,6 @@ fun main() = application {
             onAction = {
                 if (!isVisible)
                     isVisible = true
-                if (!testWindow)
-                    testWindow = true
             },
             menu = {
                 SelectionState.entries.forEach {
@@ -73,7 +69,7 @@ fun main() = application {
                         Menu(gui.title.i18nByLang("en")) {
                             gui.trays.forEach {
                                 Item(it.label.i18nByLang("en"), enabled = it.isEnabled) {
-                                    it.onClick(gui, trayState, needRestart, needRefresh)
+                                    it.onClick(gui)
                                 }
                             }
                         }
@@ -81,12 +77,12 @@ fun main() = application {
                 }
                 Separator()
                 Item("gui.tray.exit".i18nByLang("en")) {
-                    isAskingToCloseSet = true
+                    isAskingToClose = true
                 }
             }
         )
 
-        if (!needRefreshSet) {
+        if (!needRefresh) {
             Window(
                 onCloseRequest = { isVisible = false },
                 visible = isVisible,
@@ -94,17 +90,17 @@ fun main() = application {
                 state = windowState,
                 alwaysOnTop = onTop
             ) {
-                app(trayState, needRestart, needRefresh)
+                app()
 
-                if (isAskingToCloseSet)
-                    showConfirmExitWindow(isAskingToClose, isOpen)
+                if (isAskingToClose)
+                    showConfirmExitWindow()
 
-                if (needRestartSet)
-                    showNeedRestartWindows(needRestart, isOpen)
+                if (needRestart)
+                    showNeedRestartWindows()
             }
         } else {
             Window(
-                onCloseRequest = { needRefreshSet = false },
+                onCloseRequest = { needRefresh = false },
                 visible = true,
                 title = "Refreshing...",
                 state = refreshWindowState
@@ -112,7 +108,7 @@ fun main() = application {
                 CupcakeEXTheme {
                     Text("Refreshing...")
                     ConfigManager.save()
-                    needRefreshSet = false
+                    needRefresh = false
                 }
             }
         }
@@ -122,7 +118,7 @@ fun main() = application {
             var isOnTop by remember { gui.isOnTop }
 
             if (isOnTop) {
-                gui.topMenu(trayState, needRestart, needRefresh)
+                gui.topMenu()
             }
         }
     }
