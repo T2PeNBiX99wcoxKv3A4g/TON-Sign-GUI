@@ -17,14 +17,7 @@ import io.github.t2penbix99wcoxkv3a4g.tonsign.interpreter.LogInterpreter
 import io.github.t2penbix99wcoxkv3a4g.tonsign.logger.Logger
 import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.ConfigManager
 import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.i18n
-import io.github.t2penbix99wcoxkv3a4g.tonsign.roundType.GuessRoundType
-import io.github.t2penbix99wcoxkv3a4g.tonsign.roundType.RandomRoundType
-import io.github.t2penbix99wcoxkv3a4g.tonsign.roundType.RoundType
-import io.github.t2penbix99wcoxkv3a4g.tonsign.roundType.RoundTypeConvert
-import io.github.t2penbix99wcoxkv3a4g.tonsign.roundType.classifyRound
-import io.github.t2penbix99wcoxkv3a4g.tonsign.roundType.getTypeOfRound
-import io.github.t2penbix99wcoxkv3a4g.tonsign.roundType.isSpecialOrClassic
-import io.github.t2penbix99wcoxkv3a4g.tonsign.roundType.jpToEn
+import io.github.t2penbix99wcoxkv3a4g.tonsign.roundType.*
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.logic.model.PlayerData
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.logic.model.PlayerStatus
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.logic.model.Terror
@@ -39,11 +32,13 @@ class LogWatcher(logFile: File) {
             get() = LogWatcher(findLatestLog())
 
         fun findLatestLog(): File {
-            val files = Utils.logDirectory.toFile().listFiles { file, filename ->
+            val files = Utils.logDirectory.toFile().listFiles { _, filename ->
                 filename.endsWith(".txt")
             }
+            
+            requireNotNull(files)
 
-            if (files.size < 1)
+            if (files.isEmpty())
                 throw FileNotFoundException("exception.no_log_file".i18n())
 
             files.sortWith { f1, f2 ->
@@ -52,7 +47,6 @@ class LogWatcher(logFile: File) {
                     return@sortWith -1
                 else
                     return@sortWith 1
-                return@sortWith 0
             }
 
             Logger.info("log.current_log_running", files.first().name)
@@ -107,7 +101,7 @@ class LogWatcher(logFile: File) {
     private var wrongCount = 0
     private var isTONLoaded = false
 
-    val logInterpreter = LogInterpreter(logFile)
+    private val logInterpreter = LogInterpreter(logFile)
     val onNextPredictionEvent = EventArg<GuessRoundType>()
     val onRoundStartEvent = EventArg4<ZonedDateTime, RoundType, String, Int>()
     val onRoundOverEvent = EventArg<GuessRoundType>()
@@ -139,7 +133,7 @@ class LogWatcher(logFile: File) {
             }
         }
 
-    fun isAlternatePattern(): Boolean {
+    private fun isAlternatePattern(): Boolean {
         if (roundLog.size < 3) {
             return if (roundLog.size > 1)
                 roundLog[1] == GuessRoundType.Special
@@ -156,7 +150,7 @@ class LogWatcher(logFile: File) {
         return last[0] == last[2] && last[1] == last[3]
     }
 
-    fun predictNextRound(): GuessRoundType {
+    private fun predictNextRound(): GuessRoundType {
         if (roundLog.size < 2)
             return GuessRoundType.Classic
 
@@ -184,8 +178,8 @@ class LogWatcher(logFile: File) {
             }
 
             randomRound == RandomRoundType.FAST && randomCount > 2 -> {
-                val last = roundLog.takeLast(3)
-                if (last.size > 2 && last[0] == last[1] || last[1] == last[2]) {
+                val last2 = roundLog.takeLast(3)
+                if (last2.size > 2 && last2[0] == last2[1] || last2[1] == last2[2]) {
                     randomRound = RandomRoundType.NORMAL
                     randomCount = RANDOM_COUNT_RESET
                     Logger.debug({ this::class.simpleName!! }, "Random type seem is wrong, change to $randomRound")
@@ -208,11 +202,12 @@ class LogWatcher(logFile: File) {
         if (randomRound == RandomRoundType.FAST || bonusFlag)
             return if (roundLog.last() == GuessRoundType.Special) GuessRoundType.Classic else GuessRoundType.Special
         else {
-            val last = roundLog.takeLast(2)
-            return if (last[0] == GuessRoundType.Classic && last[1] == GuessRoundType.Classic) GuessRoundType.Special else GuessRoundType.Classic
+            val last2 = roundLog.takeLast(2)
+            return if (last2[0] == GuessRoundType.Classic && last2[1] == GuessRoundType.Classic) GuessRoundType.Special else GuessRoundType.Classic
         }
     }
 
+    @Suppress("MemberVisibilityCanBePrivate")
     fun getRecentRoundsLog(maxRecent: Int): String {
         return roundLog.takeLast(maxRecent).joinToString {
             when (it) {
@@ -232,6 +227,7 @@ class LogWatcher(logFile: File) {
             return _getRecentRoundsLogState
         }
 
+    @Suppress("MemberVisibilityCanBePrivate")
     fun clear() {
         roundLog.clear()
         lastPredictionForOSC = false
@@ -399,14 +395,14 @@ class LogWatcher(logFile: File) {
                 if (!isInTON.value) return
                 val isUnknown = KILLER_MATRIX_UNKNOWN in log.msg
                 val isRevealed = KILLER_MATRIX_REVEAL in log.msg
-                val killerMatrix = arrayListOf<Int>(Terror.UNKNOWN, Terror.UNKNOWN, Terror.UNKNOWN)
+                val killerMatrix = arrayListOf(Terror.UNKNOWN, Terror.UNKNOWN, Terror.UNKNOWN)
 
                 if (!isUnknown) {
                     val kMatrixRaw = log.msg.middlePath(
                         if (isRevealed) KILLER_MATRIX_REVEAL else KILLER_MATRIX_KEYWORD,
                         KILLER_ROUND_TYPE_KEYWORD
                     ).trim().split(' ')
-                    for (i in 0..killerMatrix.size - 1) {
+                    for (i in 0..<killerMatrix.size) {
                         killerMatrix[i] = runCatching { kMatrixRaw[i].trim().toInt() }.getOrElse { -1 }
                     }
                 }

@@ -12,7 +12,7 @@ import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.ZoneId
 
-class LogInterpreter(val logFile: File) {
+class LogInterpreter(private val logFile: File) {
     private companion object {
         private const val FIRST_KEYWORD = "  -  "
         private const val DEBUG_KEYWORD = "Debug"
