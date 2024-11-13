@@ -25,6 +25,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import io.github.t2penbix99wcoxkv3a4g.tonsign.Utils
 import io.github.t2penbix99wcoxkv3a4g.tonsign.api.ApiClient
 import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.i18n
 import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.i18nState
@@ -37,6 +38,8 @@ class TabBodyLogin : TabBodyBase() {
         get() = "gui.tab.title.login"
     override val id: String
         get() = "login"
+    override val enabled: Boolean
+        get() = Utils.logger.isDebugEnabled()
 
     @Composable
     override fun icon() {

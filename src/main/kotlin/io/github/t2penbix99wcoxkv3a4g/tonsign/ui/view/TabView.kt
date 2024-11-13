@@ -66,6 +66,7 @@ internal fun tableSelection() {
 fun screenNavigation(navController: NavHostController, padding: PaddingValues) {
     NavHost(navController = navController, startDestination = SelectionState.Main.gui.id) {
         SelectionState.entries.forEach { state ->
+            if (!state.gui.enabled) return@forEach
             composable(state.gui.id) {
                 Row(
                     modifier = Modifier.padding(padding)
@@ -91,6 +92,7 @@ fun bottomNav(navController: NavHostController) {
         contentColor = MaterialTheme.colorScheme.primary
     ) {
         SelectionState.entries.forEach {
+            if (!it.gui.enabled) return@forEach
             BottomNavigationItem(
                 icon = {
                     it.gui.icon()

@@ -64,7 +64,7 @@ fun main() = application {
             menu = {
                 SelectionState.entries.forEach {
                     val gui = it.gui
-
+                    if (!gui.enabled) return@forEach
                     if (gui.trays.isNotEmpty()) {
                         Menu(gui.title.i18nByLang("en")) {
                             gui.trays.forEach {
@@ -115,6 +115,7 @@ fun main() = application {
 
         SelectionState.entries.forEach {
             val gui = it.gui
+            if (!gui.enabled) return@forEach
             var isOnTop by remember { gui.isOnTop }
 
             if (isOnTop) {

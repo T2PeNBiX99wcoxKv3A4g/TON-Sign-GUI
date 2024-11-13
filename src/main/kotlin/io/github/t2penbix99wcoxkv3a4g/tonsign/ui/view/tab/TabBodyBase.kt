@@ -19,6 +19,9 @@ abstract class TabBodyBase {
 
     open val trays: List<TrayItem>
         get() = listOf<TrayItem>()
+    
+    open val enabled: Boolean
+        get() = true
 
     @Composable
     abstract fun icon()

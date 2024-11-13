@@ -8,6 +8,7 @@ plugins {
     kotlin("plugin.serialization")
     id("org.jetbrains.compose")
     id("org.jetbrains.kotlin.plugin.compose")
+    id("app.cash.sqldelight")
 }
 
 group = "io.github.T2PeNBiX99wcoxKv3A4g.ton-sign"
@@ -67,6 +68,8 @@ dependencies {
     // define any required OkHttp artifacts without version
     implementation("com.squareup.okhttp3:okhttp")
     implementation("com.squareup.okhttp3:logging-interceptor")
+
+    implementation("app.cash.sqldelight:sqlite-driver:${property("sqldelight.version")}")
 }
 
 sourceSets {
@@ -132,6 +135,14 @@ compose.resources {
     publicResClass = false
     packageOfResClass = "$group.resources"
     generateResClass = auto
+}
+
+sqldelight {
+    databases {
+        create("Database") {
+            packageName.set("io.github.T2PeNBiX99wcoxKv3A4g.ton-sign")
+        }
+    }
 }
 
 compose.desktop {
