@@ -1,0 +1,26 @@
+import io.github.t2penbix99wcoxkv3a4g.tonsign.roundType.RoundType;
+import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.logic.model.WonOrLost;
+import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.view.TableHeader;
+import kotlin.Boolean;
+import kotlin.Long;
+
+CREATE TABLE roundData (
+    time INTEGER NOT NULL,
+    roundType INTEGER AS RoundType NOT NULL,
+    map TEXT NOT NULL,
+    mapId INTEGER NOT NULL,
+    roundTime INTEGER NOT NULL,
+    playerTime INTEGER NOT NULL,
+--     players
+-- terrors
+    isDeath INTEGER AS Boolean NOT NULL,
+    isWon INTEGER AS WonOrLost NOT NULL
+);
+
+selectAll:
+SELECT *
+FROM roundData;
+
+insert:
+INSERT INTO roundData(time, roundType, map, mapId, roundTime, playerTime, isDeath, isWon)
+VALUES ?;

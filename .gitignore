@@ -53,3 +53,4 @@ bin/
 /save.yml
 /src/test/resources/language/
 /secrets
+/*.db

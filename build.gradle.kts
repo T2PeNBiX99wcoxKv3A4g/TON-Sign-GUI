@@ -1,7 +1,8 @@
+
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import java.io.FileOutputStream
 import java.security.MessageDigest
-import java.util.Properties
+import java.util.*
 
 plugins {
     kotlin("jvm")
@@ -11,7 +12,7 @@ plugins {
     id("app.cash.sqldelight")
 }
 
-group = "io.github.T2PeNBiX99wcoxKv3A4g.ton-sign"
+group = "io.github.t2penbix99wcoxkv3a4g.tonsign"
 version = property("ton-sign.version")!!
 
 val generatedVersionDir = "${layout.buildDirectory.asFile.get()}/generated-version"
@@ -44,23 +45,28 @@ dependencies {
     }
     implementation(compose.material3)
     implementation(compose.materialIconsExtended)
+    implementation("org.jetbrains.androidx.navigation:navigation-compose:${property("navigation-compose.version")}")
     implementation(kotlin("reflect"))
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:${property("kotlinx-coroutines.version")}")
+    
     implementation("com.illposed.osc:javaosc-core:${property("javaosc.version")}")
     // No type handler registered for serializing class java.lang.String
 //    implementation("com.illposed.osc:javaosc-java-se-addons:${property("javaosc.version")}")
+    
     implementation("com.charleskorn.kaml:kaml:${property("kaml.version")}")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:${property("kotlinx-serialization-json.version")}")
+    
     implementation("org.slf4j:slf4j-api:${property("slf4j.version")}")
     implementation("ch.qos.logback:logback-core:${property("logback.version")}")
     implementation("ch.qos.logback:logback-classic:${property("logback.version")}")
+    implementation("io.github.oshai:kotlin-logging-jvm:${property("kotlin-logging.version")}")
+    
     implementation("org.codehaus.janino:janino:${property("janino.version")}")
     implementation("org.fusesource.jansi:jansi:${property("jansi.version")}")
-    implementation("io.github.oshai:kotlin-logging-jvm:${property("kotlin-logging.version")}")
-    implementation("org.jetbrains.androidx.navigation:navigation-compose:${property("navigation-compose.version")}")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:${property("kotlinx-serialization-json.version")}")
-    implementation("io.github.kdroidfilter:composenativetray:${property("composenativetray.version")}")
-//    implementation("jakarta.servlet:jakarta.servlet-api:${property("jakarta.version")}")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:${property("kotlinx-coroutines.version")}")
     implementation("javassist:javassist:${property("javassist.version")}")
+    
+    implementation("io.github.kdroidfilter:composenativetray:${property("composenativetray.version")}")
+    
     implementation("com.github.vrchatapi:vrchatapi-java:${property("vrchatapi.version")}")
     // define a BOM and its version
     implementation(platform("com.squareup.okhttp3:okhttp-bom:${property("okhttp.version")}"))
@@ -104,7 +110,7 @@ tasks.register("generateLanguageFolder") {
             when {
                 languageCopyTo.isFile -> languageCopyTo.delete()
                 languageCopyTo.isDirectory -> {
-                    languageCopyTo.listFiles().forEach {
+                    languageCopyTo.listFiles()?.forEach {
                         it.delete()
                     }
                 }
@@ -115,7 +121,7 @@ tasks.register("generateLanguageFolder") {
         languageCopyTo.parentFile.mkdirs()
         language.copyTo(languageCopyTo, true)
 
-        language.listFiles { _, filename -> filename.endsWith(".yml") }.forEach {
+        language.listFiles { _, filename -> filename.endsWith(".yml") }?.forEach {
             it.copyTo(file("${languageCopyTo.path}/${it.name}"), true)
 
             val shaFile = file("${languageCopyTo.path}/${it.name}.sha256")
@@ -139,8 +145,8 @@ compose.resources {
 
 sqldelight {
     databases {
-        create("Database") {
-            packageName.set("io.github.T2PeNBiX99wcoxKv3A4g.ton-sign")
+        create("Save") {
+            packageName.set("io.github.t2penbix99wcoxkv3a4g.tonsign.data")
         }
     }
 }
@@ -155,11 +161,6 @@ compose.desktop {
             modules("java.sql")
             packageName = "TON-Sign"
             packageVersion = "1.0.0"
-        }
-
-        buildTypes.release {
-            // Stupid
-            System.setProperty("logback.configurationFile", "/logback.xml")
         }
 
         buildTypes.release.proguard {
