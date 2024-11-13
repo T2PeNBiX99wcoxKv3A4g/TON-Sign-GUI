@@ -2,10 +2,13 @@
 <!-- turn debug=true on for logback-test.xml to help debug logging configurations. -->
 <configuration debug="false">
     <statusListener class="ch.qos.logback.core.status.NopStatusListener"/>
-    <conversionRule conversionWord="highLightLogLevel" converterClass="io.github.t2penbix99wcoxkv3a4g.tonsign.logger.HighLightLogLevel"/>
-    <conversionRule conversionWord="highLightThread" converterClass="io.github.t2penbix99wcoxkv3a4g.tonsign.logger.HighLightThread"/>
-    <property name="LOG_ROOT" value="./logs" />
-    <property name="LOG_FILE_NAME" value="latest" />
+    <conversionRule conversionWord="highLightLogLevel"
+                    converterClass="io.github.t2penbix99wcoxkv3a4g.tonsign.logger.HighLightLogLevel"/>
+    <conversionRule conversionWord="highLightThread"
+                    converterClass="io.github.t2penbix99wcoxkv3a4g.tonsign.logger.HighLightThread"/>
+    <property name="LOG_ROOT" value="./logs"/>
+    <property name="LOG_FILE_NAME" value="latest"/>
+    <property name="LOG_ERROR_FILE_NAME" value="error"/>
     <!--
     We prefer logging to console instead of a File. Its very easy
     to pipe console output to a file and most organizations already
@@ -15,10 +18,11 @@
     <appender name="OUTPUT" class="ch.qos.logback.core.ConsoleAppender">
         <!-- encoders are  by default assigned the type
              ch.qos.logback.classic.encoder.PatternLayoutEncoder -->
-<!--        <withJansi>true</withJansi>-->
+        <!--        <withJansi>true</withJansi>-->
         <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
             <charset>UTF-8</charset>
-            <pattern>%gray([%d{yyyy-MM-dd HH:mm:ss.SSS}]) [%highLightThread(%thread)/%highLightLogLevel(%level)] %blue(\(%logger{36}\)): %highLightLogLevel(%msg%n)</pattern>
+            <pattern>%gray([%d{yyyy-MM-dd HH:mm:ss.SSS}]) [%highLightThread(%thread)/%highLightLogLevel(%level)] %blue(\(%logger{36}\)): %highLightLogLevel(%msg%n)
+            </pattern>
         </encoder>
     </appender>
 
@@ -28,9 +32,35 @@
     <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>${LOG_ROOT}/${LOG_FILE_NAME}.log</file>
         <append>false</append>
-        
+
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
             <FileNamePattern>${LOG_ROOT}/${LOG_FILE_NAME}-%d{yyyy-MM-dd}-%i.log.zip</FileNamePattern>
+            <!-- each archived file's size will be max 10MB -->
+            <maxFileSize>10MB</maxFileSize>
+            <!-- days to keep -->
+            <maxHistory>7</maxHistory>
+            <!-- total size of all archive files, if total size > 100GB, it will delete old archived file -->
+            <totalSizeCap>10GB</totalSizeCap>
+        </rollingPolicy>
+
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <charset>UTF-8</charset>
+            <pattern>[%d{yyyy-MM-dd HH:mm:ss.SSS}] [%thread/%level] \(%logger{36}\): %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="ERRORFILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_ROOT}/${LOG_ERROR_FILE_NAME}.log</file>
+        <append>false</append>
+
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>ERROR</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
+        </filter>
+
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <FileNamePattern>${LOG_ROOT}/${LOG_ERROR_FILE_NAME}-%d{yyyy-MM-dd}-%i.log.zip</FileNamePattern>
             <!-- each archived file's size will be max 10MB -->
             <maxFileSize>10MB</maxFileSize>
             <!-- days to keep -->
@@ -74,6 +104,7 @@
         <appender-ref ref="ASYNC"/>
         <appender-ref ref="GUI"/>
         <appender-ref ref="FILE"/>
+        <appender-ref ref="ERRORFILE"/>
     </root>
 
     <logger name="io.github.t2penbix99wcoxkv3a4g.tonsign.test" level="debug"/>

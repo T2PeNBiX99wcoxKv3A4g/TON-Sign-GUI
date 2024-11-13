@@ -5,49 +5,49 @@ import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.i18n
 
 object RoundTypeConvert {
     val ENRoundTypes: List<String> = listOf(
-        "Classic",
-        "Fog",
-        "Punished",
-        "Sabotage",
-        "Among Us",
-        "Cracked",
-        "Alternate",
-        "Bloodbath",
-        "Midnight",
-        "Mystic Moon",
-        "Twilight",
-        "Solstice",
-        "8 Pages",
-        "Blood Moon",
-        "Run",
-        "Cold Night",
-        "Unbound",
-        "Double Trouble",
-        "Ghost",
-        "Custom"
+        "Classic",// 1
+        "Fog",// 2
+        "Punished",// 3
+        "Sabotage",// 4
+        "Among Us",// 5
+        "Cracked",// 6
+        "Alternate",// 7
+        "Bloodbath",// 8
+        "Midnight",// 9
+        "Mystic Moon",// 10
+        "Twilight",// 11
+        "Solstice",// 12
+        "8 Pages",// 13
+        "Blood Moon",// 14
+        "Run",// 15
+        "Cold Night",// 16
+        "Unbound",// 17
+        "Double Trouble",// 18
+        "Ghost",// 19
+        "Custom"// 20
     )
 
     val JPRoundTypes: List<String> = listOf(
-        "クラシック",
-        "霧",
-        "パニッシュ",
-        "サボタージュ",
-        "アモングアス",
-        "狂気",
-        "オルタネイト",
-        "ブラッドバス",
-        "ミッドナイト",
-        "ミスティックムーン",
-        "トワイライト",
-        "ソルスティス",
-        "8ページ",
-        "ブラッドムーン",
-        "走れ！",
-        "冷たい夜",
-        "アンバウンド",
-        "ダブル・トラブル",
-        "ゴースト",
-        "カスタム"
+        "クラシック",// 1
+        "霧",// 2
+        "パニッシュ",// 3
+        "サボタージュ",// 4
+        "アモングアス",// 5
+        "狂気",// 6
+        "オルタネイト",// 7
+        "ブラッドバス",// 8
+        "ミッドナイト",// 9
+        "ミスティックムーン",// 10
+        "トワイライト",// 11
+        "ソルスティス",// 12
+        "8ページ",// 13
+        "ブラッドムーン",// 14
+        "走れ！",// 15
+        "冷たい夜",// 16
+        "アンバウンド",// 17
+        "ダブル・トラブル",// 18
+        "ゴースト",// 19
+        "カスタム"// 20
     )
 
     val ExemptRounds: List<RoundType> = listOf(

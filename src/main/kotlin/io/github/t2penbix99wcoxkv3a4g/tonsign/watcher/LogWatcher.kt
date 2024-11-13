@@ -244,18 +244,22 @@ class LogWatcher(logFile: File) {
     private fun updateRoundLog(round: RoundType) {
         var classification = round.classifyRound()
 
-        if (classification == GuessRoundType.Exempt && roundLog.size >= 2) {
-            val last = roundLog.takeLast(2)
-            when {
-                last[0] == GuessRoundType.Classic && last[1] == GuessRoundType.Classic -> classification =
-                    GuessRoundType.Special
+        if (classification == GuessRoundType.Exempt) {
+            if (roundLog.size >= 2) {
+                val last = roundLog.takeLast(2)
+                when {
+                    last[0] == GuessRoundType.Classic && last[1] == GuessRoundType.Classic -> classification =
+                        GuessRoundType.Special
 
-                last[0] == GuessRoundType.Classic && last[1] == GuessRoundType.Special -> classification =
-                    GuessRoundType.Classic
+                    last[0] == GuessRoundType.Classic && last[1] == GuessRoundType.Special -> classification =
+                        GuessRoundType.Classic
 
-                last[0] == GuessRoundType.Special && last[1] == GuessRoundType.Classic -> classification =
-                    if (isAlternatePattern()) GuessRoundType.Special else GuessRoundType.Classic
+                    last[0] == GuessRoundType.Special && last[1] == GuessRoundType.Classic -> classification =
+                        if (isAlternatePattern()) GuessRoundType.Special else GuessRoundType.Classic
+                }
             }
+            else
+                classification = GuessRoundType.Classic
         }
 
         roundLog.add(classification)
