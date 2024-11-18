@@ -2,7 +2,6 @@ package io.github.t2penbix99wcoxkv3a4g.tonsign.ex
 
 import com.charleskorn.kaml.*
 import io.github.t2penbix99wcoxkv3a4g.tonsign.Utils
-import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.logic.model.RoundData
 import java.io.File
 import kotlin.reflect.KClass
 import kotlin.reflect.KMutableProperty1
@@ -73,18 +72,7 @@ inline fun <reified T> Yaml.safeDecodeFromFile(
                         val classifier = returnType.classifier!!
                         val kClass = classifier as KClass<*>
 
-                        if (default is RoundData) {
-                            list.forEach {
-//                                it.key
-                            }
-                        } else {
-                            list.forEach {
-//                                it.yamlScalar
-//                                it.yamlMap
-                            }
-
-                            TODO("Not finish")
-                        }
+                        TODO("Not finish")
                     }
 
                     is YamlNull -> TODO("Not finish")

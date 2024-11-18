@@ -1,6 +1,7 @@
 package io.github.t2penbix99wcoxkv3a4g.tonsign.interpreter
 
-import io.github.t2penbix99wcoxkv3a4g.tonsign.event.EventArg
+import io.github.t2penbix99wcoxkv3a4g.tonsign.event.EventBus
+import io.github.t2penbix99wcoxkv3a4g.tonsign.event.OnReadLogEvent
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ex.firstPath
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ex.lastPath
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ex.middlePath
@@ -20,9 +21,7 @@ class LogInterpreter(private val logFile: File) {
         private const val ERROR_KEYWORD = "Error"
         private const val EXCEPTION_KEYWORD = "Exception"
     }
-
-    val onReadLogEvent = EventArg<LogEvent>()
-
+    
     private var lastPosition = 0L
     private val logs = mutableListOf<LogEvent>()
     private val lastLog: LogEvent?
@@ -61,7 +60,7 @@ class LogInterpreter(private val logFile: File) {
                         .atZone(ZoneId.systemDefault())
 
                 if (logs.size > 1)
-                    onReadLogEvent(lastLog!!)
+                    EventBus.publish(OnReadLogEvent(lastLog!!))
 
                 if (msgPath[0] == '[') {
                     val name = line.middlePath('[', ']').trim()

@@ -3,7 +3,9 @@ package io.github.t2penbix99wcoxkv3a4g.tonsign.manager
 import com.charleskorn.kaml.Yaml
 import io.github.t2penbix99wcoxkv3a4g.tonsign.Utils
 import io.github.t2penbix99wcoxkv3a4g.tonsign.coroutineScope.ConfigScope
-import io.github.t2penbix99wcoxkv3a4g.tonsign.event.EventArg
+import io.github.t2penbix99wcoxkv3a4g.tonsign.event.EventBus
+import io.github.t2penbix99wcoxkv3a4g.tonsign.event.OnConfigLoadedEvent
+import io.github.t2penbix99wcoxkv3a4g.tonsign.event.OnConfigStartSaveEvent
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ex.safeDecodeFromFile
 import io.github.t2penbix99wcoxkv3a4g.tonsign.logger.Logger
 import kotlinx.coroutines.delay
@@ -13,7 +15,6 @@ import kotlin.io.path.Path
 
 object ConfigManager {
     private const val FILE_NAME = "config.yml"
-    private val scope = ConfigScope()
     private val filePath = Path(Utils.currentWorkingDirectory, FILE_NAME)
     private val fileBakPath = Path(Utils.currentWorkingDirectory, "$FILE_NAME.bak")
 
@@ -28,9 +29,6 @@ object ConfigManager {
         autoScrollToDown = true,
         onTop = false
     )
-
-    val onLoadedEvent = EventArg<Config>()
-    val onStartSaveEvent = EventArg<Config>()
 
     private var _config: Config? = null
     val config: Config
@@ -51,12 +49,12 @@ object ConfigManager {
     init {
         load()
 
-        scope.launch {
+        ConfigScope.launch {
             autoSave()
         }
     }
 
-    fun load() {
+    private fun load() {
         _config = Yaml.default.safeDecodeFromFile<Config>(file, Default.copy(), {
             val text = "exception.config_load_error".i18nByLang("en", it.message ?: "Unknown")
             Utils.logger.error(it) { "[${this::class.simpleName!!}] $text" }
@@ -65,11 +63,11 @@ object ConfigManager {
             renameFile()
         }
         save()
-        onLoadedEvent(config)
+        EventBus.publish(OnConfigLoadedEvent(config))
     }
 
     fun save() {
-        onStartSaveEvent(config)
+        EventBus.publish(OnConfigStartSaveEvent(config))
         file.writeText(Yaml.default.encodeToString(Config.serializer(), config))
     }
 

@@ -1,26 +1,100 @@
 import io.github.t2penbix99wcoxkv3a4g.tonsign.roundType.RoundType;
+import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.logic.model.PlayerData;
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.logic.model.WonOrLost;
-import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.view.TableHeader;
 import kotlin.Boolean;
-import kotlin.Long;
+import kotlin.Int;
+import kotlin.collections.ArrayList;
+import kotlin.collections.MutableList;
 
 CREATE TABLE roundData (
-    time INTEGER NOT NULL,
+    time INTEGER PRIMARY KEY NOT NULL,
     roundType INTEGER AS RoundType NOT NULL,
     map TEXT NOT NULL,
-    mapId INTEGER NOT NULL,
+    mapId INTEGER AS Int NOT NULL,
     roundTime INTEGER NOT NULL,
     playerTime INTEGER NOT NULL,
---     players as json
--- terrors as json
-    isDeath INTEGER AS Boolean DEFAULT 0,
-    isWon INTEGER AS WonOrLost DEFAULT 0
+    players TEXT AS MutableList<PlayerData> NOT NULL,
+    terrors TEXT AS ArrayList<Int> NOT NULL,
+    isDeath INTEGER AS Boolean NOT NULL,
+    isWon INTEGER AS WonOrLost NOT NULL
 );
 
 selectAll:
 SELECT *
 FROM roundData;
 
+selectLast:
+SELECT MAX(time)
+FROM roundData;
+
+selectOfTime:
+SELECT *
+FROM roundData
+WHERE time == (?);
+
+selectOfRoundType:
+SELECT *
+FROM roundData
+WHERE roundType == (?);
+
+selectOfMap:
+SELECT *
+FROM roundData
+WHERE map == (?);
+
+selectOfMapId:
+SELECT *
+FROM roundData
+WHERE mapId == (?);
+
+getPlayers:
+SELECT players
+FROM roundData
+WHERE time == (?);
+
+getAllPlayers:
+SELECT players
+FROM roundData;
+
+getTerrors:
+SELECT terrors
+FROM roundData
+WHERE time == (?);
+
+getAllTerrors:
+SELECT terrors
+FROM roundData;
+
+updateIsWon:
+UPDATE roundData
+SET isWon = (?)
+WHERE time == (?);
+
+updateIsDeath:
+UPDATE roundData
+SET isDeath = (?)
+WHERE time == (?);
+
+updateRoundTime:
+UPDATE roundData
+SET roundTime = (?)
+WHERE time == (?);
+
+updatePlayerTime:
+UPDATE roundData
+SET playerTime = (?)
+WHERE time == (?);
+
+updatePlayers:
+UPDATE roundData
+SET players = (?)
+WHERE time == (?);
+
+updateTerrors:
+UPDATE roundData
+SET terrors = (?)
+WHERE time == (?);
+
 insert:
-INSERT INTO roundData(time, roundType, map, mapId, roundTime, playerTime, isDeath, isWon)
+INSERT OR REPLACE INTO roundData(time, roundType, map, mapId, roundTime, playerTime, players, terrors, isDeath, isWon)
 VALUES ?;

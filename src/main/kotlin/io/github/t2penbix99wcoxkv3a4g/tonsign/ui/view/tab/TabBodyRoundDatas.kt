@@ -8,6 +8,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.OpenInNew
 import androidx.compose.material.icons.filled.History
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
@@ -22,23 +23,24 @@ import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.WindowPosition.Aligned
 import androidx.compose.ui.window.rememberWindowState
 import androidx.navigation.NavHostController
-import io.github.t2penbix99wcoxkv3a4g.tonsign.RoundTimerID
+import io.github.t2penbix99wcoxkv3a4g.tonsign.EventHandle
+import io.github.t2penbix99wcoxkv3a4g.tonsign.data.RoundData
+import io.github.t2penbix99wcoxkv3a4g.tonsign.event.*
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ex.swapList
-import io.github.t2penbix99wcoxkv3a4g.tonsign.isInWorld
-import io.github.t2penbix99wcoxkv3a4g.tonsign.lastTime
+import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.SaveManager
 import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.TimerManager
 import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.i18n
 import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.i18nState
-import io.github.t2penbix99wcoxkv3a4g.tonsign.roundDatas
 import io.github.t2penbix99wcoxkv3a4g.tonsign.roundType.RoundTypeConvert
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.logWatcher
-import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.logic.model.*
+import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.logic.model.PlayerData
+import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.logic.model.PlayerStatus
+import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.logic.model.Terrors
+import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.logic.model.WonOrLost
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.theme.CupcakeEXTheme
-import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.view.SearchButton
-import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.view.playerUrl
+import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.view.*
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.view.tab.tray.TrayItem
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.view.tab.tray.TrayRoundDatas
-import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.view.tableView
 import kotlin.time.DurationUnit
 import kotlin.time.toDuration
 
@@ -61,18 +63,66 @@ class TabBodyRoundDatas : TabBodyBase() {
     internal val internalIsOnTop = mutableStateOf(false)
 
     private val roundData: MutableState<RoundData?> = mutableStateOf(null)
+    private val roundDatas = mutableStateListOf<RoundData>()
+    private val queries = SaveManager.database.saveQueries
 
     @Composable
     override fun icon() {
         Icon(Icons.Default.History, contentDescription = title.i18n())
     }
 
+    init {
+        refresh()
+        EventBus.register(this)
+    }
+
+    private fun refresh() {
+        roundDatas.swapList(queries.selectAll().executeAsList())
+    }
+    
+    @Subscribe("OnRoundOver")
+    private fun onRoundOver(event: OnRoundOverEvent) = refresh()
+    
+    @Subscribe("OnRoundStart")
+    private fun onRoundStart(event: OnRoundStartEvent) = refresh()
+    
+    @Subscribe("OnRoundLost")
+    private fun onRoundLost(event: OnRoundLostEvent) = refresh()
+    
+    @Subscribe("OnRoundDeath")
+    private fun onRoundDeath(event: OnRoundDeathEvent) = refresh()
+    
+    @Subscribe("OnRoundWon")
+    private fun onRoundWon(event: OnRoundWonEvent) = refresh()
+    
+    @Subscribe("OnKillerSet")
+    private fun onKillterSet(event: OnKillerSetEvent) = refresh()
+    
+    @Subscribe("OnHideTerrorShowUp")
+    private fun onHideTerrorShowUp(event: OnHideTerrorShowUpEvent) = refresh()
+    
+    @Subscribe("OnPlayerLeftRoom")
+    private fun onPlayerLeftRoom(event: OnPlayerLeftRoomEvent) = refresh()
+    
+    @Subscribe("OnLeftTON")
+    private fun onLeftTON(event: OnLeftTONEvent) = refresh()
+    
+    @Subscribe("OnJoinTON")
+    private fun onJoinTON(event: OnJoinTONEvent) = refresh()
+
     @Composable
     override fun view(navController: NavHostController, padding: PaddingValues) {
         val roundData: MutableState<RoundData?> = remember { roundData }
         var isOnTop by remember { internalIsOnTop }
 
+        SideEffect {
+            refresh()
+        }
+
         val searchButtons = listOf(
+            SearchButton({
+                refresh()
+            }, Icons.Default.Refresh, "refresh"),
             SearchButton({
                 isOnTop = true
             }, Icons.AutoMirrored.Filled.OpenInNew, "IsOnTop")
@@ -80,9 +130,13 @@ class TabBodyRoundDatas : TabBodyBase() {
 
         tableView(
             roundData, roundDatas, searchButtons,
+            filter = listOf(
+                TimeValue("time"),
+                RoundTypeValue("roundType")
+            ),
             onRowSelection = {
                 roundData.value = it
-            },
+            }
         )
     }
 
@@ -102,19 +156,18 @@ class TabBodyRoundDatas : TabBodyBase() {
 
     @Composable
     override fun detailView(navController: NavHostController, padding: PaddingValues) {
-        val roundData: MutableState<RoundData?> = remember { roundData }
-        if (roundData.value == null)
+        val roundDataTry: MutableState<RoundData?> = remember { roundData }
+        if (roundDataTry.value == null)
             return
 
-        val roundDataGet = roundData.value!!
-        val roundDetail = roundDataGet.roundDetail
-        val terrors = Terrors(roundDetail.terrors, roundDataGet.roundType)
+        val roundData = roundDataTry.value!!
+        val terrors = Terrors(roundData.terrors, roundData.roundType)
         val scrollState = rememberScrollState()
         val youDeath by "gui.text.round_datas.you_death".i18nState()
         val youAlive by "gui.text.round_datas.you_alive".i18nState()
 
-        val textTime by mutableStateOf(roundDetail.time)
-        val realTime by mutableStateOf(TimerManager.get(RoundTimerID))
+        val textTime by mutableStateOf(roundData.roundTime)
+        val realTime by mutableStateOf(TimerManager.get(EventHandle.ROUND_TIMER_ID))
         val time = if (textTime < 0) realTime else textTime
         val duration = time.toDuration(DurationUnit.MILLISECONDS)
         val hours = duration.inWholeHours
@@ -129,7 +182,7 @@ class TabBodyRoundDatas : TabBodyBase() {
         val secondsText = seconds.toString().padStart(2, '0')
         val milliSecondsText = milliSeconds.toString().padStart(2, '0')
 
-        val playerTime by mutableStateOf(roundDetail.playerTime)
+        val playerTime by mutableStateOf(roundData.playerTime)
         val playerDuration = playerTime.toDuration(DurationUnit.MILLISECONDS)
         val playerHours = playerDuration.inWholeHours
         val playerMinutes = playerDuration.minus(playerHours.toDuration(DurationUnit.HOURS)).inWholeMinutes
@@ -148,15 +201,15 @@ class TabBodyRoundDatas : TabBodyBase() {
                 Modifier.fillMaxSize().padding(10.dp).verticalScroll(scrollState),
                 verticalArrangement = Arrangement.Top
             ) {
-                Text(roundDetail.map)
-                Text(RoundTypeConvert.getTextOfRound(roundDataGet.roundType))
+                Text(roundData.map)
+                Text(RoundTypeConvert.getTextOfRound(roundData.roundType))
 
-                if (roundDetail.isDeath)
+                if (roundData.isDeath)
                     Text(youDeath)
                 else
                     Text(youAlive)
 
-                when (roundDetail.isWon) {
+                when (roundData.isWon) {
                     WonOrLost.UnKnown -> Text("gui.text.round_datas.unknown".i18n())
                     WonOrLost.Won -> Text("gui.text.round_datas.player_won".i18n())
                     WonOrLost.Lost -> Text("gui.text.round_datas.player_lost".i18n())
@@ -183,15 +236,15 @@ class TabBodyRoundDatas : TabBodyBase() {
                     }
                 }
 
-                if (roundDetail.players.isNotEmpty())
+                if (roundData.players.isNotEmpty())
                     Text(
                         "gui.text.round_datas.players".i18n(
-                            roundDetail.players.filter { it.status == PlayerStatus.Alive }.size,
-                            roundDetail.players.size
+                            roundData.players.filter { it.status == PlayerStatus.Alive }.size,
+                            roundData.players.size
                         )
                     )
                 Column(Modifier.padding(10.dp)) {
-                    roundDetail.players.forEach {
+                    roundData.players.forEach {
                         Box(
                             Modifier.fillMaxWidth()
                                 .background(Color(0, 0, 0, 40))
@@ -221,12 +274,6 @@ class TabBodyRoundDatas : TabBodyBase() {
 
         if (!isOnTop) return
 
-        val isInWorld by isInWorld
-        var lastTime by mutableStateOf(lastTime)
-
-        if (lastTime !in roundDatas && roundDatas.isNotEmpty())
-            lastTime = roundDatas.maxOf { it.key }
-
         Window(
             onCloseRequest = { isOnTop = false },
             visible = true,
@@ -235,26 +282,28 @@ class TabBodyRoundDatas : TabBodyBase() {
             alwaysOnTop = true
         ) {
             CupcakeEXTheme {
-                if (roundDatas.isEmpty() || lastTime !in roundDatas) return@CupcakeEXTheme
+                val isInWorld by remember { EventHandle.isInWorld }
+                val lastTime by remember { mutableStateOf(EventHandle.lastTime) }
+                val roundData = queries.selectOfTime(lastTime).executeAsOneOrNull()
 
-                val roundData by mutableStateOf(roundDatas[lastTime]!!)
-                val roundDetail by mutableStateOf(roundData.roundDetail)
+                if (roundDatas.isEmpty() || roundData == null) return@CupcakeEXTheme
+
                 val players = remember { mutableStateListOf<PlayerData>() }
 
-                players.swapList(roundDetail.players)
+                players.swapList(roundData.players)
 
                 val terrorsList = remember { mutableStateListOf<Int>() }
 
-                terrorsList.swapList(roundDetail.terrors)
+                terrorsList.swapList(roundData.terrors)
 
                 val roundType by mutableStateOf(roundData.roundType)
                 val terrors by mutableStateOf(Terrors(terrorsList, roundType))
                 val scrollState = rememberScrollState()
                 val youDeath by "gui.text.round_datas.you_death".i18nState()
                 val youAlive by "gui.text.round_datas.you_alive".i18nState()
-                val map by mutableStateOf(roundDetail.map)
-                val isDeath by mutableStateOf(roundDetail.isDeath)
-                val isWon by mutableStateOf(roundDetail.isWon)
+                val map by mutableStateOf(roundData.map)
+                val isDeath by mutableStateOf(roundData.isDeath)
+                val isWon by mutableStateOf(roundData.isWon)
                 val terrorsNames = remember { mutableStateListOf<String>() }
 
                 terrorsNames.swapList(terrors.names)
@@ -271,8 +320,8 @@ class TabBodyRoundDatas : TabBodyBase() {
                 val terrorsText by "gui.text.round_datas.terrors".i18nState(terrorsNames.size)
                 val notInTon by "gui.text.round_datas.not_in_ton".i18nState(terrorsNames.size)
 
-                val textTime by mutableStateOf(roundDetail.time)
-                val realTime by mutableStateOf(TimerManager.get(RoundTimerID))
+                val textTime by mutableStateOf(roundData.roundTime)
+                val realTime by mutableStateOf(TimerManager.get(EventHandle.ROUND_TIMER_ID))
                 val time = if (textTime < 0) realTime else textTime
                 val duration = time.toDuration(DurationUnit.MILLISECONDS)
                 val hours = duration.inWholeHours
@@ -287,7 +336,7 @@ class TabBodyRoundDatas : TabBodyBase() {
                 val secondsText = seconds.toString().padStart(2, '0')
                 val milliSecondsText = milliSeconds.toString().padStart(2, '0')
 
-                val playerTime by mutableStateOf(roundDetail.playerTime)
+                val playerTime by mutableStateOf(roundData.playerTime)
                 val playerDuration = playerTime.toDuration(DurationUnit.MILLISECONDS)
                 val playerHours = playerDuration.inWholeHours
                 val playerMinutes = playerDuration.minus(playerHours.toDuration(DurationUnit.HOURS)).inWholeMinutes

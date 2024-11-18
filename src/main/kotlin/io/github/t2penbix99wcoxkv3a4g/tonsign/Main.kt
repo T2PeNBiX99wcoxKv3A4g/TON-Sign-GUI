@@ -12,12 +12,8 @@ import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Tray
-import androidx.compose.ui.window.TrayState
-import androidx.compose.ui.window.Window
+import androidx.compose.ui.window.*
 import androidx.compose.ui.window.WindowPosition.Aligned
-import androidx.compose.ui.window.application
-import androidx.compose.ui.window.rememberWindowState
 import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.ConfigManager
 import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.i18nByLang
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.app
@@ -33,11 +29,11 @@ internal val needRefresh = mutableStateOf(false)
 internal val needRestart = mutableStateOf(false)
 
 fun main() = application {
-    var isOpen by remember { isOpen }
+    val isOpen by remember { isOpen }
     var isAskingToClose by remember { isAskingToClose }
     var isVisible by remember { mutableStateOf(true) }
     var needRefresh by remember { needRefresh }
-    var needRestart by remember { needRestart }
+    val needRestart by remember { needRestart }
     val windowState =
         rememberWindowState(position = Aligned(alignment = Alignment.Center), size = DpSize(800.dp, 600.dp))
     val refreshWindowState =
@@ -67,9 +63,9 @@ fun main() = application {
                     if (!gui.enabled) return@forEach
                     if (gui.trays.isNotEmpty()) {
                         Menu(gui.title.i18nByLang("en")) {
-                            gui.trays.forEach {
-                                Item(it.label.i18nByLang("en"), enabled = it.isEnabled) {
-                                    it.onClick(gui)
+                            gui.trays.forEach { item ->
+                                Item(item.label.i18nByLang("en"), enabled = item.isEnabled) {
+                                    item.onClick(gui)
                                 }
                             }
                         }
@@ -116,7 +112,7 @@ fun main() = application {
         SelectionState.entries.forEach {
             val gui = it.gui
             if (!gui.enabled) return@forEach
-            var isOnTop by remember { gui.isOnTop }
+            val isOnTop by remember { gui.isOnTop }
 
             if (isOnTop) {
                 gui.topMenu()

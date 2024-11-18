@@ -6,7 +6,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlin.coroutines.CoroutineContext
 
-class ConfigScope : CoroutineScope {
+object ConfigScope : CoroutineScope {
     override val coroutineContext: CoroutineContext
         get() = Job() + Dispatchers.IO + CoroutineName("Config")
 }

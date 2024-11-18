@@ -4,13 +4,7 @@ package io.github.t2penbix99wcoxkv3a4g.tonsign.ui.view
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -18,19 +12,8 @@ import androidx.compose.material.icons.filled.Key
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
-import androidx.compose.material3.Checkbox
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Switch
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
@@ -45,13 +28,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.logic.model.PlayerData
-import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.view.tab.TabBodyBase
-import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.view.tab.TabBodyLogin
-import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.view.tab.TabBodyLogs
-import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.view.tab.TabBodyMain
-import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.view.tab.TabBodyRoundDatas
-import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.view.tab.TabBodySetting
-import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.view.tab.TabBodyVRChatLogs
+import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.view.tab.*
 
 enum class SelectionState(val gui: TabBodyBase) {
     Main(TabBodyMain()),
@@ -155,6 +132,23 @@ fun updateSortingStates(
     sortingStates.value = newMap
 }
 
+fun updateSortingStates(
+    sortingStates: MutableState<Map<TableValue, MutableState<SortingState>>>,
+    tableValue: TableValue
+) {
+    val newMap = sortingStates.value
+    when (sortingStates.value[tableValue]!!.value) {
+        SortingState.ASC -> newMap[tableValue]!!.value = SortingState.DESC
+        SortingState.DESC -> newMap[tableValue]!!.value = SortingState.NONE
+        SortingState.NONE -> newMap[tableValue]!!.value = SortingState.ASC
+    }
+    sortingStates.value.filter { it.key != tableValue }.forEach {
+        newMap[it.key]!!.value = SortingState.NONE
+    }
+
+    sortingStates.value = newMap
+}
+
 fun playerUrl(player: PlayerData): String {
     return "https://vrchat.com/home/user/${player.id}"
 }
@@ -169,6 +163,16 @@ fun worldUrl(world: String): String {
 
 inline fun <reified T : Any> sort(t: T, tableHeader: TableHeader): String {
     val filterCriterion = t::class.members.first { f -> f.annotations.any { a -> a == tableHeader } }
+    val call = filterCriterion.call(t)
+    return if (call != null) {
+        "$call"
+    } else {
+        ""
+    }
+}
+
+inline fun <reified T : Any> sort(t: T, tableValue: TableValue): String {
+    val filterCriterion = t::class.members.first { f -> f.name == tableValue.name }
     val call = filterCriterion.call(t)
     return if (call != null) {
         "$call"

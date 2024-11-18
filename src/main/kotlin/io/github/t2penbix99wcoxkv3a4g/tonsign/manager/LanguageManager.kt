@@ -9,19 +9,18 @@ import com.charleskorn.kaml.YamlMap
 import com.charleskorn.kaml.YamlScalar
 import com.charleskorn.kaml.yamlMap
 import io.github.t2penbix99wcoxkv3a4g.tonsign.Utils
-import io.github.t2penbix99wcoxkv3a4g.tonsign.coroutineScope.LanguageScope
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ex.firstPath
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ex.sha256
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ex.toFile
 import io.github.t2penbix99wcoxkv3a4g.tonsign.exception.FolderNotFoundException
 import io.github.t2penbix99wcoxkv3a4g.tonsign.logger.Logger
+import java.io.File
 import kotlin.io.path.Path
 
 object LanguageManager {
     private const val DIR = "language"
     private const val YML = ".yml"
     private const val SHA256 = ".sha256"
-    private val scope = LanguageScope()
     private val dataBase = mutableMapOf<String, YamlMap>()
     private val states = mutableMapOf<String, MutableState<String>>()
     private val langState = mutableStateOf("")
@@ -36,7 +35,8 @@ object LanguageManager {
     val lang: MutableState<String>
         get() = langState
 
-    val dir = Path(Utils.currentWorkingDirectory, DIR).toFile()
+    @Suppress("MemberVisibilityCanBePrivate")
+    val dir: File = Path(Utils.currentWorkingDirectory, DIR).toFile()
 
     init {
         checkDir()
@@ -44,7 +44,7 @@ object LanguageManager {
         load()
     }
 
-    fun checkDir() {
+    private fun checkDir() {
         if (!dir.exists())
             dir.mkdir()
         
@@ -57,7 +57,7 @@ object LanguageManager {
         }
     }
 
-    fun updateLanguage() {
+    private fun updateLanguage() {
         if (!dir.exists()) return
         
         internalLanguageList.forEach {
@@ -76,7 +76,7 @@ object LanguageManager {
         }
     }
 
-    fun load() {
+    private fun load() {
         runCatching {
             if (!dir.exists()) {
                 Logger.error(
@@ -86,7 +86,7 @@ object LanguageManager {
                 )
                 return
             }
-            dir.listFiles { file, filename -> filename.endsWith(YML) }.forEach {
+            dir.listFiles { _, filename -> filename.endsWith(YML) }?.forEach {
                 val data = Yaml.default.parseToYamlNode(it.readText())
                 val langID = it.name.firstPath('.')
 
@@ -108,6 +108,7 @@ object LanguageManager {
 
     fun exists(lang: String, text: String) = lang in dataBase && dataBase[lang]!!.get<YamlScalar>(text) != null
 
+    @Suppress("MemberVisibilityCanBePrivate")
     fun existsLanguage(lang: String) = lang in dataBase
 
     fun getByLang(lang: String, text: String): String {

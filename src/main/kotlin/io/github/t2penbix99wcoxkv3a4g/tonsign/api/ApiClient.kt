@@ -15,12 +15,7 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
-import okhttp3.Call
-import okhttp3.Callback
-import okhttp3.Credentials
-import okhttp3.OkHttpClient
-import okhttp3.Request
-import okhttp3.Response
+import okhttp3.*
 import java.io.IOException
 
 class ApiClient() {
@@ -42,7 +37,6 @@ class ApiClient() {
     private val authHeader = apiClient.getAuthentication("authHeader") as HttpBasicAuth
     private val twoFactorAuthCookie = apiClient.getAuthentication("twoFactorAuthCookie") as ApiKeyAuth
     private val apiInstance = SystemApi(apiClient)
-    private val scope = ApiScope()
 
     private var _config: JsonObject? = null
 
@@ -86,7 +80,7 @@ class ApiClient() {
         retryDelay: Long = 5000L,
         onResponse: (Response) -> Unit
     ) {
-        scope.launch {
+        ApiScope.launch {
             var needRetry = true
             var nowRetryTime = 0
 
@@ -139,7 +133,7 @@ class ApiClient() {
 
     fun login(username: String, password: String) {
         if (clientApiKey.isNullOrEmpty()) return
-        scope.launch {
+        ApiScope.launch {
             val credential = Credentials.basic(username, password)
             val url = "$BASE_URL/auth/user"
 //            ApiCookieHelper.setCookie(url, "auth", clientApiKey!!)

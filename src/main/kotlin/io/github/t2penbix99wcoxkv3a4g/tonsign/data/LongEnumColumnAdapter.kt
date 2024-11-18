@@ -7,7 +7,3 @@ class LongEnumColumnAdapter<T : Enum<T>>(private val enumValues: Array<out T>) :
 
     override fun encode(value: T) = value.ordinal.toLong()
 }
-
-inline fun <reified T : Enum<T>> LongEnumColumnAdapter(): LongEnumColumnAdapter<T> {
-    return LongEnumColumnAdapter(enumValues())
-}

@@ -76,6 +76,7 @@ dependencies {
     implementation("com.squareup.okhttp3:logging-interceptor")
 
     implementation("app.cash.sqldelight:sqlite-driver:${property("sqldelight.version")}")
+    implementation("app.cash.sqldelight:primitive-adapters:${property("sqldelight.version")}")
 }
 
 sourceSets {

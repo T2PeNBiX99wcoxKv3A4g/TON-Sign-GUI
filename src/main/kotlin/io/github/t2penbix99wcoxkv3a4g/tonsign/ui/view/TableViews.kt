@@ -68,10 +68,9 @@ inline fun <reified T : Any> tableView(
     }
 
     val search = remember { mutableStateOf("") }
-    val tableContent = remember { content }
     val tabContent = remember { mutableStateListOf<T>() }
 
-    tabContent.swapList(tableContent)
+    tabContent.swapList(content)
 
     if (search.value.isNotEmpty())
         searchFilter(tabContent, fields, search)
@@ -124,6 +123,76 @@ inline fun <reified T : Any> tableView(
 @Composable
 inline fun <reified T : Any> tableView(
     currentItem: MutableState<T?>,
+    content: SnapshotStateList<T>,
+    searchButtons: List<SearchButton>,
+    indexColumn: Boolean = false,
+    indexColWidth: Dp = 30.dp,
+    filter: List<TableValue>,
+    noinline onRowSelection: (T) -> Unit
+) {
+    @Suppress("NAME_SHADOWING")
+    val filter by remember { mutableStateOf(filter) }
+    val fields = T::class.members.filter {
+        filter.any { a -> a.name == it.name }
+    }.sortedBy {
+        val value = filter.find { a -> a.name == it.name }
+        value?.columnIndex ?: 0
+    }
+
+    val search = remember { mutableStateOf("") }
+    val tabContent = remember { mutableStateListOf<T>() }
+
+    tabContent.swapList(content)
+
+    if (search.value.isNotEmpty())
+        searchFilter(tabContent, fields, search)
+
+    val onContentUpdate: (String) -> Unit = {
+        search.value = it
+        searchFilter(tabContent, fields, search)
+    }
+
+    Column(
+        Modifier.fillMaxWidth()
+    ) {
+        searchField(search.value, onContentUpdate, searchButtons)
+
+        val filterList = filter
+            .filter { it.columnIndex >= 0 }
+
+        val stateMap = filterList.associateWith { mutableStateOf(SortingState.NONE) }
+        val sortingStates = remember { mutableStateOf(stateMap) }
+
+        val onSortingUpdate: (TableValue, SortingState) -> Unit = { tableValue, sortingState ->
+            val sortedList: List<T> = when (sortingState) {
+                SortingState.ASC -> {
+                    tabContent.sortedBy { t ->
+                        sort(t, tableValue)
+                    }
+                }
+
+                SortingState.DESC -> {
+                    tabContent.sortedByDescending { t ->
+                        sort(t, tableValue)
+                    }
+                }
+
+                else -> {
+                    tabContent
+                }
+            }
+
+            tabContent.swapList(sortedList)
+        }
+
+        tableValue(indexColumn, indexColWidth, filterList, sortingStates, onSortingUpdate)
+        tableContent(currentItem, tabContent, indexColumn, indexColWidth, filterList, onRowSelection)
+    }
+}
+
+@Composable
+inline fun <reified T : Any> tableView(
+    currentItem: MutableState<T?>,
     content: SnapshotStateMap<*, T>,
     searchButtons: List<SearchButton>,
     indexColumn: Boolean = false,
@@ -138,11 +207,9 @@ inline fun <reified T : Any> tableView(
     }
 
     val search = remember { mutableStateOf("") }
-    val tableContent = remember { content }
     val tabContent = remember { mutableStateListOf<T>() }
 
-    tabContent.clear()
-    tableContent.forEach { tabContent.add(it.value) }
+    tabContent.swapList(content)
 
     if (search.value.isNotEmpty())
         searchFilter(tabContent, fields, search)
@@ -343,12 +410,12 @@ fun searchField(
 }
 
 @Composable
-fun tableHeader(
+fun tableValue(
     indexColumn: Boolean,
     indexColWidth: Dp,
-    headerList: List<TableHeader>,
-    sortingStates: MutableState<Map<TableHeader, MutableState<SortingState>>>,
-    onSortingUpdate: (TableHeader, SortingState) -> Unit
+    filter: List<TableValue>,
+    sortingStates: MutableState<Map<TableValue, MutableState<SortingState>>>,
+    onSortingUpdate: (TableValue, SortingState) -> Unit
 ) {
     Card(modifier = Modifier.padding(5.dp).fillMaxWidth()) {
         Row(
@@ -368,7 +435,7 @@ fun tableHeader(
                     )
                 }
             }
-            headerList.forEach {
+            filter.forEach {
                 Row(
                     modifier = Modifier.fillMaxWidth().weight(1f).height(30.dp)
                         .clickable {
@@ -418,6 +485,81 @@ fun tableHeader(
 }
 
 @Composable
+fun tableHeader(
+    indexColumn: Boolean,
+    indexColWidth: Dp,
+    headerList: List<TableHeader>,
+    sortingStates: MutableState<Map<TableHeader, MutableState<SortingState>>>,
+    onSortingUpdate: (TableHeader, SortingState) -> Unit
+) {
+    Card(modifier = Modifier.padding(5.dp).fillMaxWidth()) {
+        Row(
+            modifier = Modifier.padding(3.dp).fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceEvenly
+        ) {
+            if (indexColumn) {
+                Row(
+                    modifier = Modifier.width(indexColWidth).height(30.dp),
+                    horizontalArrangement = Arrangement.SpaceEvenly,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "#",
+                        style = MaterialTheme.typography.labelLarge,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            }
+            headerList.forEach {
+                Row(
+                    modifier = Modifier.fillMaxWidth().weight(1f).height(30.dp)
+                        .clickable {
+                            updateSortingStates(sortingStates, it)
+                            onSortingUpdate(it, sortingStates.value[it]!!.value)
+                        },
+                    horizontalArrangement = Arrangement.SpaceEvenly,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    val headerText by it.headerText.i18nState()
+
+                    Text(
+                        text = headerText,
+                        style = MaterialTheme.typography.labelLarge,
+                        fontWeight = FontWeight.Bold
+                    )
+
+                    when (sortingStates.value[it]?.value) {
+                        SortingState.DESC -> {
+                            Icon(
+                                Icons.Filled.KeyboardArrowDown,
+                                contentDescription = "",
+                                modifier = Modifier.width(15.dp)
+                            )
+
+                            onSortingUpdate(it, sortingStates.value[it]!!.value)
+                        }
+
+                        SortingState.ASC -> {
+                            Icon(
+                                Icons.Filled.KeyboardArrowUp,
+                                contentDescription = "",
+                                modifier = Modifier.width(15.dp)
+                            )
+
+                            onSortingUpdate(it, sortingStates.value[it]!!.value)
+                        }
+
+                        else -> {
+                            // to be left empty
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
 inline fun <reified T> tableContent(
     currentItem: MutableState<T?>,
     tableContent: SnapshotStateList<T>,
@@ -434,6 +576,23 @@ inline fun <reified T> tableContent(
 }
 
 @Composable
+inline fun <reified T> tableContent(
+    currentItem: MutableState<T?>,
+    tableContent: SnapshotStateList<T>,
+    indexColumn: Boolean,
+    indexColWidth: Dp,
+    filter: List<TableValue>,
+    noinline onRowSelection: (T) -> Unit
+) {
+    LazyColumn {
+        items(items = tableContent) {
+            val rowIndex = tableContent.indexOf(it) + 1
+            tableRow(it, indexColumn, rowIndex, indexColWidth, onRowSelection, it == currentItem.value, filter)
+        }
+    }
+}
+
+@Composable
 inline fun <reified T> tableRow(
     item: T,
     indexColumn: Boolean,
@@ -442,7 +601,6 @@ inline fun <reified T> tableRow(
     noinline onRowSelection: (T) -> Unit,
     selected: Boolean
 ) {
-//    val color = if (selected) MaterialTheme.colors.primary else MaterialTheme.colors.background
     val color = if (selected) CardColors(
         containerColor = MaterialTheme.colorScheme.primaryContainer,
         contentColor = MaterialTheme.colorScheme.primary,
@@ -504,6 +662,88 @@ inline fun <reified T> tableRow(
 
                         when {
                             header.isTime && rc is Long -> {
+                                val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+                                val zone = Instant.ofEpochSecond(rc).atZone(ZoneId.systemDefault())
+                                Text(modifier = Modifier.padding(5.dp), text = zone.format(formatter))
+                            }
+
+                            rc is RoundType -> {
+                                Text(modifier = Modifier.padding(5.dp), text = rc.getTextOfRound())
+                            }
+
+                            else -> Text(modifier = Modifier.padding(5.dp), text = "$rc")
+                        }
+                    } else {
+                        Text(modifier = Modifier.padding(5.dp), text = "--")
+                    }
+                }
+                i++
+            }
+        }
+    }
+}
+
+@Composable
+inline fun <reified T> tableRow(
+    item: T,
+    indexColumn: Boolean,
+    rowIndex: Int,
+    indexColWidth: Dp,
+    noinline onRowSelection: (T) -> Unit,
+    selected: Boolean,
+    filters: List<TableValue>
+) {
+    val color = if (selected) CardColors(
+        containerColor = MaterialTheme.colorScheme.primaryContainer,
+        contentColor = MaterialTheme.colorScheme.primary,
+        disabledContentColor = MaterialTheme.colorScheme.surfaceContainer,
+        disabledContainerColor = MaterialTheme.colorScheme.surface
+    ) else CardColors(
+        containerColor = MaterialTheme.colorScheme.secondaryContainer,
+        contentColor = MaterialTheme.colorScheme.secondary,
+        disabledContentColor = MaterialTheme.colorScheme.surfaceContainer,
+        disabledContainerColor = MaterialTheme.colorScheme.surface
+    )
+    Card(
+        modifier = Modifier
+            .padding(3.dp)
+            .fillMaxWidth()
+            .clickable {
+                onRowSelection(item)
+            },
+        colors = color
+    ) {
+        Row(
+            horizontalArrangement = Arrangement.SpaceEvenly,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            if (indexColumn) {
+                Row(
+                    modifier = Modifier.width(indexColWidth),
+                    horizontalArrangement = Arrangement.SpaceEvenly,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(text = "$rowIndex")
+                }
+            }
+
+            val rowContent = item!!::class.members
+                .filter { filters.any { a -> a.name == it.name } }
+                .sortedBy { k ->
+                    val value = filters.find { a -> a.name == k.name }
+                    value?.columnIndex ?: 0
+                }
+                .map { t -> t.call(item) }
+
+            var i = 0
+
+            rowContent.forEach { rc ->
+                Box(modifier = Modifier.fillMaxWidth().weight(1f), contentAlignment = Alignment.Center) {
+                    if (rc != null && i < filters.size) {
+                        val filter = filters[i]
+
+                        when {
+                            filter.isTime && rc is Long -> {
                                 val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
                                 val zone = Instant.ofEpochSecond(rc).atZone(ZoneId.systemDefault())
                                 Text(modifier = Modifier.padding(5.dp), text = zone.format(formatter))

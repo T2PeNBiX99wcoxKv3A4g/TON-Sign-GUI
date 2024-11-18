@@ -5,7 +5,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 object TimerManager {
-    private val scope = TimerScope()
     private var mainTime = 0L
     private val times = mutableMapOf<String, Long>()
 
@@ -17,7 +16,7 @@ object TimerManager {
     }
 
     private fun startMainTime() {
-        scope.launch {
+        TimerScope.launch {
             while (true) {
                 mainTime++
                 delay(1)

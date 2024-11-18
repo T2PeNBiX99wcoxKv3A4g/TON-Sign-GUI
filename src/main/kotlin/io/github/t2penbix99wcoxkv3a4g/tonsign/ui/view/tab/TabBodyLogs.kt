@@ -25,9 +25,10 @@ import androidx.compose.ui.window.WindowPosition.Aligned
 import androidx.compose.ui.window.rememberWindowState
 import androidx.navigation.NavHostController
 import ch.qos.logback.classic.Level
-import ch.qos.logback.classic.spi.ILoggingEvent
+import io.github.t2penbix99wcoxkv3a4g.tonsign.event.EventBus
+import io.github.t2penbix99wcoxkv3a4g.tonsign.event.OnLogAppendEvent
+import io.github.t2penbix99wcoxkv3a4g.tonsign.event.Subscribe
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ex.swapList
-import io.github.t2penbix99wcoxkv3a4g.tonsign.logger.EventAppender
 import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.ConfigManager
 import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.i18n
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.theme.CupcakeEXTheme
@@ -57,7 +58,7 @@ class TabBodyLogs : TabBodyBase() {
     private val logs = mutableStateListOf<AnnotatedString>()
 
     init {
-        EventAppender.onLogAppendEvent += ::onLogAppend
+        EventBus.register(this)
     }
 
     @Composable
@@ -82,7 +83,9 @@ class TabBodyLogs : TabBodyBase() {
         }
     }
 
-    private fun onLogAppend(event: ILoggingEvent) {
+    @Subscribe("OnLogAppend")
+    private fun onLogAppend(event: OnLogAppendEvent) {
+        val logEvent = event.loggingEvent
         val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS")
         val current = LocalDateTime.now().format(formatter)
 
@@ -94,28 +97,28 @@ class TabBodyLogs : TabBodyBase() {
             append(' ')
             append('[')
 
-            withStyle(style = SpanStyle(color = getThreadColor(event.level))) {
-                append(event.threadName)
+            withStyle(style = SpanStyle(color = getThreadColor(logEvent.level))) {
+                append(logEvent.threadName)
             }
 
             append('/')
 
-            withStyle(style = SpanStyle(color = getLogLevelColor(event.level))) {
-                append(event.level.levelStr)
+            withStyle(style = SpanStyle(color = getLogLevelColor(logEvent.level))) {
+                append(logEvent.level.levelStr)
             }
 
             append(']')
             append(' ')
 
             withStyle(style = SpanStyle(color = Color.Magenta)) {
-                append("(${event.loggerName})")
+                append("(${logEvent.loggerName})")
             }
 
             append(':')
             append(' ')
 
-            withStyle(style = SpanStyle(color = getLogLevelColor(event.level))) {
-                append(event.formattedMessage)
+            withStyle(style = SpanStyle(color = getLogLevelColor(logEvent.level))) {
+                append(logEvent.formattedMessage)
             }
         })
     }
@@ -130,7 +133,7 @@ class TabBodyLogs : TabBodyBase() {
         val changedLogs = remember { mutableStateListOf<AnnotatedString>() }
         val autoScrollToDown by remember { mutableStateOf(ConfigManager.config.autoScrollToDown) }
         var isOnTop by remember { internalIsOnTop }
-        
+
         changedLogs.swapList(logs)
 
         fun searchFilter() {

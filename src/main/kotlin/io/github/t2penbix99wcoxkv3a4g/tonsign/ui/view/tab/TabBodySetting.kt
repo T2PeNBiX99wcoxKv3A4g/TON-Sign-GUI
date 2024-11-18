@@ -11,21 +11,12 @@ import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import io.github.t2penbix99wcoxkv3a4g.tonsign.OSCSender
-import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.ConfigManager
-import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.LanguageManager
-import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.SaveManager
-import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.SecretsManager
-import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.i18n
-import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.i18nState
+import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.*
 import io.github.t2penbix99wcoxkv3a4g.tonsign.needRefresh
 import io.github.t2penbix99wcoxkv3a4g.tonsign.needRestart
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.view.switchWithText
@@ -105,13 +96,6 @@ class TabBodySetting : TabBodyBase() {
                 }
             ) {
                 Text("Save config")
-            }
-            Button(
-                onClick = {
-                    SaveManager.save()
-                }
-            ) {
-                Text("Save data")
             }
             Button(
                 onClick = {

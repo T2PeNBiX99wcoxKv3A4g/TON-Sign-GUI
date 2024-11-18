@@ -11,16 +11,13 @@ import androidx.compose.material.icons.filled.Home
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import io.github.t2penbix99wcoxkv3a4g.tonsign.EventHandle
 import io.github.t2penbix99wcoxkv3a4g.tonsign.delayToLoadingLog
-import io.github.t2penbix99wcoxkv3a4g.tonsign.isInWorld
 import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.i18n
 import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.i18nState
-import io.github.t2penbix99wcoxkv3a4g.tonsign.nowWorldID
-import io.github.t2penbix99wcoxkv3a4g.tonsign.players
 import io.github.t2penbix99wcoxkv3a4g.tonsign.roundType.GuessRoundType
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.logWatcher
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.nextPrediction
@@ -44,17 +41,17 @@ class TabBodyMain : TabBodyBase() {
 
     @Composable
     override fun view(navController: NavHostController, padding: PaddingValues) {
-        var isWaitingVRChat by VRChatWatcher.isWaitingVRChat
-        var nextPredictionSet by nextPrediction
-        var delayToLoadingLog by delayToLoadingLog
+        val isWaitingVRChat by VRChatWatcher.isWaitingVRChat
+        val nextPredictionSet by nextPrediction
+        val delayToLoadingLog by delayToLoadingLog
         val isNotRunning by "gui.text.main.vrchat_is_not_running".i18nState()
         val roundSpecial by "gui.text.main.round_special".i18nState()
         val roundClassic by "gui.text.main.round_classic".i18nState()
         val waitingJoinTon by "gui.text.main.waiting_join_ton".i18nState()
         val theIsNothingHere by "gui.text.main.the_is_nothing_here".i18nState()
         val waitUntilJoin by "log.wait_until_join_game".i18nState()
-        val nowWorldId by nowWorldID
-        val isInWorld by isInWorld
+        val nowWorldId by EventHandle.nowWorldID
+        val isInWorld by EventHandle.isInWorld
         val scrollState = rememberScrollState()
 
         SelectionContainer {
@@ -80,7 +77,7 @@ class TabBodyMain : TabBodyBase() {
 
                             val recentRounds by logWatcher.getRecentRoundsLogState
 
-                            if (!recentRounds.isBlank()) {
+                            if (recentRounds.isNotBlank()) {
                                 textBox("gui.text.main.recent_rounds".i18n(recentRounds))
                             } else {
                                 textBox(theIsNothingHere)
@@ -90,10 +87,10 @@ class TabBodyMain : TabBodyBase() {
                         }
                         if (isInWorld && nowWorldId.isNotEmpty())
                             textBoxWithLink("gui.text.main.current_world".i18n(nowWorldId), worldUrl(nowWorldId))
-                        if (players.isNotEmpty())
-                            textBox("gui.text.main.players".i18n(players.size))
+                        if (EventHandle.players.isNotEmpty())
+                            textBox("gui.text.main.players".i18n(EventHandle.players.size))
                         Column(Modifier.padding(10.dp)) {
-                            players.forEach {
+                            EventHandle.players.forEach {
                                 textBoxWithLink(it.name, playerUrl(it))
                             }
                         }

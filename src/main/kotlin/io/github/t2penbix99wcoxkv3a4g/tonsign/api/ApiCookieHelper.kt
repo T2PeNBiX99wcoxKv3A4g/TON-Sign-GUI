@@ -23,9 +23,11 @@
  */
 package io.github.t2penbix99wcoxkv3a4g.tonsign.api
 
+import io.github.t2penbix99wcoxkv3a4g.tonsign.event.EventBus
+import io.github.t2penbix99wcoxkv3a4g.tonsign.event.OnSecretsLoadedEvent
+import io.github.t2penbix99wcoxkv3a4g.tonsign.event.OnSecretsStartSaveEvent
+import io.github.t2penbix99wcoxkv3a4g.tonsign.event.Subscribe
 import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.CookieData
-import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.Secrets
-import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.SecretsManager
 import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.toCookie
 import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.toData
 import okhttp3.Cookie
@@ -40,8 +42,7 @@ object ApiCookieHelper {
     private val _clientCookieStore = ConcurrentHashMap<String, ArrayList<Cookie>>()
 
     init {
-        SecretsManager.onLoadedEvent += ::onLoaded
-        SecretsManager.onStartSaveEvent += ::onStartSave
+        EventBus.register(this)
     }
 
     val cookieJar: CookieJar
@@ -49,12 +50,12 @@ object ApiCookieHelper {
 
     private val _cookieJar = object : CookieJar {
         override fun loadForRequest(url: HttpUrl): List<Cookie> {
-            var serverCookieList = _serverCookieStore.get(url.host)
+            var serverCookieList = _serverCookieStore[url.host]
 
             if (serverCookieList == null)
                 serverCookieList = arrayListOf()
 
-            val clientCookieStore = _clientCookieStore.get(url.host)
+            val clientCookieStore = _clientCookieStore[url.host]
 
             if (clientCookieStore != null)
                 serverCookieList.addAll(clientCookieStore)
@@ -63,10 +64,11 @@ object ApiCookieHelper {
         }
 
         override fun saveFromResponse(url: HttpUrl, cookies: List<Cookie>) {
-            _serverCookieStore.put(url.host, ArrayList(cookies))
+            _serverCookieStore[url.host] = ArrayList(cookies)
         }
     }
 
+    @Suppress("MemberVisibilityCanBePrivate")
     fun setCookie(url: String, cookie: Cookie) {
         val host = url.toHttpUrlOrNull()?.host
         requireNotNull(host)
@@ -74,7 +76,7 @@ object ApiCookieHelper {
         var cookieListForUrl = _clientCookieStore[host]
         if (cookieListForUrl == null) {
             cookieListForUrl = arrayListOf()
-            _clientCookieStore.put(host, cookieListForUrl)
+            _clientCookieStore[host] = cookieListForUrl
         }
         putCookie(cookieListForUrl, cookie)
     }
@@ -94,7 +96,7 @@ object ApiCookieHelper {
     }
 
     private fun putCookie(storedCookieList: ArrayList<Cookie>, newCookie: Cookie) {
-        var oldCookie = storedCookieList.firstOrNull { it.name + it.path == newCookie.name + newCookie.path }
+        val oldCookie = storedCookieList.firstOrNull { it.name + it.path == newCookie.name + newCookie.path }
 
         if (oldCookie != null)
             storedCookieList.remove(oldCookie)
@@ -107,11 +109,11 @@ object ApiCookieHelper {
             val cookieList = it.value
             val cookieDataList = arrayListOf<CookieData>()
 
-            cookieList.forEach {
-                cookieDataList.add(it.toData())
+            cookieList.forEach { cookie ->
+                cookieDataList.add(cookie.toData())
             }
 
-            retMap.put(it.key, cookieDataList)
+            retMap[it.key] = cookieDataList
         }
         return retMap
     }
@@ -124,11 +126,11 @@ object ApiCookieHelper {
             val cookieDataList = it.value
             val cookieList = arrayListOf<Cookie>()
 
-            cookieDataList.forEach {
-                cookieList.add(it.toCookie())
+            cookieDataList.forEach { cookieData ->
+                cookieList.add(cookieData.toCookie())
             }
 
-            map.put(it.key, cookieList)
+            map[it.key] = cookieList
         }
     }
 
@@ -152,11 +154,15 @@ object ApiCookieHelper {
         loadStore(_clientCookieStore, clientCookieStore)
     }
 
-    private fun onLoaded(secrets: Secrets) {
+    @Subscribe("OnSecretsLoaded")
+    private fun onLoaded(event: OnSecretsLoadedEvent) {
+        val secrets = event.secrets
         load(secrets.serverCookieStore, secrets.clientCookieStore)
     }
 
-    private fun onStartSave(secrets: Secrets) {
+    @Subscribe("OnSecretsStartSave")
+    private fun onStartSave(event: OnSecretsStartSaveEvent) {
+        val secrets = event.secrets
         secrets.serverCookieStore.clear()
         secrets.serverCookieStore.putAll(serverCookieStore)
         secrets.clientCookieStore.clear()

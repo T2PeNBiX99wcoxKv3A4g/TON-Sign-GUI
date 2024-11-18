@@ -2,13 +2,14 @@ package io.github.t2penbix99wcoxkv3a4g.tonsign.manager
 
 import io.github.t2penbix99wcoxkv3a4g.tonsign.Utils
 import io.github.t2penbix99wcoxkv3a4g.tonsign.coroutineScope.SecretsScope
-import io.github.t2penbix99wcoxkv3a4g.tonsign.event.EventArg
+import io.github.t2penbix99wcoxkv3a4g.tonsign.event.EventBus
+import io.github.t2penbix99wcoxkv3a4g.tonsign.event.OnSecretsLoadedEvent
 import io.github.t2penbix99wcoxkv3a4g.tonsign.logger.Logger
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import java.io.File
-import java.util.Base64
+import java.util.*
 import javax.crypto.Cipher
 import javax.crypto.spec.IvParameterSpec
 import javax.crypto.spec.SecretKeySpec
@@ -17,7 +18,6 @@ import kotlin.io.path.Path
 // TODO: sqlite3
 internal object SecretsManager {
     private const val FILE_NAME = "secrets"
-    private val scope = SecretsScope()
     private val filePath = Path(Utils.currentWorkingDirectory, FILE_NAME)
     private val fileBakPath = Path(Utils.currentWorkingDirectory, "${FILE_NAME}.bak")
 
@@ -27,9 +27,6 @@ internal object SecretsManager {
         serverCookieStore = hashMapOf(),
         clientCookieStore = hashMapOf()
     )
-
-    val onLoadedEvent = EventArg<Secrets>()
-    val onStartSaveEvent = EventArg<Secrets>()
 
     private var _secrets: Secrets? = null
     val secrets: Secrets
@@ -50,23 +47,23 @@ internal object SecretsManager {
     init {
         load()
 
-        scope.launch {
+        SecretsScope.launch {
             autoSave()
         }
     }
 
-    fun load() {
+    private fun load() {
         _secrets = runCatching { Json.decodeFromString<Secrets>(file.readText()) }.getOrElse {
             Utils.logger.error(it) { "[${this::class.simpleName!!}] Secrets load error: ${it.message ?: "Unknown"}" }
             renameFile()
             Default
         }
         save()
-        onLoadedEvent(secrets)
+        EventBus.publish(OnSecretsLoadedEvent(secrets))
     }
 
     fun save() {
-        onStartSaveEvent(secrets)
+        EventBus.publish(OnSecretsLoadedEvent(secrets))
         file.writeText(Json.encodeToString(Secrets.serializer(), secrets))
     }
 

@@ -1,96 +1,71 @@
 package io.github.t2penbix99wcoxkv3a4g.tonsign.manager
 
-import com.charleskorn.kaml.Yaml
+import app.cash.sqldelight.adapter.primitive.IntColumnAdapter
+import app.cash.sqldelight.db.QueryResult
+import app.cash.sqldelight.db.SqlCursor
+import app.cash.sqldelight.driver.jdbc.sqlite.JdbcSqliteDriver
 import io.github.t2penbix99wcoxkv3a4g.tonsign.Utils
-import io.github.t2penbix99wcoxkv3a4g.tonsign.coroutineScope.SaveScope
-import io.github.t2penbix99wcoxkv3a4g.tonsign.event.EventArg
-import io.github.t2penbix99wcoxkv3a4g.tonsign.ex.safeDecodeFromFile
-import io.github.t2penbix99wcoxkv3a4g.tonsign.logger.Logger
-import io.github.t2penbix99wcoxkv3a4g.tonsign.onLoadedSave
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import java.io.File
-import kotlin.io.path.Path
+import io.github.t2penbix99wcoxkv3a4g.tonsign.data.ArrayIntListColumnAdapter
+import io.github.t2penbix99wcoxkv3a4g.tonsign.data.LongEnumColumnAdapter
+import io.github.t2penbix99wcoxkv3a4g.tonsign.data.PlayerDataListColumnAdapter
+import io.github.t2penbix99wcoxkv3a4g.tonsign.data.RoundData
+import io.github.t2penbix99wcoxkv3a4g.tonsign.data.Save as SqlSave
 
-// TODO: sqlite3
+// https://github.com/sqldelight/sqldelight/issues/1605
 object SaveManager {
-    private const val FILE_NAME = "save.yml"
-    private val scope = SaveScope()
-    private val filePath = Path(Utils.currentWorkingDirectory, FILE_NAME)
-    private val fileBakPath = Path(Utils.currentWorkingDirectory, "$FILE_NAME.bak")
+    private const val FILE_NAME = "save.db"
+    private val driver: JdbcSqliteDriver by lazy { JdbcSqliteDriver("jdbc:sqlite:$FILE_NAME") }
 
-    val Default = Save(
-        roundHistories = listOf()
-    )
-    
-    val onLoadedEvent = EventArg<Save>()
-    val onStartSaveEvent = EventArg<Save>()
+    val database: SqlSave by lazy {
+        val currentVer = version
+        if (currentVer == 0L) {
+            SqlSave.Schema.create(driver)
+            version = SqlSave.Schema.version
+            Utils.logger.debug { "init: created tables, setVersion to 1" }
+        } else {
+            val schemaVer = SqlSave.Schema.version
+            if (schemaVer > currentVer) {
+                SqlSave.Schema.migrate(driver, currentVer, schemaVer)
+                version = schemaVer
+                Utils.logger.debug { "init: migrated from $currentVer to $schemaVer" }
+            } else {
+                Utils.logger.debug { "init" }
+            }
+        }
 
-    private var _save: Save? = null
-    var save: Save
+        SqlSave(
+            driver,
+            roundDataAdapter = RoundData.Adapter(
+                roundTypeAdapter = LongEnumColumnAdapter(),
+                mapIdAdapter = IntColumnAdapter,
+                playersAdapter = PlayerDataListColumnAdapter,
+                terrorsAdapter = ArrayIntListColumnAdapter,
+                isWonAdapter = LongEnumColumnAdapter(),
+            )
+        )
+    }
+
+    private var version: Long
         get() {
-            if (_save == null)
-                load()
-            return _save!!
+            val queryResult = driver.executeQuery(
+                identifier = null,
+                sql = "PRAGMA user_version;",
+                mapper = { sqlCursor: SqlCursor -> QueryResult.Value(sqlCursor.getLong(0)) },
+                parameters = 0,
+                binders = null
+            )
+            return queryResult.value!!
         }
         set(value) {
-            _save = value
-        }
-
-    private var _file: File? = null
-    val file: File
-        get() {
-            if (_file == null)
-                _file = filePath.toFile()
-            return _file!!
-        }
-
-    init {
-        load()
-
-        scope.launch {
-            autoSave()
-        }
-    }
-
-    fun load() {
-        _save = Yaml.default.safeDecodeFromFile<Save>(file, Default.copy(), {
-            val text = "exception.save_load_error".i18nByLang("en", it.message ?: "Unknown")
-            Utils.logger.error(it) { "[${this::class.simpleName!!}] $text" }
-        }) {
-            Utils.logger.error(it) { "[${this::class.simpleName!!}] Save fix failed: ${it.message}" }
-            renameFile()
-        }
-        save()
-        onLoadedSave(save)
-        onLoadedEvent(save)
-    }
-
-    fun save() {
-        onStartSaveEvent(save)
-        file.writeText(Yaml.default.encodeToString(Save.serializer(), save))
-    }
-
-    private fun renameFile() {
-        if (!file.exists()) return
-        val fileBakFile = fileBakPath.toFile()
-
-        if (fileBakFile.exists())
-            fileBakFile.renameTo(
-                Path(
-                    Utils.currentWorkingDirectory,
-                    "${FILE_NAME}.${Utils.timeNowForFile}.bak"
-                ).toFile()
+            driver.execute(
+                identifier = null,
+                sql = "PRAGMA user_version = $value;",
+                parameters = 0,
+                binders = null
             )
-
-        file.renameTo(fileBakFile)
-    }
-
-    private suspend fun autoSave() {
-        while (true) {
-            delay((ConfigManager.config.autoSaveMinutes * 60 * 1000).toLong())
-            save()
-            Logger.debug({ this::class.simpleName!! }, "Auto save")
         }
+
+    fun close() {
+        driver.close()
     }
 }

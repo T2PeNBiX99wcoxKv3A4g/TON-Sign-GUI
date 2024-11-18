@@ -21,8 +21,8 @@ import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.WindowPosition.Aligned
 import androidx.compose.ui.window.rememberWindowState
 import androidx.navigation.NavHostController
+import io.github.t2penbix99wcoxkv3a4g.tonsign.EventHandle
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ex.swapList
-import io.github.t2penbix99wcoxkv3a4g.tonsign.logs
 import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.ConfigManager
 import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.i18n
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.theme.CupcakeEXTheme
@@ -57,7 +57,7 @@ class TabBodyVRChatLogs : TabBodyBase() {
     private fun viewAll(isTopWindow: Boolean) {
         val scope = rememberCoroutineScope()
         val scrollState = rememberLazyListState()
-        val logs = remember { logs }
+        val logs = remember { EventHandle.logs }
         var search by remember { mutableStateOf("") }
         val changedLogs = remember { mutableStateListOf<AnnotatedString>() }
         val autoScrollToDown by remember { mutableStateOf(ConfigManager.config.autoScrollToDown) }

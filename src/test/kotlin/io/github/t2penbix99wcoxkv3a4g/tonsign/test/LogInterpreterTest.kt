@@ -7,7 +7,6 @@ import io.github.t2penbix99wcoxkv3a4g.tonsign.watcher.LogWatcher
 
 fun main() {
     val interpreter = LogInterpreter(LogWatcher.findLatestLog())
-    interpreter.onReadLogEvent += ::testReadLog
     interpreter.read()
 }
 
