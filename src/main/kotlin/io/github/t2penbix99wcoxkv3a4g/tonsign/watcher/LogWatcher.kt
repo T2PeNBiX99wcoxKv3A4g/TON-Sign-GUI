@@ -82,6 +82,7 @@ class LogWatcher(logFile: File) {
         private const val AND_THE_ROUND_TYPE_IS_KEYWORD = " and the round type is "
         private const val ROUND_MAP_LOCATION_KEYWORD = "This round is taking place at "
         private const val BEHAVIOUR_KEYWORD = "Behaviour"
+        private const val HANDLE_APPLICATION_QUIT_KEYWORD = "HandleApplicationQuit"
         private const val RANDOM_COUNT_CHANGE = 1
         private const val RANDOM_COUNT_RESET = 3
     }
@@ -245,7 +246,11 @@ class LogWatcher(logFile: File) {
         val log = event.logEvent
         
         when {
-            // TERROR NIGHTS STRING
+            HANDLE_APPLICATION_QUIT_KEYWORD in log.msg -> {
+                EventBus.publish(OnVRChatQuitEvent())
+            }
+            
+            // TERROR NIGHTS STRING, Maybe useless right now
             BONUS_ACTIVE_KEYWORD in log.msg -> {
                 bonusFlag = true
                 Logger.info("log.think_terror_nights")
@@ -256,11 +261,13 @@ class LogWatcher(logFile: File) {
                 clear()
                 OSCSender.send(true)
                 lastPredictionForOSC = true
+                EventBus.publish(OnTONMasterClientSwitchedEvent())
             }
 
             SAVING_AVATAR_DATA_KEYWORD in log.msg -> {
                 Logger.info("log.saving_avatar_data")
                 OSCSender.send(lastPredictionForOSC)
+                EventBus.publish(OnSavingAvatarDataEvent())
             }
 
             WORLD_JOIN_KEYWORD in log.msg -> {

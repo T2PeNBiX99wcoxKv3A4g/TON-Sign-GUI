@@ -38,13 +38,12 @@ object EventHandle {
     private var isRoundStart = false
     private var isTimerSet = false
     private var roundSkip = false
-    
+
     init {
         EventBus.register(this)
     }
 
-    @Subscribe("OnExit")
-    private fun onExit(event: OnExitEvent) {
+    private fun exitDo() {
         nextPrediction.value = GuessRoundType.NIL
 
         val roundData = queries.selectOfTime(lastTime).executeAsOneOrNull() ?: return
@@ -52,6 +51,16 @@ object EventHandle {
             queries.updateIsWon(WonOrLost.UnKnown, lastTime)
         queries.updateRoundTime(TimerManager.get(ROUND_TIMER_ID), lastTime)
         queries.updatePlayerTime(TimerManager.get(ROUND_TIMER_ID), lastTime)
+    }
+
+    @Subscribe("OnExit")
+    private fun onExit(event: OnExitEvent) {
+        exitDo()
+    }
+
+    @Subscribe("OnApplicationQuit")
+    private fun onVRChatQuit(event: OnVRChatQuitEvent) {
+        exitDo()
     }
 
     @Subscribe("OnNextPrediction")
@@ -69,13 +78,7 @@ object EventHandle {
 
     @Subscribe("OnLeftTON")
     private fun onLeftTON(event: OnLeftTONEvent) {
-        nextPrediction.value = GuessRoundType.NIL
-
-        val roundData = queries.selectOfTime(lastTime).executeAsOneOrNull() ?: return
-        if (roundData.isWon == WonOrLost.InProgress)
-            queries.updateIsWon(WonOrLost.UnKnown, lastTime)
-        queries.updateRoundTime(TimerManager.get(ROUND_TIMER_ID), lastTime)
-        queries.updatePlayerTime(TimerManager.get(ROUND_TIMER_ID), lastTime)
+        exitDo()
     }
 
     @Subscribe("OnLeftRoom")
@@ -194,7 +197,7 @@ object EventHandle {
 
         players.removeAll { it.id == player.id }
         sendNotificationOnPlayerLeftRoom(player)
-        
+
         if (!isRoundStart) return
 
         val lastTime = lastTime
