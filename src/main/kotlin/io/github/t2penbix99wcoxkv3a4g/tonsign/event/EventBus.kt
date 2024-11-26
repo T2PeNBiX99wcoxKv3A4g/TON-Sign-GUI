@@ -37,8 +37,8 @@ object EventBus {
     suspend fun publishSuspend(event: Event) {
         _events.emit(event)
     }
-    
-    fun publish(event: Event){
+
+    fun publish(event: Event) {
         EventPushScope.launch {
             publishSuspend(event)
         }
@@ -86,7 +86,7 @@ object EventBus {
 
     @Suppress("unused")
     fun subscribe(funcs: List<KFunction<*>>) {
-        funcs.filter { it.hasAnnotation<Subscribe>() }.forEach { 
+        funcs.filter { it.hasAnnotation<Subscribe>() }.forEach {
             subscribe(it)
         }
     }
