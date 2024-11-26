@@ -2,7 +2,7 @@ package io.github.t2penbix99wcoxkv3a4g.tonsign
 
 import com.illposed.osc.OSCMessage
 import com.illposed.osc.transport.OSCPortOut
-import io.github.t2penbix99wcoxkv3a4g.tonsign.ex.debug
+import io.github.t2penbix99wcoxkv3a4g.tonsign.logger.debug
 import io.github.t2penbix99wcoxkv3a4g.tonsign.logger.Logger
 import java.net.InetSocketAddress
 

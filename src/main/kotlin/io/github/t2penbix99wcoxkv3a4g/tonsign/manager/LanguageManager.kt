@@ -9,9 +9,13 @@ import com.charleskorn.kaml.YamlMap
 import com.charleskorn.kaml.YamlScalar
 import com.charleskorn.kaml.yamlMap
 import io.github.t2penbix99wcoxkv3a4g.tonsign.Utils
-import io.github.t2penbix99wcoxkv3a4g.tonsign.ex.*
+import io.github.t2penbix99wcoxkv3a4g.tonsign.ex.firstPath
+import io.github.t2penbix99wcoxkv3a4g.tonsign.ex.safeFormat
+import io.github.t2penbix99wcoxkv3a4g.tonsign.ex.sha256
+import io.github.t2penbix99wcoxkv3a4g.tonsign.ex.toFile
 import io.github.t2penbix99wcoxkv3a4g.tonsign.exception.FolderNotFoundException
 import io.github.t2penbix99wcoxkv3a4g.tonsign.logger.Logger
+import io.github.t2penbix99wcoxkv3a4g.tonsign.logger.error
 import java.io.File
 import kotlin.io.path.Path
 
@@ -92,23 +96,23 @@ object LanguageManager {
     }
 
     fun exists(text: String): Boolean {
-        if (language in dataBase && dataBase[language]!!.get<YamlScalar>(text) != null)
+        if (language in dataBase && dataBase[language]?.get<YamlScalar>(text) != null)
             return true
 
-        if ("en" in dataBase && dataBase["en"]!!.get<YamlScalar>(text) != null)
+        if ("en" in dataBase && dataBase["en"]?.get<YamlScalar>(text) != null)
             return true
         return false
     }
 
-    fun exists(lang: String, text: String) = lang in dataBase && dataBase[lang]!!.get<YamlScalar>(text) != null
+    fun exists(lang: String, text: String) = lang in dataBase && dataBase[lang]?.get<YamlScalar>(text) != null
 
     @Suppress("MemberVisibilityCanBePrivate")
     fun existsLanguage(lang: String) = lang in dataBase
 
     fun getByLang(lang: String, text: String): String {
-        if (lang !in dataBase || dataBase[lang]!!.get<YamlScalar>(text) == null) {
-            if ("en" in dataBase && dataBase["en"]!!.get<YamlScalar>(text) != null)
-                return dataBase["en"]!!.get<YamlScalar>(text)!!.content
+        if (lang !in dataBase || dataBase[lang]?.get<YamlScalar>(text) == null) {
+            if ("en" in dataBase && dataBase["en"]?.get<YamlScalar>(text) != null)
+                return dataBase["en"]?.get<YamlScalar>(text)!!.content
             return text
         }
         return dataBase[lang]!!.get<YamlScalar>(text)!!.content
@@ -123,7 +127,7 @@ object LanguageManager {
         return "${get(text, *objects)} (${getByLang("en", text, *objects)})"
     }
 
-    fun getState(text: String, vararg objects: Any): MutableState<String> {
+    fun getState(text: String, vararg objects: Any?): MutableState<String> {
         if (!exists(text))
             return mutableStateOf(get(text, *objects))
         if (text !in states)
@@ -133,7 +137,7 @@ object LanguageManager {
         return states[text]!!
     }
 
-    fun getStateWithEn(text: String, vararg objects: Any): MutableState<String> {
+    fun getStateWithEn(text: String, vararg objects: Any?): MutableState<String> {
         if (!exists(language, text) || language == "en" || get(text, *objects) == getByLang("en", text, *objects))
             return mutableStateOf(getByLang("en", text, *objects))
         if (text !in states)

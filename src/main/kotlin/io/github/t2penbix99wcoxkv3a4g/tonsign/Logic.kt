@@ -26,7 +26,7 @@ internal fun startWatcher() {
         return
 
     LogicScope.launch {
-        runCatching { EventHandle }.getOrElse { Logger.error(it, { "exception.something_is_not_right" }, it.localizedMessage!!) }
+        runCatching { EventHandle }.getOrElse { Logger.error(it, { "exception.something_is_not_right" }, it.localizedMessage) }
 
         while (true) {
             runCatching {
@@ -52,7 +52,7 @@ internal fun startWatcher() {
                 logWatcher.monitorRoundType()
                 EventBus.unregister(logWatcher)
             }.getOrElse {
-                Logger.error(it, { "exception.something_is_not_right" }, it.localizedMessage!!)
+                Logger.error(it, { "exception.something_is_not_right" }, it.localizedMessage)
                 needToWait = false
             }
         }

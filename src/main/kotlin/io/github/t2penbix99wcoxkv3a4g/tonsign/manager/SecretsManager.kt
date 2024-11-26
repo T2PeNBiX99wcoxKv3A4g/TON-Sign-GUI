@@ -4,8 +4,8 @@ import io.github.t2penbix99wcoxkv3a4g.tonsign.Utils
 import io.github.t2penbix99wcoxkv3a4g.tonsign.coroutineScope.SecretsScope
 import io.github.t2penbix99wcoxkv3a4g.tonsign.event.EventBus
 import io.github.t2penbix99wcoxkv3a4g.tonsign.event.OnSecretsLoadedEvent
-import io.github.t2penbix99wcoxkv3a4g.tonsign.ex.debug
 import io.github.t2penbix99wcoxkv3a4g.tonsign.logger.Logger
+import io.github.t2penbix99wcoxkv3a4g.tonsign.logger.debug
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
@@ -55,7 +55,7 @@ internal object SecretsManager {
 
     private fun load() {
         _secrets = runCatching { Json.decodeFromString<Secrets>(file.readText()) }.getOrElse {
-            Utils.logger.error(it) { "[${this::class.simpleName!!}] Secrets load error: ${it.localizedMessage ?: "Unknown"}" }
+            Utils.logger.error(it) { "[${this::class.simpleName}] Secrets load error: ${it.localizedMessage ?: "Unknown"}" }
             renameFile()
             Default
         }

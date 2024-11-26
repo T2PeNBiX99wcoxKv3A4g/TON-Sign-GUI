@@ -2,8 +2,8 @@ package io.github.t2penbix99wcoxkv3a4g.tonsign.api
 
 import io.github.t2penbix99wcoxkv3a4g.tonsign.Utils
 import io.github.t2penbix99wcoxkv3a4g.tonsign.coroutineScope.ApiScope
-import io.github.t2penbix99wcoxkv3a4g.tonsign.ex.error
 import io.github.t2penbix99wcoxkv3a4g.tonsign.logger.Logger
+import io.github.t2penbix99wcoxkv3a4g.tonsign.logger.error
 import io.github.vrchatapi.ApiException
 import io.github.vrchatapi.Configuration
 import io.github.vrchatapi.api.AuthenticationApi

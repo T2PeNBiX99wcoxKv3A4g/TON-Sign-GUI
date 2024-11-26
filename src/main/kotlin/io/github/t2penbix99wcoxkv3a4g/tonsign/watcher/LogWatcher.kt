@@ -10,6 +10,8 @@ import io.github.t2penbix99wcoxkv3a4g.tonsign.exception.UnknownRoundTypeExceptio
 import io.github.t2penbix99wcoxkv3a4g.tonsign.exception.WrongRecentRoundException
 import io.github.t2penbix99wcoxkv3a4g.tonsign.interpreter.LogInterpreter
 import io.github.t2penbix99wcoxkv3a4g.tonsign.logger.Logger
+import io.github.t2penbix99wcoxkv3a4g.tonsign.logger.debug
+import io.github.t2penbix99wcoxkv3a4g.tonsign.logger.error
 import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.ConfigManager
 import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.i18n
 import io.github.t2penbix99wcoxkv3a4g.tonsign.roundType.*
