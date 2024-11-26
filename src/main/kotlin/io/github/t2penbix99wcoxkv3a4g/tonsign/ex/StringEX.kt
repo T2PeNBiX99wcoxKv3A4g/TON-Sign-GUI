@@ -2,17 +2,19 @@
 
 package io.github.t2penbix99wcoxkv3a4g.tonsign.ex
 
-import io.github.t2penbix99wcoxkv3a4g.tonsign.logger.Logger
+import io.github.t2penbix99wcoxkv3a4g.tonsign.Utils
+import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.i18n
 import java.io.File
+import java.net.URL
 import java.security.MessageDigest
 
-fun String.toUTF8(): String {
-    return this.toByteArray(Charsets.ISO_8859_1).decodeToString()
-}
+fun String.toUTF8() = toByteArray(Charsets.ISO_8859_1).decodeToString()
 
 fun String.safeFormat(vararg args: Any?): String {
-    return runCatching { this.format(*args) }.getOrElse {
-        Logger.error({ this::class.simpleName!! }, it, "exception.string_format_error", it.message!!)
+    if (Utils.logger.isDebugEnabled())
+        return format(*args)
+    return runCatching { format(*args) }.getOrElse {
+        Utils.logger.error(it) { "exception.string_format_error".i18n(it.localizedMessage) }
         this
     }
 }
@@ -45,35 +47,18 @@ fun String.firstPath(find: Char): String {
     return this.substring(0, index)
 }
 
-fun String.middlePath(first: String, last: String): String {
-    return this.firstPath(last).lastPath(first)
-}
-
-fun String.middlePath(first: Char, last: Char): String {
-    return this.firstPath(last).lastPath(first)
-}
-
-fun String.middlePath(first: Char, last: String): String {
-    return this.firstPath(last).lastPath(first)
-}
-
-fun String.middlePath(first: String, last: Char): String {
-    return this.firstPath(last).lastPath(first)
-}
+fun String.middlePath(first: String, last: String) = firstPath(last).lastPath(first)
+fun String.middlePath(first: Char, last: Char) = firstPath(last).lastPath(first)
+fun String.middlePath(first: Char, last: String) = firstPath(last).lastPath(first)
+fun String.middlePath(first: String, last: Char) = firstPath(last).lastPath(first)
 
 fun String.asResource(work: (String) -> Unit) {
-    val content = object {}.javaClass.getResource(this)?.readText()
-    if (content == null) return
+    val content = asResourceUrl()?.readText() ?: return
     work(content)
 }
 
-fun String.asResourceUrl() = object {}.javaClass.getResource(this)
-fun String.asResourceFile(): File? {
-    val url = asResourceUrl()
-    if (url == null)
-        return null
-    return File(url.file)
-}
+fun String.asResourceUrl(): URL? = Utils.resourceUrl(this)
+fun String.asResourceFile(): File? = Utils.resourceFile(this)
 
 fun String.md5() = hashString(this, "MD5")
 fun String.sha256() = hashString(this, "SHA-256")

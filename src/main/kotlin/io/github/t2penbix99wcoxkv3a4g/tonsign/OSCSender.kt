@@ -2,6 +2,7 @@ package io.github.t2penbix99wcoxkv3a4g.tonsign
 
 import com.illposed.osc.OSCMessage
 import com.illposed.osc.transport.OSCPortOut
+import io.github.t2penbix99wcoxkv3a4g.tonsign.ex.debug
 import io.github.t2penbix99wcoxkv3a4g.tonsign.logger.Logger
 import java.net.InetSocketAddress
 
@@ -12,7 +13,7 @@ object OSCSender {
     private const val PARAM_TON_SIGN = "/avatar/parameters/TON_Sign"
     private const val PARAM_CHAT_BOX = "/chatbox/input"
 
-    val oscClient = OSCPortOut(InetSocketAddress(IP, PORT))
+    private val oscClient = OSCPortOut(InetSocketAddress(IP, PORT))
 
     fun send(bool: Boolean) = send(PARAM_TON_SIGN, bool)
 
@@ -21,12 +22,13 @@ object OSCSender {
     fun sendChat(msg: String, direct: Boolean = true, complete: Boolean = false) {
         val message = OSCMessage(PARAM_CHAT_BOX, mutableListOf(msg, direct, complete))
         oscClient.send(message)
-        Logger.debug({ this::class.simpleName!! }, "$PARAM_CHAT_BOX $msg $direct $complete")
+        Logger.debug<OSCSender> { "$PARAM_CHAT_BOX $msg $direct $complete" }
     }
 
+    @Suppress("MemberVisibilityCanBePrivate")
     fun <T> send(addres: String, input: T) {
         val message = OSCMessage(addres, mutableListOf(input))
         oscClient.send(message)
-        Logger.debug({ this::class.simpleName!! }, "$addres $input")
+        Logger.debug<OSCSender> { "$addres $input" }
     }
 }

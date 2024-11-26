@@ -6,6 +6,7 @@ import io.github.t2penbix99wcoxkv3a4g.tonsign.coroutineScope.ConfigScope
 import io.github.t2penbix99wcoxkv3a4g.tonsign.event.EventBus
 import io.github.t2penbix99wcoxkv3a4g.tonsign.event.OnConfigLoadedEvent
 import io.github.t2penbix99wcoxkv3a4g.tonsign.event.OnConfigStartSaveEvent
+import io.github.t2penbix99wcoxkv3a4g.tonsign.ex.debug
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ex.safeDecodeFromFile
 import io.github.t2penbix99wcoxkv3a4g.tonsign.logger.Logger
 import kotlinx.coroutines.delay
@@ -56,10 +57,10 @@ object ConfigManager {
 
     private fun load() {
         _config = Yaml.default.safeDecodeFromFile<Config>(file, Default.copy(), {
-            val text = "exception.config_load_error".i18nByLang("en", it.message ?: "Unknown")
+            val text = "exception.config_load_error".i18nByLang("en", it.localizedMessage ?: "Unknown")
             Utils.logger.error(it) { "[${this::class.simpleName!!}] $text" }
         }) {
-            Utils.logger.error(it) { "[${this::class.simpleName!!}] Config fix failed: ${(it.message)}" }
+            Utils.logger.error(it) { "[${this::class.simpleName!!}] Config fix failed: ${(it.localizedMessage)}" }
             renameFile()
         }
         save()
@@ -85,7 +86,7 @@ object ConfigManager {
         while (true) {
             delay((config.autoSaveMinutes * 60 * 1000).toLong())
             save()
-            Logger.debug({ this::class.simpleName!! }, "Auto save")
+            Logger.debug<ConfigManager> { "Auto save" }
         }
     }
 }

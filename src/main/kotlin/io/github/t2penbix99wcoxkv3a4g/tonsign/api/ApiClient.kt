@@ -2,6 +2,7 @@ package io.github.t2penbix99wcoxkv3a4g.tonsign.api
 
 import io.github.t2penbix99wcoxkv3a4g.tonsign.Utils
 import io.github.t2penbix99wcoxkv3a4g.tonsign.coroutineScope.ApiScope
+import io.github.t2penbix99wcoxkv3a4g.tonsign.ex.error
 import io.github.t2penbix99wcoxkv3a4g.tonsign.logger.Logger
 import io.github.vrchatapi.ApiException
 import io.github.vrchatapi.Configuration
@@ -18,7 +19,7 @@ import kotlinx.serialization.json.jsonPrimitive
 import okhttp3.*
 import java.io.IOException
 
-class ApiClient() {
+class ApiClient {
     private companion object {
         private const val BASE_URL = "https://vrchat.com/api/1"
         private const val BASE_URL_WITHOUT_HTTP = "vrchat.com/api/1"
@@ -65,12 +66,9 @@ class ApiClient() {
 
     private fun exceptionHandle(error: Throwable) {
         when (error) {
-            is ApiException -> Logger.error(
-                error,
-                "Status code: ${error.code}\nReason: ${error.responseBody}\nResponse headers: ${error.responseHeaders}"
-            )
+            is ApiException -> Logger.error<ApiClient>(error) { "Status code: ${error.code}\nReason: ${error.responseBody}\nResponse headers: ${error.responseHeaders}" }
 
-            else -> Logger.error({ this::class.simpleName!! }, error, "Error: ")
+            else -> Logger.error<ApiClient>(error) { "Error: ${error.localizedMessage}" }
         }
     }
 
@@ -91,7 +89,7 @@ class ApiClient() {
                 runCatching {
                     client.newCall(request).enqueue(object : Callback {
                         override fun onFailure(call: Call, e: IOException) {
-                            Logger.error({ this::class.simpleName!! }, e, "Request Error: ")
+                            Logger.error<ApiClient>(e) { "Request Error: ${e.localizedMessage}" }
                         }
 
                         override fun onResponse(call: Call, response: Response) {
@@ -116,7 +114,7 @@ class ApiClient() {
         }
     }
 
-    fun getConfig(onGet: (JsonObject) -> Unit) {
+    private fun getConfig(onGet: (JsonObject) -> Unit) {
         val request = Request.Builder()
             .url("$BASE_URL/config")
             .build()

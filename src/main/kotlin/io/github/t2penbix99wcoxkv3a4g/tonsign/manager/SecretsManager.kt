@@ -4,6 +4,7 @@ import io.github.t2penbix99wcoxkv3a4g.tonsign.Utils
 import io.github.t2penbix99wcoxkv3a4g.tonsign.coroutineScope.SecretsScope
 import io.github.t2penbix99wcoxkv3a4g.tonsign.event.EventBus
 import io.github.t2penbix99wcoxkv3a4g.tonsign.event.OnSecretsLoadedEvent
+import io.github.t2penbix99wcoxkv3a4g.tonsign.ex.debug
 import io.github.t2penbix99wcoxkv3a4g.tonsign.logger.Logger
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -54,7 +55,7 @@ internal object SecretsManager {
 
     private fun load() {
         _secrets = runCatching { Json.decodeFromString<Secrets>(file.readText()) }.getOrElse {
-            Utils.logger.error(it) { "[${this::class.simpleName!!}] Secrets load error: ${it.message ?: "Unknown"}" }
+            Utils.logger.error(it) { "[${this::class.simpleName!!}] Secrets load error: ${it.localizedMessage ?: "Unknown"}" }
             renameFile()
             Default
         }
@@ -101,7 +102,7 @@ internal object SecretsManager {
     private suspend fun autoSave() {
         while (true) {
             delay((ConfigManager.config.autoSaveMinutes * 60 * 1000).toLong())
-            Logger.debug({ this::class.simpleName!! }, "Auto save")
+            Logger.debug<SecretsManager> { "Auto save" }
         }
     }
 }

@@ -5,9 +5,7 @@ import androidx.compose.runtime.mutableStateOf
 import io.github.t2penbix99wcoxkv3a4g.tonsign.OSCSender
 import io.github.t2penbix99wcoxkv3a4g.tonsign.Utils
 import io.github.t2penbix99wcoxkv3a4g.tonsign.event.*
-import io.github.t2penbix99wcoxkv3a4g.tonsign.ex.firstPath
-import io.github.t2penbix99wcoxkv3a4g.tonsign.ex.lastPath
-import io.github.t2penbix99wcoxkv3a4g.tonsign.ex.middlePath
+import io.github.t2penbix99wcoxkv3a4g.tonsign.ex.*
 import io.github.t2penbix99wcoxkv3a4g.tonsign.exception.UnknownRoundTypeException
 import io.github.t2penbix99wcoxkv3a4g.tonsign.exception.WrongRecentRoundException
 import io.github.t2penbix99wcoxkv3a4g.tonsign.interpreter.LogInterpreter
@@ -45,7 +43,7 @@ class LogWatcher(logFile: File) {
                     return@sortWith 1
             }
 
-            Logger.info("log.current_log_running", files.first().name)
+            Logger.info({ "log.current_log_running" }, files.first().name)
             return files.first()
         }
 
@@ -86,7 +84,7 @@ class LogWatcher(logFile: File) {
         private const val RANDOM_COUNT_CHANGE = 1
         private const val RANDOM_COUNT_RESET = 3
     }
-    
+
     private val roundLog = mutableListOf<GuessRoundType>()
     private var lastPredictionForOSC = false
     private var lastPrediction = GuessRoundType.NIL
@@ -138,7 +136,7 @@ class LogWatcher(logFile: File) {
         val last = roundLog.takeLast(2)
 
         if (last[0] == GuessRoundType.Special && last[1] == GuessRoundType.Special) {
-            Logger.info("log.host_left_before")
+            Logger.info { "log.host_left_before" }
             roundLog.removeLast()
         }
 
@@ -155,7 +153,7 @@ class LogWatcher(logFile: File) {
             randomRound == RandomRoundType.NORMAL && isAlternate -> {
                 randomRound = RandomRoundType.FAST
                 randomCount = RANDOM_COUNT_RESET
-                Logger.debug({ this::class.simpleName!! }, "Random type seem is wrong, change to $randomRound")
+                Logger.debug<LogWatcher> { "Random type seem is wrong, change to $randomRound" }
             }
 
             randomRound == RandomRoundType.FAST && randomCount > 2 -> {
@@ -163,7 +161,7 @@ class LogWatcher(logFile: File) {
                 if (last2.size > 2 && last2[0] == last2[1] || last2[1] == last2[2]) {
                     randomRound = RandomRoundType.NORMAL
                     randomCount = RANDOM_COUNT_RESET
-                    Logger.debug({ this::class.simpleName!! }, "Random type seem is wrong, change to $randomRound")
+                    Logger.debug<LogWatcher> { "Random type seem is wrong, change to $randomRound" }
                 }
             }
         }
@@ -172,13 +170,10 @@ class LogWatcher(logFile: File) {
             lastRandomCount = randomCount
             randomCount = RANDOM_COUNT_CHANGE
             randomRound = if (randomRound == RandomRoundType.FAST) RandomRoundType.NORMAL else RandomRoundType.FAST
-            Logger.debug({ this::class.simpleName!! }, "Random start to change, now random round is $randomRound")
+            Logger.debug<LogWatcher> { "Random start to change, now random round is $randomRound" }
         }
 
-        Logger.debug(
-            { this::class.simpleName!! },
-            "randomCount: $randomCount, randomRound: $randomRound, maxRoundChange: $maxRoundChange"
-        )
+        Logger.debug<LogWatcher> { "randomCount: $randomCount, randomRound: $randomRound, maxRoundChange: $maxRoundChange" }
 
         if (randomRound == RandomRoundType.FAST || bonusFlag)
             return if (roundLog.last() == GuessRoundType.Special) GuessRoundType.Classic else GuessRoundType.Special
@@ -244,20 +239,20 @@ class LogWatcher(logFile: File) {
     @Subscribe("OnReadLog")
     private fun onReadLog(event: OnReadLogEvent) {
         val log = event.logEvent
-        
+
         when {
             HANDLE_APPLICATION_QUIT_KEYWORD in log.msg -> {
                 EventBus.publish(OnVRChatQuitEvent())
             }
-            
+
             // TERROR NIGHTS STRING, Maybe useless right now
             BONUS_ACTIVE_KEYWORD in log.msg -> {
                 bonusFlag = true
-                Logger.info("log.think_terror_nights")
+                Logger.info { "log.think_terror_nights" }
             }
 
             MASTER_CLIENT_SWITCHED_KEYWORD in log.msg -> {
-                Logger.info("log.host_just_left")
+                Logger.info { "log.host_just_left" }
                 clear()
                 OSCSender.send(true)
                 lastPredictionForOSC = true
@@ -265,20 +260,20 @@ class LogWatcher(logFile: File) {
             }
 
             SAVING_AVATAR_DATA_KEYWORD in log.msg -> {
-                Logger.info("log.saving_avatar_data")
+                Logger.info { "log.saving_avatar_data" }
                 OSCSender.send(lastPredictionForOSC)
                 EventBus.publish(OnSavingAvatarDataEvent())
             }
 
             WORLD_JOIN_KEYWORD in log.msg -> {
                 val worldId = log.msg.lastPath(WORLD_JOIN_KEYWORD).middlePath('[', ']')
-                
+
                 EventBus.publish(OnJoinRoomEvent(worldId))
 
                 if (worldId == WORLD_TON_KEYWORD) {
                     isTONLoaded = true
                     isInTON.value = true
-                    Logger.info("log.is_join_ton")
+                    Logger.info { "log.is_join_ton" }
                     EventBus.publish(OnJoinTONEvent())
                 }
             }
@@ -287,7 +282,7 @@ class LogWatcher(logFile: File) {
                 EventBus.publish(OnLeftRoomEvent())
                 if (isTONLoaded) {
                     isInTON.value = false
-                    Logger.info("log.is_left_ton")
+                    Logger.info { "log.is_left_ton" }
                     EventBus.publish(OnLeftTONEvent())
                     clear()
                 }
@@ -395,7 +390,7 @@ class LogWatcher(logFile: File) {
                         killerMatrix[i] = runCatching { kMatrixRaw[i].trim().toInt() }.getOrElse { -1 }
                     }
                 }
-                
+
                 EventBus.publish(OnKillerSetEvent(killerMatrix))
             }
 
@@ -404,7 +399,7 @@ class LogWatcher(logFile: File) {
                 var possibleRoundType = log.msg.lastPath(ROUND_TYPE_IS_KEYWORD).trim()
                 val possibleRoundTypeForPrint = possibleRoundType
 
-                Logger.debug({ this::class.simpleName!! }, "possibleRoundType: '${possibleRoundType}'")
+                Logger.debug<LogWatcher> { "possibleRoundType: '${possibleRoundType}'" }
 
                 possibleRoundType = possibleRoundType.jpToEn()
 
@@ -418,29 +413,25 @@ class LogWatcher(logFile: File) {
 
                     val isSpecialOrNot = roundType.isSpecialOrClassic()
 
-                    Logger.debug(
-                        { this::class.simpleName!! },
-                        "Guess is wrong, Last Guess: $lastPrediction, Actually is: $isSpecialOrNot, Wrong Count: $wrongCount"
-                    )
+                    Logger.debug<LogWatcher> { "Guess is wrong, Last Guess: $lastPrediction, Actually is: $isSpecialOrNot, Wrong Count: $wrongCount" }
                 }
 
                 val mapString = log.msg.middlePath(ROUND_MAP_LOCATION_KEYWORD, AND_THE_ROUND_TYPE_IS_KEYWORD).trim()
                 val idAndMap = mapString.split('(')
                 val map = idAndMap[0].trim()
                 val id = idAndMap[1].filter { it.isDigit() }.trim()
-                
+
                 EventBus.publish(OnRoundStartEvent(log.time, roundType, map, id.toInt()))
 
                 updateRoundLog(roundType)
                 Logger.info(
-                    "log.new_round_started",
+                    { "log.new_round_started" },
                     runCatching { RoundTypeConvert.getTextOfRound(roundType) }.getOrElse {
                         when (it) {
                             is UnknownRoundTypeException -> {
-                                Logger.error(
-                                    { this::class.simpleName!! },
+                                Logger.error<LogWatcher>(
                                     it,
-                                    "exception.unknown_round_type",
+                                    { "exception.unknown_round_type" },
                                     possibleRoundTypeForPrint
                                 )
                                 "exception.unknown_round_type_simple".i18n(possibleRoundTypeForPrint)
@@ -460,11 +451,11 @@ class LogWatcher(logFile: File) {
                 EventBus.publish(OnNextPredictionEvent(prediction))
 
                 Logger.info(
-                    "log.next_round_should_be",
+                    { "log.next_round_should_be" },
                     recentRoundsLog,
                     if (prediction == GuessRoundType.Special) special else classic
                 )
-                Logger.debug({ this::class.simpleName!! }, "Full Recent Rounds: ${getRecentRoundsLog(200)}")
+                Logger.debug<LogWatcher> { "Full Recent Rounds: ${getRecentRoundsLog(200)}" }
 
                 val sendValue = prediction == GuessRoundType.Special
 
@@ -485,7 +476,7 @@ class LogWatcher(logFile: File) {
     suspend fun monitorRoundType() {
         while (true) {
             if (!VRChatWatcher.isVRChatRunning()) {
-                Logger.info("log.vrchat_not_found")
+                Logger.info { "log.vrchat_not_found" }
                 break
             }
 

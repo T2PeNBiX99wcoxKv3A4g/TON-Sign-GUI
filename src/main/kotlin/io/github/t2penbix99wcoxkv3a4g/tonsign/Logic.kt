@@ -21,13 +21,13 @@ val delayToLoadingLog = mutableStateOf(false)
 
 internal fun startWatcher() {
     var delayToLoadingLog by delayToLoadingLog
-    
+
     if (logWatcherIsStarted)
         return
 
     LogicScope.launch {
-        runCatching { EventHandle }.getOrElse { Logger.error(it, "exception.something_is_not_right", it.message!!) }
-        
+        runCatching { EventHandle }.getOrElse { Logger.error(it, { "exception.something_is_not_right" }, it.localizedMessage!!) }
+
         while (true) {
             runCatching {
                 if (!VRChatWatcher.isVRChatRunning()) {
@@ -37,7 +37,7 @@ internal fun startWatcher() {
                 }
 
                 if (needToWait) {
-                    Logger.info("log.wait_until_join_game")
+                    Logger.info { "log.wait_until_join_game" }
                     delayToLoadingLog = true
                     delay(60000)
                 }
@@ -52,7 +52,7 @@ internal fun startWatcher() {
                 logWatcher.monitorRoundType()
                 EventBus.unregister(logWatcher)
             }.getOrElse {
-                Logger.error(it, "exception.something_is_not_right", it.message!!)
+                Logger.error(it, { "exception.something_is_not_right" }, it.localizedMessage!!)
                 needToWait = false
             }
         }

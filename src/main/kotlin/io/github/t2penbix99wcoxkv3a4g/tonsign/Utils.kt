@@ -2,10 +2,12 @@ package io.github.t2penbix99wcoxkv3a4g.tonsign
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import java.io.File
+import java.io.InputStream
+import java.net.URL
 import java.nio.file.Path
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
-import java.util.Properties
+import java.util.*
 import kotlin.io.path.Path
 
 object Utils {
@@ -33,16 +35,14 @@ object Utils {
     val version: String
         get() = versionProperties.getProperty("version") ?: "0.0.0"
 
-    fun resourceUrl(name: String) = this.javaClass.getResource(name)
+    fun resourceUrl(name: String): URL? = this.javaClass.getResource(name)
 
     fun resourceFile(name: String): File? {
-        val url = resourceUrl(name)
-        if (url == null)
-            return null
+        val url = resourceUrl(name) ?: return null
         return File(url.file)
     }
 
-    fun resourceAsStream(name: String) = this.javaClass.getResourceAsStream(name)
+    fun resourceAsStream(name: String): InputStream? = this.javaClass.getResourceAsStream(name)
 
     init {
         versionProperties.load(resourceAsStream(VERSION_FILE))

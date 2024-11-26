@@ -9,9 +9,7 @@ import com.charleskorn.kaml.YamlMap
 import com.charleskorn.kaml.YamlScalar
 import com.charleskorn.kaml.yamlMap
 import io.github.t2penbix99wcoxkv3a4g.tonsign.Utils
-import io.github.t2penbix99wcoxkv3a4g.tonsign.ex.firstPath
-import io.github.t2penbix99wcoxkv3a4g.tonsign.ex.sha256
-import io.github.t2penbix99wcoxkv3a4g.tonsign.ex.toFile
+import io.github.t2penbix99wcoxkv3a4g.tonsign.ex.*
 import io.github.t2penbix99wcoxkv3a4g.tonsign.exception.FolderNotFoundException
 import io.github.t2penbix99wcoxkv3a4g.tonsign.logger.Logger
 import java.io.File
@@ -47,7 +45,7 @@ object LanguageManager {
     private fun checkDir() {
         if (!dir.exists())
             dir.mkdir()
-        
+
         internalLanguageList.forEach {
             val file = Path(Utils.currentWorkingDirectory, DIR, "$it$YML").toFile()
             if (file.exists()) return@forEach
@@ -59,7 +57,7 @@ object LanguageManager {
 
     private fun updateLanguage() {
         if (!dir.exists()) return
-        
+
         internalLanguageList.forEach {
             val file = Path(Utils.currentWorkingDirectory, DIR, "$it$YML").toFile()
             if (!file.exists()) return@forEach
@@ -79,11 +77,7 @@ object LanguageManager {
     private fun load() {
         runCatching {
             if (!dir.exists()) {
-                Logger.error(
-                    { this::class.simpleName!! },
-                    FolderNotFoundException("'${dir.path}' is not exists!"),
-                    "Can't found 'language' folder! Language is not working anymore."
-                )
+                Logger.error<LanguageManager>(FolderNotFoundException("'${dir.path}' is not exists!")) { "Can't found 'language' folder! Language is not working anymore." }
                 return
             }
             dir.listFiles { _, filename -> filename.endsWith(YML) }?.forEach {
@@ -93,7 +87,7 @@ object LanguageManager {
                 dataBase[langID] = data.yamlMap
             }
         }.getOrElse {
-            Logger.error({ this::class.simpleName!! }, it, "Initialization Failure: %s", it.message ?: "Unknown")
+            Logger.error<LanguageManager>(it, { "Initialization Failure: %s" }, it.message ?: "Unknown")
         }
     }
 
@@ -120,10 +114,10 @@ object LanguageManager {
         return dataBase[lang]!!.get<YamlScalar>(text)!!.content
     }
 
-    fun getByLang(lang: String, text: String, vararg objects: Any) = getByLang(lang, text).format(*objects)
-    fun get(text: String, vararg objects: Any) = getByLang(language, text, *objects)
+    fun getByLang(lang: String, text: String, vararg objects: Any?) = getByLang(lang, text).safeFormat(*objects)
+    fun get(text: String, vararg objects: Any?) = getByLang(language, text, *objects)
 
-    fun getWithEn(text: String, vararg objects: Any): String {
+    fun getWithEn(text: String, vararg objects: Any?): String {
         if (!exists(language, text) || language == "en" || get(text, *objects) == getByLang("en", text, *objects))
             return getByLang("en", text, *objects)
         return "${get(text, *objects)} (${getByLang("en", text, *objects)})"
