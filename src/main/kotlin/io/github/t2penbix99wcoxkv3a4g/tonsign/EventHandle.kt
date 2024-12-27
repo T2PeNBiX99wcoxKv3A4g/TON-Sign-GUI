@@ -3,6 +3,7 @@ package io.github.t2penbix99wcoxkv3a4g.tonsign
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
@@ -11,6 +12,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.window.Notification
 import io.github.t2penbix99wcoxkv3a4g.tonsign.data.RoundData
 import io.github.t2penbix99wcoxkv3a4g.tonsign.event.*
+import io.github.t2penbix99wcoxkv3a4g.tonsign.ex.*
 import io.github.t2penbix99wcoxkv3a4g.tonsign.interpreter.LogLevel
 import io.github.t2penbix99wcoxkv3a4g.tonsign.interpreter.LogLevel.*
 import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.ConfigManager
@@ -18,8 +20,10 @@ import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.SaveManager
 import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.TimerManager
 import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.i18n
 import io.github.t2penbix99wcoxkv3a4g.tonsign.roundType.GuessRoundType
+import io.github.t2penbix99wcoxkv3a4g.tonsign.roundType.RoundType
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.logic.model.PlayerData
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.logic.model.PlayerStatus
+import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.logic.model.Terror
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.logic.model.WonOrLost
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.nextPrediction
 import java.time.format.DateTimeFormatter
@@ -32,12 +36,13 @@ object EventHandle {
     internal val logs = mutableStateListOf<AnnotatedString>()
     internal val players = mutableStateListOf<PlayerData>()
     internal val nowWorldID = mutableStateOf("")
-    internal var isInWorld = mutableStateOf(false)
-    internal var lastTime = queries.selectLast().executeAsOneOrNull()?.MAX ?: 0L
+    internal val isInWorld = mutableStateOf(false)
+    internal val currentTime by lazy { mutableStateOf(queries.last() ?: 0L) }
 
     private var isRoundStart = false
     private var isTimerSet = false
     private var roundSkip = false
+    private var tempTerrors: ArrayList<Int>? = null
 
     init {
         EventBus.register(this)
@@ -45,43 +50,43 @@ object EventHandle {
 
     private fun exitDo() {
         nextPrediction.value = GuessRoundType.NIL
-
-        val roundData = queries.selectOfTime(lastTime).executeAsOneOrNull() ?: return
+        val currentTime by currentTime
+        val roundData = queries.timeOf(currentTime) ?: return
         if (roundData.isWon == WonOrLost.InProgress)
-            queries.updateIsWon(WonOrLost.UnKnown, lastTime)
-        queries.updateRoundTime(TimerManager.get(ROUND_TIMER_ID), lastTime)
-        queries.updatePlayerTime(TimerManager.get(ROUND_TIMER_ID), lastTime)
+            queries.setIsWon(currentTime, WonOrLost.UnKnown)
+        queries.setRoundTime(currentTime, TimerManager.get(ROUND_TIMER_ID))
+        queries.setPlayerTime(currentTime, TimerManager.get(ROUND_TIMER_ID))
     }
 
-    @Subscribe("OnExit")
+    @Subscribe(Events.OnExit)
     private fun onExit(event: OnExitEvent) {
         exitDo()
     }
 
-    @Subscribe("OnApplicationQuit")
+    @Subscribe(Events.OnVRChatQuit)
     private fun onVRChatQuit(event: OnVRChatQuitEvent) {
         exitDo()
     }
 
-    @Subscribe("OnNextPrediction")
+    @Subscribe(Events.OnNextPrediction)
     private fun onNextPrediction(event: OnNextPredictionEvent) {
         val guessRound = event.nextPrediction
         nextPrediction.value = guessRound
     }
 
-    @Subscribe("OnJoinRoom")
+    @Subscribe(Events.OnJoinRoom)
     private fun onJoinRoom(event: OnJoinRoomEvent) {
         val worldId = event.worldId
         isInWorld.value = true
         nowWorldID.value = worldId
     }
 
-    @Subscribe("OnLeftTON")
+    @Subscribe(Events.OnLeftTON)
     private fun onLeftTON(event: OnLeftTONEvent) {
         exitDo()
     }
 
-    @Subscribe("OnLeftRoom")
+    @Subscribe(Events.OnLeftRoom)
     private fun onLeftRoom(event: OnLeftRoomEvent) {
         players.clear()
         isInWorld.value = false
@@ -90,39 +95,43 @@ object EventHandle {
         isTimerSet = false
     }
 
-    @Subscribe("OnRoundStart")
+    @Subscribe(Events.OnRoundStart)
     private fun onRoundStart(event: OnRoundStartEvent) {
         val time = event.time
         val round = event.roundType
         val map = event.map
         val mapId = event.mapId
-        val roundData = queries.selectOfTime(lastTime).executeAsOneOrNull()
+        var currentTime by currentTime
+        val lastRoundData = queries.timeOf(currentTime)
 
-        if (roundData != null && roundData.isWon == WonOrLost.InProgress)
-            queries.updateIsWon(WonOrLost.UnKnown, lastTime)
-
-        val logTime = time.toInstant().epochSecond
-        val newRoundData = queries.selectOfTime(logTime).executeAsOneOrNull()
+        if (lastRoundData != null && lastRoundData.isWon == WonOrLost.InProgress)
+            queries.setIsWon(currentTime, WonOrLost.UnKnown)
+        currentTime = time.toInstant().epochSecond
+        val newRoundData = queries.timeOf(currentTime)
+        var newTerrors = tempTerrors ?: arrayListOf(-1, -1, -1)
+        
+        // For some reason not unknown id
+        if (round == RoundType.Fog)
+            newTerrors = arrayListOf(Terror.UNKNOWN,Terror.UNKNOWN,Terror.UNKNOWN)
 
         if (newRoundData == null)
-            queries.insert(
+            queries.add(
                 RoundData(
-                    time = logTime,
+                    time = currentTime,
                     roundType = round,
                     map = map,
                     mapId = mapId,
                     roundTime = -1L,
                     playerTime = -1L,
                     players = players.toMutableList(),
-                    terrors = arrayListOf(-1, -1, -1),
+                    terrors = newTerrors,
                     isDeath = false,
                     isWon = WonOrLost.InProgress
                 )
             )
         else
             roundSkip = true
-
-        lastTime = time.toInstant().epochSecond
+        tempTerrors = null
         isRoundStart = true
     }
 
@@ -146,13 +155,14 @@ object EventHandle {
         if (!isRoundStart) return
         isRoundStart = false
 
-        val roundData = queries.selectOfTime(lastTime).executeAsOneOrNull() ?: return
+        val currentTime by currentTime
+        val roundData = queries.timeOf(currentTime) ?: return
         if (roundData.isWon == WonOrLost.InProgress)
-            queries.updateIsWon(WonOrLost.UnKnown, lastTime)
-        queries.updateRoundTime(TimerManager.get(ROUND_TIMER_ID), lastTime)
+            queries.setIsWon(currentTime, WonOrLost.UnKnown)
+        queries.setRoundTime(currentTime, TimerManager.get(ROUND_TIMER_ID))
     }
 
-    @Subscribe("OnRoundOver")
+    @Subscribe(Events.OnRoundOver)
     private fun onRoundOver(event: OnRoundOverEvent) {
         val guessRound = event.lastPrediction
         sendNotificationOnRoundOver(guessRound)
@@ -172,7 +182,7 @@ object EventHandle {
         trayState.sendNotification(newPlayerNotification)
     }
 
-    @Subscribe("OnPlayerJoinedRoom")
+    @Subscribe(Events.OnPlayerJoinedRoom)
     private fun onPlayerJoinedRoom(event: OnPlayerJoinedRoomEvent) {
         val player = event.playerData
         players.add(player)
@@ -190,7 +200,7 @@ object EventHandle {
         trayState.sendNotification(playerLeftNotification)
     }
 
-    @Subscribe("OnPlayerLeftRoom")
+    @Subscribe(Events.OnPlayerLeftRoom)
     private fun onPlayerLeftRoom(event: OnPlayerLeftRoomEvent) {
         val player = event.playerData
         val isInWorld by isInWorld
@@ -200,8 +210,8 @@ object EventHandle {
 
         if (!isRoundStart) return
 
-        val lastTime = lastTime
-        val roundData = queries.selectOfTime(lastTime).executeAsOneOrNull()
+        val currentTime by currentTime
+        val roundData = queries.timeOf(currentTime)
         if (roundData == null || roundSkip) return
         val players = roundData.players
         val data = players.find { it.id == player.id }
@@ -212,14 +222,14 @@ object EventHandle {
             players[i].status = PlayerStatus.Left
         else
             players[i].status = PlayerStatus.Unknown
-        queries.updatePlayers(players, lastTime)
+        queries.setPlayers(currentTime, players)
     }
 
-    @Subscribe("OnPlayerDeath")
+    @Subscribe(Events.OnPlayerDeath)
     private fun onPlayerDeath(event: OnPlayerDeathEvent) {
         var player = event.playerData
-        val lastTime = lastTime
-        val roundData = queries.selectOfTime(lastTime).executeAsOneOrNull()
+        val currentTime by currentTime
+        val roundData = queries.timeOf(currentTime)
         if (roundData == null || roundSkip) return
         val players = roundData.players
         val data = players.find { it.name == player.name }
@@ -229,56 +239,60 @@ object EventHandle {
         if (player.id.isNullOrBlank())
             player = player.copy(id = data.id)
         players[i] = player
-        queries.updatePlayers(players, lastTime)
+        queries.setPlayers(currentTime, players)
     }
 
-    @Subscribe("OnRoundWon")
+    @Subscribe(Events.OnRoundWon)
     private fun onRoundWon(event: OnRoundWonEvent) {
-        val lastTime = lastTime
-        val roundData = queries.selectOfTime(lastTime).executeAsOneOrNull()
+        val currentTime by currentTime
+        val roundData = queries.timeOf(currentTime)
         if (roundData == null || roundSkip) return
-        queries.updateIsWon(WonOrLost.Won, lastTime)
+        queries.setIsWon(currentTime, WonOrLost.Won)
     }
 
-    @Subscribe("OnRoundLost")
+    @Subscribe(Events.OnRoundLost)
     private fun onRoundLost(event: OnRoundLostEvent) {
-        val lastTime = lastTime
-        val roundData = queries.selectOfTime(lastTime).executeAsOneOrNull()
+        val currentTime by currentTime
+        val roundData = queries.timeOf(currentTime)
         if (roundData == null || roundSkip) return
-        queries.updateIsWon(WonOrLost.Lost, lastTime)
+        queries.setIsWon(currentTime, WonOrLost.Lost)
     }
 
-    @Subscribe("OnRoundDeath")
+    @Subscribe(Events.OnRoundDeath)
     private fun onRoundDeath(event: OnRoundDeathEvent) {
-        val lastTime = lastTime
-        val roundData = queries.selectOfTime(lastTime).executeAsOneOrNull()
+        val currentTime by currentTime
+        val roundData = queries.timeOf(currentTime)
         if (roundData == null || roundSkip) return
-        queries.updatePlayerTime(TimerManager.get(ROUND_TIMER_ID), lastTime)
-        queries.updateIsDeath(true, lastTime)
+        queries.setPlayerTime(currentTime, TimerManager.get(ROUND_TIMER_ID))
+        queries.setIsDeath(currentTime, true)
     }
 
-    @Subscribe("OnKillerSet")
+    @Subscribe(Events.OnKillerSet)
     private fun onKillerSet(event: OnKillerSetEvent) {
         val terrors = event.killerMatrix
+        val currentTime by currentTime
         if (!isTimerSet && terrors[0] > -1) {
             TimerManager.set(ROUND_TIMER_ID)
             isTimerSet = true
         }
-        val lastTime = lastTime
-        val roundData = queries.selectOfTime(lastTime).executeAsOneOrNull()
+        if (!isRoundStart) {
+            tempTerrors = terrors
+            return
+        }
+        val roundData = queries.timeOf(currentTime)
         if (roundData == null || roundSkip) return
-        queries.updateTerrors(terrors, lastTime)
+        queries.setTerrors(currentTime, terrors)
     }
 
-    @Subscribe("OnHideTerrorShowUp")
+    @Subscribe(Events.OnHideTerrorShowUp)
     private fun onHideTerrorShowUp(event: OnHideTerrorShowUpEvent) {
         val terrorId = event.newTerrorId
-        val lastTime = lastTime
-        val roundData = queries.selectOfTime(lastTime).executeAsOneOrNull()
+        val lastTime by currentTime
+        val roundData = queries.timeOf(lastTime)
         if (roundData == null || roundSkip) return
         val terrors = roundData.terrors
         terrors[0] = terrorId
-        queries.updateTerrors(terrors, lastTime)
+        queries.setTerrors(lastTime, terrors)
     }
 
     private fun getLogLevelColor(level: LogLevel): Color {
@@ -290,7 +304,7 @@ object EventHandle {
         }
     }
 
-    @Subscribe("OnReadLog")
+    @Subscribe(Events.OnReadLog)
     private fun onReadLog(event: OnReadLogEvent) {
         val log = event.logEvent
         val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
