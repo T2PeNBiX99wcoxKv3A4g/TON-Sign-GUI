@@ -26,7 +26,9 @@ import androidx.navigation.NavHostController
 import io.github.t2penbix99wcoxkv3a4g.tonsign.EventHandle
 import io.github.t2penbix99wcoxkv3a4g.tonsign.data.RoundData
 import io.github.t2penbix99wcoxkv3a4g.tonsign.event.*
+import io.github.t2penbix99wcoxkv3a4g.tonsign.ex.getAll
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ex.swapList
+import io.github.t2penbix99wcoxkv3a4g.tonsign.ex.timeOf
 import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.SaveManager
 import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.TimerManager
 import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.i18n
@@ -76,38 +78,39 @@ class TabBodyRoundDatas : TabBodyBase() {
         EventBus.register(this)
     }
 
+    // TODO: completely use sql data
     private fun refresh() {
-        roundDatas.swapList(queries.selectAll().executeAsList())
+        roundDatas.swapList(queries.getAll())
     }
-    
-    @Subscribe("OnRoundOver")
+
+    @Subscribe(Events.OnRoundOver)
     private fun onRoundOver(event: OnRoundOverEvent) = refresh()
-    
-    @Subscribe("OnRoundStart")
+
+    @Subscribe(Events.OnRoundStart)
     private fun onRoundStart(event: OnRoundStartEvent) = refresh()
-    
-    @Subscribe("OnRoundLost")
+
+    @Subscribe(Events.OnRoundLost)
     private fun onRoundLost(event: OnRoundLostEvent) = refresh()
-    
-    @Subscribe("OnRoundDeath")
+
+    @Subscribe(Events.OnRoundDeath)
     private fun onRoundDeath(event: OnRoundDeathEvent) = refresh()
-    
-    @Subscribe("OnRoundWon")
+
+    @Subscribe(Events.OnRoundWon)
     private fun onRoundWon(event: OnRoundWonEvent) = refresh()
-    
-    @Subscribe("OnKillerSet")
+
+    @Subscribe(Events.OnKillerSet)
     private fun onKillterSet(event: OnKillerSetEvent) = refresh()
-    
-    @Subscribe("OnHideTerrorShowUp")
+
+    @Subscribe(Events.OnHideTerrorShowUp)
     private fun onHideTerrorShowUp(event: OnHideTerrorShowUpEvent) = refresh()
-    
-    @Subscribe("OnPlayerLeftRoom")
+
+    @Subscribe(Events.OnPlayerLeftRoom)
     private fun onPlayerLeftRoom(event: OnPlayerLeftRoomEvent) = refresh()
-    
-    @Subscribe("OnLeftTON")
+
+    @Subscribe(Events.OnLeftTON)
     private fun onLeftTON(event: OnLeftTONEvent) = refresh()
-    
-    @Subscribe("OnJoinTON")
+
+    @Subscribe(Events.OnJoinTON)
     private fun onJoinTON(event: OnJoinTONEvent) = refresh()
 
     @Composable
@@ -283,11 +286,10 @@ class TabBodyRoundDatas : TabBodyBase() {
         ) {
             CupcakeEXTheme {
                 val isInWorld by remember { EventHandle.isInWorld }
-                val lastTime by remember { mutableStateOf(EventHandle.lastTime) }
-                val roundData = queries.selectOfTime(lastTime).executeAsOneOrNull()
-
-                if (roundDatas.isEmpty() || roundData == null) return@CupcakeEXTheme
-
+                val lastTime by EventHandle.currentTime
+                val roundDataState = mutableStateOf(queries.timeOf(lastTime))
+                if (roundDatas.isEmpty() || roundDataState.value == null) return@CupcakeEXTheme
+                val roundData = roundDataState.value!!
                 val players = remember { mutableStateListOf<PlayerData>() }
 
                 players.swapList(roundData.players)
