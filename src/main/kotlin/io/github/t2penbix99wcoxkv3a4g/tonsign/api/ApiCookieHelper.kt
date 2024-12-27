@@ -23,10 +23,7 @@
  */
 package io.github.t2penbix99wcoxkv3a4g.tonsign.api
 
-import io.github.t2penbix99wcoxkv3a4g.tonsign.event.EventBus
-import io.github.t2penbix99wcoxkv3a4g.tonsign.event.OnSecretsLoadedEvent
-import io.github.t2penbix99wcoxkv3a4g.tonsign.event.OnSecretsStartSaveEvent
-import io.github.t2penbix99wcoxkv3a4g.tonsign.event.Subscribe
+import io.github.t2penbix99wcoxkv3a4g.tonsign.event.*
 import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.CookieData
 import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.toCookie
 import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.toData
@@ -154,13 +151,13 @@ object ApiCookieHelper {
         loadStore(_clientCookieStore, clientCookieStore)
     }
 
-    @Subscribe("OnSecretsLoaded")
+    @Subscribe(Events.OnSecretsLoaded)
     private fun onLoaded(event: OnSecretsLoadedEvent) {
         val secrets = event.secrets
         load(secrets.serverCookieStore, secrets.clientCookieStore)
     }
 
-    @Subscribe("OnSecretsStartSave")
+    @Subscribe(Events.OnSecretsStartSave)
     private fun onStartSave(event: OnSecretsStartSaveEvent) {
         val secrets = event.secrets
         secrets.serverCookieStore.clear()

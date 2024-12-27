@@ -5,7 +5,9 @@ import androidx.compose.runtime.mutableStateOf
 import io.github.t2penbix99wcoxkv3a4g.tonsign.OSCSender
 import io.github.t2penbix99wcoxkv3a4g.tonsign.Utils
 import io.github.t2penbix99wcoxkv3a4g.tonsign.event.*
-import io.github.t2penbix99wcoxkv3a4g.tonsign.ex.*
+import io.github.t2penbix99wcoxkv3a4g.tonsign.ex.firstPath
+import io.github.t2penbix99wcoxkv3a4g.tonsign.ex.lastPath
+import io.github.t2penbix99wcoxkv3a4g.tonsign.ex.middlePath
 import io.github.t2penbix99wcoxkv3a4g.tonsign.exception.UnknownRoundTypeException
 import io.github.t2penbix99wcoxkv3a4g.tonsign.exception.WrongRecentRoundException
 import io.github.t2penbix99wcoxkv3a4g.tonsign.interpreter.LogInterpreter
@@ -238,7 +240,7 @@ class LogWatcher(logFile: File) {
         roundLog.add(classification)
     }
 
-    @Subscribe("OnReadLog")
+    @Subscribe(Events.OnReadLog)
     private fun onReadLog(event: OnReadLogEvent) {
         val log = event.logEvent
 

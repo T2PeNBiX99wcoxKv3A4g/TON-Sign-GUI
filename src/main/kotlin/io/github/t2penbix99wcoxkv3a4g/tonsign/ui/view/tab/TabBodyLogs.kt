@@ -26,6 +26,7 @@ import androidx.compose.ui.window.rememberWindowState
 import androidx.navigation.NavHostController
 import ch.qos.logback.classic.Level
 import io.github.t2penbix99wcoxkv3a4g.tonsign.event.EventBus
+import io.github.t2penbix99wcoxkv3a4g.tonsign.event.Events
 import io.github.t2penbix99wcoxkv3a4g.tonsign.event.OnLogAppendEvent
 import io.github.t2penbix99wcoxkv3a4g.tonsign.event.Subscribe
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ex.swapList
@@ -83,7 +84,7 @@ class TabBodyLogs : TabBodyBase() {
         }
     }
 
-    @Subscribe("OnLogAppend")
+    @Subscribe(Events.OnLogAppend)
     private fun onLogAppend(event: OnLogAppendEvent) {
         val logEvent = event.loggingEvent
         val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS")
