@@ -151,7 +151,7 @@ class Terror(val id: Int, val terrorId: Int, val roundType: RoundType) {
             "walpurgisnacht",// 3 TODO: Not sure
             "parhelion",// 4
             "a005",// 5
-            "voidwalker",// 6
+            "chomper",// 6
             "knight_of_toren",// 7
             "tragedy",// 8
             "apathy",// 9
