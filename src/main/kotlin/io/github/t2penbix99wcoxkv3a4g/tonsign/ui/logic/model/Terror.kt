@@ -252,6 +252,18 @@ class Terror(val id: Int, val terrorId: Int, val roundType: RoundType) {
         return "${terrorType()}${idStr.padStart(3, '0')}"
     }
 
+    private fun normalOralternate(): String {
+        val notFound = "gui.terror.name.not_found".i18nWithEn()
+        if (terrorId >= normals.size) return notFound
+
+        var orName = ""
+
+        if (terrorId < alternates.size)
+            orName = "gui.terror.name.alternate.${alternates[terrorId]}".i18nWithEn()
+
+        return "${"gui.terror.name.normal.${normals[terrorId]}".i18nWithEn()} ${if (terrorId < alternates.size) "|" else ""} $orName".trim()
+    }
+
     private fun nameFromID(): String {
         val notFound = "gui.terror.name.not_found".i18nWithEn()
 
@@ -297,17 +309,8 @@ class Terror(val id: Int, val terrorId: Int, val roundType: RoundType) {
             RoundType.Twilight -> "gui.terror.name.twilight.apocalypse_bird".i18nWithEn()
             RoundType.Solstice -> "gui.terror.name.solstice.pandora".i18nWithEn()
             RoundType.Run -> "gui.terror.name.run.the_meat_ball_man".i18nWithEn()
-
-            RoundType.Fog -> {
-                if (terrorId >= normals.size) return notFound
-
-                var orName = ""
-
-                if (terrorId < alternates.size)
-                    orName = "gui.terror.name.alternate.${alternates[terrorId]}".i18nWithEn()
-
-                return "${"gui.terror.name.normal.${normals[terrorId]}".i18nWithEn()} ${if (terrorId < alternates.size) "|" else ""} $orName".trim()
-            }
+            RoundType.Fog -> normalOralternate()
+            RoundType.Ghost -> normalOralternate()
 
             else -> {
                 if (terrorId >= normals.size) return notFound
