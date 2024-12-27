@@ -27,6 +27,7 @@ object RoundTypeConvert {
         "Custom"// 20
     )
 
+    @Suppress("MemberVisibilityCanBePrivate")
     val JPRoundTypes: List<String> = listOf(
         "クラシック",// 1
         "霧",// 2
@@ -50,14 +51,13 @@ object RoundTypeConvert {
         "カスタム"// 20
     )
 
-    val ExemptRounds: List<RoundType> = listOf(
+    private val ExemptRounds: List<RoundType> = listOf(
         RoundType.MysticMoon,
         RoundType.Twilight,
-        RoundType.Solstice,
-        RoundType.ColdNight
+        RoundType.Solstice
     )
 
-    val SpecialRounds: List<RoundType> = listOf(
+    private val SpecialRounds: List<RoundType> = listOf(
         RoundType.Fog,
         RoundType.Punished,
         RoundType.Sabotage,
@@ -68,10 +68,11 @@ object RoundTypeConvert {
         RoundType.EightPages,
         RoundType.Unbound,
         RoundType.DoubleTrouble,
-        RoundType.Ghost
+        RoundType.Ghost,
+        RoundType.ColdNight
     )
 
-    val ClassicRounds: List<RoundType> = listOf(
+    private val ClassicRounds: List<RoundType> = listOf(
         RoundType.Classic,
         RoundType.BloodMoon,
         RoundType.Run
