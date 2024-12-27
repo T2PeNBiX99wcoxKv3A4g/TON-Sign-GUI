@@ -135,7 +135,7 @@ class Terror(val id: Int, val terrorId: Int, val roundType: RoundType) {
             "parhelion_s_victims",// 124
             "bed_mecha",// 125
             "killer_rabbit",// 126
-            "bravera",// 127 TODO: Seem getting removed
+            "bravera",// 127
             "missing_no",// 128
             "living_shadow",// 129
             "the_plague_doctor",// 130
