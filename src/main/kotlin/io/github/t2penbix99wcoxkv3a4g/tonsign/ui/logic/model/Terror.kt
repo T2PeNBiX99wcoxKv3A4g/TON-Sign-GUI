@@ -148,7 +148,7 @@ class Terror(val id: Int, val terrorId: Int, val roundType: RoundType) {
         private val alternates = listOf(
             "decayed_sponge",// 1
             "whiteface",// 2
-            "walpurgisnacht",// 3 TODO: Not sure
+            "sanic",// 3
             "parhelion",// 4
             "a005",// 5
             "chomper",// 6
@@ -180,7 +180,7 @@ class Terror(val id: Int, val terrorId: Int, val roundType: RoundType) {
             "the_red_mist",// 32
             "sakuya_the_ripper",// 33
             "dev_maulers",// 34
-            "sanic", // 35 TODO: Maybe is wrong id
+            "walpurgisnacht",// 35 TODO: Maybe is wrong id
             "restless_creator",// 36
             "overseer" // 37 Should not be show in game but still add it
         )
