@@ -4,7 +4,7 @@
 
 ## Original Idea By [\~Emerald~](https://github.com/Emmyvee/TON-Sign)
 
-**TON Sign GUI** is a complete rework GUI version for the [**TON Sign**](https://github.com/Emmyvee/TON-Sign).
+**TON Sign GUI** is a complete rework GUI version of the [**TON Sign**](https://github.com/Emmyvee/TON-Sign).
 This asset uses OSC to display the next
 round type beside the start button, meaning you should never miss another Alternate round again!
 
@@ -21,10 +21,10 @@ round type beside the start button, meaning you should never miss another Altern
 
 # [Download](https://github.com/T2PeNBiX99wcoxKv3A4g/TON-Sign-GUI/releases/latest)
 
-### 🚨 Important Notice 🚨
+[//]: # (### 🚨 Important Notice 🚨)
 
-**You still need to download asset
-from [original repository](https://github.com/Emmyvee/TON-Sign?tab=readme-ov-file#-important-notice-)**
+**You need to download asset from [original repository](https://github.com/Emmyvee/TON-Sign?tab=readme-ov-file#-important-notice-) and [fork repository](https://github.com/T2PeNBiX99wcoxKv3A4g/TON-Sign) for now**
+### TODO
 
 ---
 
