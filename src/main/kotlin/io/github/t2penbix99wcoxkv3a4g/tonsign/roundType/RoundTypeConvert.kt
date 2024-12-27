@@ -53,7 +53,8 @@ object RoundTypeConvert {
     val ExemptRounds: List<RoundType> = listOf(
         RoundType.MysticMoon,
         RoundType.Twilight,
-        RoundType.Solstice
+        RoundType.Solstice,
+        RoundType.ColdNight
     )
 
     val SpecialRounds: List<RoundType> = listOf(
@@ -65,7 +66,6 @@ object RoundTypeConvert {
         RoundType.Bloodbath,
         RoundType.Midnight,
         RoundType.EightPages,
-        RoundType.ColdNight,
         RoundType.Unbound,
         RoundType.DoubleTrouble,
         RoundType.Ghost
