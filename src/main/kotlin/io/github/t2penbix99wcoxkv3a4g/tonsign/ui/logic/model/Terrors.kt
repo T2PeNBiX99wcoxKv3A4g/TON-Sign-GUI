@@ -3,6 +3,7 @@ package io.github.t2penbix99wcoxkv3a4g.tonsign.ui.logic.model
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import io.github.t2penbix99wcoxkv3a4g.tonsign.roundType.RoundType
 
+// TODO: Unbound and Double Trouble
 class Terrors {
     val ids: ArrayList<Int>
     val roundType: RoundType

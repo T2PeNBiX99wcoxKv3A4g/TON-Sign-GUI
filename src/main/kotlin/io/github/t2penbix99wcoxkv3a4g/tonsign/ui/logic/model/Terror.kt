@@ -96,7 +96,7 @@ class Terror(val id: Int, val terrorId: Int, val roundType: RoundType) {
             "sakuya_izayoi",// 85
             "arrival",// 86 TODO: Not sure
             "miros_birds",// 87
-            "bff",// 88 TODO: Not sure
+            "bff",// 88
             "scavenger",// 89
             "tinky_winky",// 90
             "tricky",// 91
@@ -135,7 +135,7 @@ class Terror(val id: Int, val terrorId: Int, val roundType: RoundType) {
             "parhelion_s_victims",// 124
             "bed_mecha",// 125
             "killer_rabbit",// 126
-            "random_flying_knife",// 127
+            "bravera",// 127 TODO: Seem getting removed
             "missing_no",// 128
             "living_shadow",// 129
             "the_plague_doctor",// 130
@@ -243,7 +243,7 @@ class Terror(val id: Int, val terrorId: Int, val roundType: RoundType) {
 
     private fun idToString(): String {
         when {
-            roundType == RoundType.MysticMoon || roundType == RoundType.BloodMoon || roundType == RoundType.Twilight || roundType == RoundType.Solstice || roundType == RoundType.Run -> return ""
+            roundType == RoundType.MysticMoon || roundType == RoundType.BloodMoon || roundType == RoundType.Twilight || roundType == RoundType.Solstice || roundType == RoundType.Run || roundType == RoundType.ColdNight -> return ""
             terrorId == UNKNOWN -> return "???"
         }
         var idStr = "${terrorId + 1}"
@@ -311,6 +311,7 @@ class Terror(val id: Int, val terrorId: Int, val roundType: RoundType) {
             RoundType.Run -> "gui.terror.name.run.the_meat_ball_man".i18nWithEn()
             RoundType.Fog -> normalOralternate()
             RoundType.Ghost -> normalOralternate()
+            RoundType.ColdNight -> "gui.terror.name.hide_cold_night.rift_monsters".i18nWithEn()
 
             else -> {
                 if (terrorId >= normals.size) return notFound
