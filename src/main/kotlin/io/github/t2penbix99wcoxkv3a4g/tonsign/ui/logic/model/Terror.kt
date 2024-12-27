@@ -228,7 +228,7 @@ class Terror(val id: Int, val terrorId: Int, val roundType: RoundType) {
 
         return when (roundType) {
             RoundType.Alternate -> "A"
-            RoundType.Fog -> {
+            RoundType.Fog, RoundType.Ghost -> {
                 if (terrorId >= alternates.size) return "T"
                 "T-A"
             }
