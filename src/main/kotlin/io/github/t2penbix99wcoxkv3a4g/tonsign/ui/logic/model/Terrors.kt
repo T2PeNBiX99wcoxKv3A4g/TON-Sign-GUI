@@ -5,8 +5,11 @@ import io.github.t2penbix99wcoxkv3a4g.tonsign.roundType.RoundType
 
 // TODO: Unbound and Double Trouble, 8 pages terror
 class Terrors {
+    @Suppress("MemberVisibilityCanBePrivate")
     val ids: ArrayList<Int>
     val roundType: RoundType
+
+    @Suppress("MemberVisibilityCanBePrivate")
     val terrors: List<Terror>
 
     constructor(ids: ArrayList<Int>, roundType: RoundType) {
@@ -38,7 +41,7 @@ class Terrors {
             val list = mutableListOf<String>()
 
             list.add(terrors[0].name)
-            
+
             if (roundType == RoundType.EightPages && terrors[0].isHideTerror())
                 return list.toList()
 
