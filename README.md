@@ -24,13 +24,18 @@ round type beside the start button, meaning you should never miss another Altern
 
 [//]: # (### 🚨 Important Notice 🚨)
 
-**You need to download asset from [original repository](https://github.com/Emmyvee/TON-Sign?tab=readme-ov-file#-important-notice-) and [fork repository](https://github.com/T2PeNBiX99wcoxKv3A4g/TON-Sign) for now**
-### TODO
+[//]: # ()
+[//]: # (**You need to download asset from [original repository]&#40;https://github.com/Emmyvee/TON-Sign?tab=readme-ov-file#-important-notice-&#41; and [fork repository]&#40;https://github.com/T2PeNBiX99wcoxKv3A4g/TON-Sign&#41; for now**)
 
----
+[//]: # (### TODO)
 
-## Setup Instructions
+[//]: # ()
+[//]: # (---)
 
-[Follow original Setup Instructions](https://github.com/Emmyvee/TON-Sign?tab=readme-ov-file#setup-instructions)
+[//]: # ()
+[//]: # (## Setup Instructions)
+
+[//]: # ()
+[//]: # ([Follow original Setup Instructions]&#40;https://github.com/Emmyvee/TON-Sign?tab=readme-ov-file#setup-instructions&#41;)
 
 ### TODO
