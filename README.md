@@ -1,6 +1,7 @@
 # TON Sign GUI
 
 ## Still very in development
+## まだリリースしてないからお待ちしてください
 
 ## Original Idea By [\~Emerald~](https://github.com/Emmyvee/TON-Sign)
 
