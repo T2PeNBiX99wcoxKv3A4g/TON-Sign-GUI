@@ -1,10 +1,7 @@
 package io.github.t2penbix99wcoxkv3a4g.tonsign
 
 import androidx.compose.material3.Text
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
@@ -18,6 +15,7 @@ import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.ConfigManager
 import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.i18nByLang
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.app
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.showConfirmExitWindow
+import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.showErrorWindows
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.showNeedRestartWindows
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.theme.CupcakeEXTheme
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.view.SelectionState
@@ -34,13 +32,16 @@ fun main() = application {
     var isVisible by remember { mutableStateOf(true) }
     var needRefresh by remember { needRefresh }
     val needRestart by remember { needRestart }
+    val logicHasError by remember { logicHasError }
     val windowState =
         rememberWindowState(position = Aligned(alignment = Alignment.Center), size = DpSize(800.dp, 600.dp))
     val refreshWindowState =
         rememberWindowState(position = Aligned(alignment = Alignment.Center), size = DpSize(300.dp, 260.dp))
     val onTop by remember { mutableStateOf(ConfigManager.config.onTop) }
 
-    startWatcher()
+    SideEffect {
+        startWatcher()
+    }
 
     if (isAskingToClose && !isVisible)
         isVisible = true
@@ -93,6 +94,9 @@ fun main() = application {
 
                 if (needRestart)
                     showNeedRestartWindows()
+                
+                if (logicHasError)
+                    showErrorWindows()
             }
         } else {
             Window(
