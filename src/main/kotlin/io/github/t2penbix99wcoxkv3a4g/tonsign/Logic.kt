@@ -3,10 +3,12 @@ package io.github.t2penbix99wcoxkv3a4g.tonsign
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.window.Notification
 import io.github.t2penbix99wcoxkv3a4g.tonsign.coroutineScope.LogicScope
 import io.github.t2penbix99wcoxkv3a4g.tonsign.event.EventBus
 import io.github.t2penbix99wcoxkv3a4g.tonsign.event.OnLogWatcherInitEvent
 import io.github.t2penbix99wcoxkv3a4g.tonsign.logger.Logger
+import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.i18n
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.logWatcher
 import io.github.t2penbix99wcoxkv3a4g.tonsign.watcher.LogWatcher
 import io.github.t2penbix99wcoxkv3a4g.tonsign.watcher.VRChatWatcher
@@ -18,15 +20,26 @@ private var runningTime = 0
 private var needToWait = false
 
 val delayToLoadingLog = mutableStateOf(false)
+val logicHasError = mutableStateOf(false)
+val logicError = mutableStateOf(Throwable())
 
 internal fun startWatcher() {
     var delayToLoadingLog by delayToLoadingLog
+    var logicHasError by logicHasError
+    var logicError by logicError
 
     if (logWatcherIsStarted)
         return
 
     LogicScope.launch {
-        runCatching { EventHandle }.getOrElse { Logger.error(it, { "exception.something_is_not_right" }, it.localizedMessage) }
+        runCatching { EventHandle }.getOrElse {
+            Logger.error(
+                it,
+                { "exception.something_is_not_right" },
+                it.localizedMessage,
+                it.stackTraceToString()
+            )
+        }
 
         while (true) {
             runCatching {
@@ -52,8 +65,17 @@ internal fun startWatcher() {
                 logWatcher.monitorRoundType()
                 EventBus.unregister(logWatcher)
             }.getOrElse {
-                Logger.error(it, { "exception.something_is_not_right" }, it.localizedMessage)
-                needToWait = false
+                logicError = it
+                logicHasError = true
+                Logger.error(it, { "exception.something_is_not_right" }, it.localizedMessage, it.stackTraceToString())
+                
+                val errorNotification = Notification(
+                    "gui.notification.error_title".i18n(),
+                    "gui.notification.error_message".i18n()
+                )
+
+                trayState.sendNotification(errorNotification)
+                return@launch
             }
         }
     }
