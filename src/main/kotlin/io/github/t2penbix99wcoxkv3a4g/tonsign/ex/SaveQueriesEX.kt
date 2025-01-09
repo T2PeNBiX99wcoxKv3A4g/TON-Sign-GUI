@@ -6,44 +6,97 @@ import io.github.t2penbix99wcoxkv3a4g.tonsign.data.SaveQueries
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.logic.model.PlayerData
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.logic.model.WonOrLost
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.sync.Mutex
+
+private val mutex = Mutex()
 
 fun SaveQueries.last() = runBlocking(SaveDataUpdateScope.coroutineContext) {
-    selectLast().executeAsOneOrNull()?.MAX
+    mutex.lock()
+    try {
+        selectLast().executeAsOneOrNull()?.MAX
+    } finally {
+        mutex.unlock()
+    }
 }
 
 fun SaveQueries.timeOf(time: Long) = runBlocking(SaveDataUpdateScope.coroutineContext) {
-    selectOfTime(time).executeAsOneOrNull()
+    mutex.lock()
+    try {
+        selectOfTime(time).executeAsOneOrNull()
+    } finally {
+        mutex.unlock()
+    }
 }
 
 fun SaveQueries.setIsWon(time: Long, isWon: WonOrLost) = runBlocking(SaveDataUpdateScope.coroutineContext) {
-    updateIsWon(isWon, time)
+    mutex.lock()
+    try {
+        updateIsWon(isWon, time)
+    } finally {
+        mutex.unlock()
+    }
 }
 
 fun SaveQueries.setRoundTime(time: Long, roundTime: Long) = runBlocking(SaveDataUpdateScope.coroutineContext) {
-    updateRoundTime(roundTime, time)
+    mutex.lock()
+    try {
+        updateRoundTime(roundTime, time)
+    } finally {
+        mutex.unlock()
+    }
 }
 
 fun SaveQueries.setPlayerTime(time: Long, playerTime: Long) = runBlocking(SaveDataUpdateScope.coroutineContext) {
-    updatePlayerTime(playerTime, time)
+    mutex.lock()
+    try {
+        updatePlayerTime(playerTime, time)
+    } finally {
+        mutex.unlock()
+    }
 }
 
 fun SaveQueries.add(roundData: RoundData) = runBlocking(SaveDataUpdateScope.coroutineContext) {
-    insert(roundData)
+    mutex.lock()
+    try {
+        insert(roundData)
+    } finally {
+        mutex.unlock()
+    }
 }
 
 fun SaveQueries.setPlayers(time: Long, players: MutableList<PlayerData>) =
     runBlocking(SaveDataUpdateScope.coroutineContext) {
-        updatePlayers(players, time)
+        mutex.lock()
+        try {
+            updatePlayers(players, time)
+        } finally {
+            mutex.unlock()
+        }
     }
 
 fun SaveQueries.setIsDeath(time: Long, isDeath: Boolean) = runBlocking(SaveDataUpdateScope.coroutineContext) {
-    updateIsDeath(isDeath, time)
+    mutex.lock()
+    try {
+        updateIsDeath(isDeath, time)
+    } finally {
+        mutex.unlock()
+    }
 }
 
 fun SaveQueries.setTerrors(time: Long, terrors: ArrayList<Int>) = runBlocking(SaveDataUpdateScope.coroutineContext) {
-    updateTerrors(terrors, time)
+    mutex.lock()
+    try {
+        updateTerrors(terrors, time)
+    } finally {
+        mutex.unlock()
+    }
 }
 
 fun SaveQueries.getAll() = runBlocking(SaveDataUpdateScope.coroutineContext) {
-    selectAll().executeAsList()
+    mutex.lock()
+    try {
+        selectAll().executeAsList()
+    } finally {
+        mutex.unlock()
+    }
 }
