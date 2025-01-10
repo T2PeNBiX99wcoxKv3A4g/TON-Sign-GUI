@@ -42,7 +42,7 @@ class TabBodyMain : TabBodyBase() {
     @Composable
     override fun view(navController: NavHostController, padding: PaddingValues) {
         val isWaitingVRChat by VRChatWatcher.isWaitingVRChat
-        val nextPredictionSet by nextPrediction
+        val nextPredictionGet by nextPrediction
         val delayToLoadingLog by delayToLoadingLog
         val isNotRunning by "gui.text.main.vrchat_is_not_running".i18nState()
         val roundSpecial by "gui.text.main.round_special".i18nState()
@@ -70,8 +70,8 @@ class TabBodyMain : TabBodyBase() {
                             val special = roundSpecial
                             val classic = roundClassic
 
-                            if (nextPredictionSet == GuessRoundType.Special || nextPredictionSet == GuessRoundType.Classic) {
-                                val nextPrediction by "gui.text.main.next_prediction".i18nState(if (nextPredictionSet == GuessRoundType.Special) special else classic)
+                            if (nextPredictionGet == GuessRoundType.Special || nextPredictionGet == GuessRoundType.Classic) {
+                                val nextPrediction by "gui.text.main.next_prediction".i18nState(if (nextPredictionGet == GuessRoundType.Special) special else classic)
                                 textBox(nextPrediction)
                             }
 

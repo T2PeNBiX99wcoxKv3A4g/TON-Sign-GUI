@@ -23,6 +23,7 @@ import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.logic.model.Terror
 import kotlinx.coroutines.delay
 import java.io.File
 import java.io.FileNotFoundException
+import java.util.*
 
 class LogWatcher(logFile: File) {
     companion object {
@@ -51,7 +52,6 @@ class LogWatcher(logFile: File) {
             return files.first()
         }
 
-        private const val BONUS_ACTIVE_KEYWORD = "BONUS ACTIVE!"
         private const val MASTER_CLIENT_SWITCHED_KEYWORD = "OnMasterClientSwitched"
         private const val SAVING_AVATAR_DATA_KEYWORD = "Saving Avatar Data:"
         private const val ROUND_TYPE_IS_KEYWORD = "round type is"
@@ -85,20 +85,19 @@ class LogWatcher(logFile: File) {
         private const val ROUND_MAP_LOCATION_KEYWORD = "This round is taking place at "
         private const val BEHAVIOUR_KEYWORD = "Behaviour"
         private const val HANDLE_APPLICATION_QUIT_KEYWORD = "HandleApplicationQuit"
-        private const val RANDOM_COUNT_CHANGE = 1
         private const val RANDOM_COUNT_RESET = 3
     }
 
     private val roundLog = mutableListOf<GuessRoundType>()
     private var lastPredictionForOSC = false
+    private var lastPredictionTabunForOSC = false
     private var lastPrediction = GuessRoundType.NIL
     private var lastRoundType = RoundType.Unknown
-    private var bonusFlag = false
     private var randomRound = RandomRoundType.Unknown
     private var randomCount = 0
-    private var lastRandomCount = -1
     private var wrongCount = 0
     private var isTONLoaded = false
+    private var roundFlags = EnumSet.of(RoundFlag.WaitingFirstSpecial)
 
     private val logInterpreter = LogInterpreter(logFile)
     val isInTON = mutableStateOf(false)
@@ -133,7 +132,7 @@ class LogWatcher(logFile: File) {
         return last[0] == last[2] && last[1] == last[3]
     }
 
-    private fun predictNextRound(): GuessRoundType {
+    private fun predictNextRound(round: RoundType): GuessRoundType {
         if (roundLog.size < 2)
             return GuessRoundType.Classic
 
@@ -170,16 +169,42 @@ class LogWatcher(logFile: File) {
             }
         }
 
-        if (randomCount >= maxRoundChange) {
-            lastRandomCount = randomCount
-            randomCount = RANDOM_COUNT_CHANGE
-            randomRound = if (randomRound == RandomRoundType.FAST) RandomRoundType.NORMAL else RandomRoundType.FAST
-            Logger.debug<LogWatcher> { "Random start to change, now random round is $randomRound" }
-        }
-
         Logger.debug<LogWatcher> { "randomCount: $randomCount, randomRound: $randomRound, maxRoundChange: $maxRoundChange" }
 
-        if (randomRound == RandomRoundType.FAST || bonusFlag)
+        when (randomRound) {
+            RandomRoundType.NORMAL -> {
+                when {
+                    last[1] == GuessRoundType.Classic && lastPrediction == GuessRoundType.Classic && RoundTypeConvert.isCorrectGuess(
+                        lastPrediction,
+                        round
+                    ) -> roundFlags.addSafe(RoundFlag.NotSure)
+
+                    lastPrediction == GuessRoundType.Classic && !RoundTypeConvert.isCorrectGuess(
+                        lastPrediction,
+                        round
+                    ) -> roundFlags.removeSafe(RoundFlag.NotSure)
+
+                    lastPrediction == GuessRoundType.Special && RoundTypeConvert.isCorrectGuess(
+                        lastPrediction,
+                        round
+                    ) -> roundFlags.removeSafe(RoundFlag.NotSure)
+
+                    lastPrediction == GuessRoundType.Special && !RoundTypeConvert.isCorrectGuess(
+                        lastPrediction,
+                        round
+                    ) -> roundFlags.removeSafe(RoundFlag.NotSure)
+                }
+            }
+
+            RandomRoundType.FAST -> {
+                // Too hard to guess
+                roundFlags.addSafe(RoundFlag.NotSure)
+            }
+
+            else -> {}
+        }
+
+        if (randomRound == RandomRoundType.FAST)
             return if (roundLog.last() == GuessRoundType.Special) GuessRoundType.Classic else GuessRoundType.Special
         else {
             val last2 = roundLog.takeLast(2)
@@ -211,30 +236,64 @@ class LogWatcher(logFile: File) {
     fun clear() {
         roundLog.clear()
         lastPredictionForOSC = false
+        lastPredictionTabunForOSC = false
         lastPrediction = GuessRoundType.NIL
-        bonusFlag = false
         randomRound = RandomRoundType.Unknown
         randomCount = 0
+        roundFlags.removeAll { true }
+        roundFlags.add(RoundFlag.WaitingFirstSpecial)
     }
 
     private fun updateRoundLog(round: RoundType) {
         var classification = round.classifyRound()
 
-        if (classification == GuessRoundType.Exempt) {
-            if (roundLog.size >= 2) {
-                val last = roundLog.takeLast(2)
+        when (classification) {
+            GuessRoundType.Exempt -> {
                 when {
-                    last[0] == GuessRoundType.Classic && last[1] == GuessRoundType.Classic -> classification =
-                        GuessRoundType.Special
+                    (round == RoundType.MysticMoon && roundFlags.contains(RoundFlag.MysticMoonFinish)) || (round == RoundType.BloodMoon && roundFlags.contains(
+                        RoundFlag.BloodMoonFinish
+                    )) || (round == RoundType.Twilight && roundFlags.contains(RoundFlag.TwilightFinish)) || (round == RoundType.Solstice && roundFlags.contains(
+                        RoundFlag.SolsticeFinish
+                    )) -> {
+                        if (roundFlags.contains(RoundFlag.NotSure))
+                            roundFlags.remove(RoundFlag.NotSure)
+                        classification = GuessRoundType.Special
+                    }
 
-                    last[0] == GuessRoundType.Classic && last[1] == GuessRoundType.Special -> classification =
-                        GuessRoundType.Classic
+                    else -> {
+                        when (round) {
+                            RoundType.MysticMoon -> roundFlags.add(RoundFlag.MysticMoonFinish)
+                            RoundType.BloodMoon -> roundFlags.add(RoundFlag.BloodMoonFinish)
+                            RoundType.Twilight -> roundFlags.add(RoundFlag.TwilightFinish)
+                            RoundType.Solstice -> roundFlags.add(RoundFlag.SolsticeFinish)
+                            else -> {}
+                        }
 
-                    last[0] == GuessRoundType.Special && last[1] == GuessRoundType.Classic -> classification =
-                        if (isAlternatePattern()) GuessRoundType.Special else GuessRoundType.Classic
+                        if (roundLog.size >= 2) {
+                            val last = roundLog.takeLast(2)
+                            when {
+                                last[0] == GuessRoundType.Classic && last[1] == GuessRoundType.Classic -> classification =
+                                    GuessRoundType.Special
+
+                                last[0] == GuessRoundType.Classic && last[1] == GuessRoundType.Special -> classification =
+                                    GuessRoundType.Classic
+
+                                last[0] == GuessRoundType.Special && last[1] == GuessRoundType.Classic -> classification =
+                                    if (isAlternatePattern()) GuessRoundType.Special else GuessRoundType.Classic
+                            }
+                        } else
+                            classification = GuessRoundType.Classic
+                        roundFlags.add(RoundFlag.NotSure)
+                    }
                 }
-            } else
-                classification = GuessRoundType.Classic
+            }
+
+            GuessRoundType.Special -> {
+                if (roundFlags.contains(RoundFlag.WaitingFirstSpecial))
+                    roundFlags.remove(RoundFlag.WaitingFirstSpecial)
+            }
+
+            else -> {}
         }
 
         roundLog.add(classification)
@@ -249,23 +308,20 @@ class LogWatcher(logFile: File) {
                 EventBus.publish(OnVRChatQuitEvent())
             }
 
-            // TERROR NIGHTS STRING, Maybe useless right now
-            BONUS_ACTIVE_KEYWORD in log.msg -> {
-                bonusFlag = true
-                Logger.info { "log.think_terror_nights" }
-            }
-
             MASTER_CLIENT_SWITCHED_KEYWORD in log.msg -> {
                 Logger.info { "log.host_just_left" }
                 clear()
                 OSCSender.send(true)
+                OSCSender.sendTabun(false)
                 lastPredictionForOSC = true
+                lastPredictionTabunForOSC = false
                 EventBus.publish(OnTONMasterClientSwitchedEvent())
             }
 
             SAVING_AVATAR_DATA_KEYWORD in log.msg -> {
                 Logger.info { "log.saving_avatar_data" }
                 OSCSender.send(lastPredictionForOSC)
+                OSCSender.sendTabun(lastPredictionTabunForOSC)
                 EventBus.publish(OnSavingAvatarDataEvent())
             }
 
@@ -448,7 +504,7 @@ class LogWatcher(logFile: File) {
 
                 val classic = "log.predict_next_round_classic".i18n()
                 val special = "log.predict_next_round_special".i18n()
-                val prediction = predictNextRound()
+                val prediction = predictNextRound(roundType)
                 val recentRoundsLog = getRecentRoundsLog(ConfigManager.config.maxRecentRounds)
 
                 lastPrediction = prediction
@@ -462,16 +518,17 @@ class LogWatcher(logFile: File) {
                 Logger.debug<LogWatcher> { "Full Recent Rounds: ${getRecentRoundsLog(200)}" }
 
                 val sendValue = prediction == GuessRoundType.Special
+                val sendTabunValue =
+                    roundFlags.contains(RoundFlag.WaitingFirstSpecial) || roundFlags.contains(RoundFlag.NotSure)
 
                 // Send OSC message
                 OSCSender.send(sendValue)
+                OSCSender.sendTabun(sendTabunValue)
                 lastPredictionForOSC = sendValue
+                lastPredictionTabunForOSC = sendTabunValue
                 lastRoundType = roundType
             }
         }
-
-        if (roundLog.size >= ROUND_FAST_CHANGE && bonusFlag)
-            bonusFlag = false
     }
 
     @Suppress("unused")

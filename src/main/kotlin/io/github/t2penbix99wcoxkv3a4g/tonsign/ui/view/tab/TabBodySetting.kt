@@ -45,6 +45,8 @@ class TabBodySetting : TabBodyBase() {
         var onTop by remember { mutableStateOf(ConfigManager.config.onTop) }
         val forceSendTrue by "gui.button.setting.force_send_true".i18nState()
         val forceSendFalse by "gui.button.setting.force_send_false".i18nState()
+        val forceSendTabunTrue by "gui.button.setting.force_send_tabun_true".i18nState()
+        val forceSendTabunFalse by "gui.button.setting.force_send_tabun_false".i18nState()
         val refresh by "gui.button.setting.refresh".i18nState()
         val scrollState = rememberScrollState()
 
@@ -66,6 +68,20 @@ class TabBodySetting : TabBodyBase() {
                 }
             ) {
                 Text(forceSendFalse)
+            }
+            Button(
+                onClick = {
+                    OSCSender.sendTabun(true)
+                }
+            ) {
+                Text(forceSendTabunTrue)
+            }
+            Button(
+                onClick = {
+                    OSCSender.sendTabun(false)
+                }
+            ) {
+                Text(forceSendTabunFalse)
             }
             Button(
                 onClick = {
