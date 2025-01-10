@@ -255,17 +255,16 @@ class LogWatcher(logFile: File) {
                     )) || (round == RoundType.Twilight && roundFlags.contains(RoundFlag.TwilightFinish)) || (round == RoundType.Solstice && roundFlags.contains(
                         RoundFlag.SolsticeFinish
                     )) -> {
-                        if (roundFlags.contains(RoundFlag.NotSure))
-                            roundFlags.remove(RoundFlag.NotSure)
+                        roundFlags.removeSafe(RoundFlag.NotSure)
                         classification = GuessRoundType.Special
                     }
 
                     else -> {
                         when (round) {
-                            RoundType.MysticMoon -> roundFlags.add(RoundFlag.MysticMoonFinish)
-                            RoundType.BloodMoon -> roundFlags.add(RoundFlag.BloodMoonFinish)
-                            RoundType.Twilight -> roundFlags.add(RoundFlag.TwilightFinish)
-                            RoundType.Solstice -> roundFlags.add(RoundFlag.SolsticeFinish)
+                            RoundType.MysticMoon -> roundFlags.addSafe(RoundFlag.MysticMoonFinish)
+                            RoundType.BloodMoon -> roundFlags.addSafe(RoundFlag.BloodMoonFinish)
+                            RoundType.Twilight -> roundFlags.addSafe(RoundFlag.TwilightFinish)
+                            RoundType.Solstice -> roundFlags.addSafe(RoundFlag.SolsticeFinish)
                             else -> {}
                         }
 
@@ -283,15 +282,12 @@ class LogWatcher(logFile: File) {
                             }
                         } else
                             classification = GuessRoundType.Classic
-                        roundFlags.add(RoundFlag.NotSure)
+                        roundFlags.addSafe(RoundFlag.NotSure)
                     }
                 }
             }
 
-            GuessRoundType.Special -> {
-                if (roundFlags.contains(RoundFlag.WaitingFirstSpecial))
-                    roundFlags.remove(RoundFlag.WaitingFirstSpecial)
-            }
+            GuessRoundType.Special -> roundFlags.removeSafe(RoundFlag.WaitingFirstSpecial)
 
             else -> {}
         }
