@@ -38,10 +38,8 @@ object EventBus {
         _events.emit(event)
     }
 
-    fun publish(event: Event) {
-        EventPushScope.launch {
-            publishSuspend(event)
-        }
+    fun publish(event: Event) = EventPushScope.launch {
+        publishSuspend(event)
     }
 
     private fun <T : Event> call(event: T) {
