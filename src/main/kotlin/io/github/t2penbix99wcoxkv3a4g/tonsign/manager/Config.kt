@@ -12,5 +12,9 @@ data class Config(
     var playerJoinedNotify: Boolean,
     var playerLeftNotify: Boolean,
     var autoScrollToDown: Boolean,
-    var onTop: Boolean
+    var onTop: Boolean,
+    var automaticTurnOnSign: Boolean,
+    var oscParamTonSign: String,
+    var oscParamTonSignTabun: String,
+    var oscParamTonSignOn: String
 )

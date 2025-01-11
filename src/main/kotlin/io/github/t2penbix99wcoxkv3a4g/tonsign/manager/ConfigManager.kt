@@ -28,7 +28,11 @@ object ConfigManager {
         playerJoinedNotify = true,
         playerLeftNotify = true,
         autoScrollToDown = true,
-        onTop = false
+        onTop = false,
+        automaticTurnOnSign = true,
+        oscParamTonSign = "TON_Sign",
+        oscParamTonSignTabun = "TON_Sign_Tabun",
+        oscParamTonSignOn = "TonSign/On"
     )
 
     private var _config: Config? = null

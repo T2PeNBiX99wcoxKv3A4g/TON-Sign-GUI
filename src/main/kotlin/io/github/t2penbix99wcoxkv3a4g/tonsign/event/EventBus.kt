@@ -6,6 +6,8 @@ import io.github.t2penbix99wcoxkv3a4g.tonsign.coroutineScope.EventCollectScope
 import io.github.t2penbix99wcoxkv3a4g.tonsign.coroutineScope.EventPushScope
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ex.firstPath
 import io.github.t2penbix99wcoxkv3a4g.tonsign.exception.WrongFunctionException
+import io.github.t2penbix99wcoxkv3a4g.tonsign.logger.Logger
+import io.github.t2penbix99wcoxkv3a4g.tonsign.logger.debug
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -51,7 +53,15 @@ object EventBus {
             eventScope.launch {
                 it.value.filter { a -> a.findAnnotation<Subscribe>()?.event == name }.forEach { f ->
                     f.isAccessible = true
-                    f.call(it.key, event)
+                    runCatching { f.call(it.key, event) }.getOrElse { throwable ->
+                        Logger.debug<EventBus> { "Call: ${it.key} ${it.value} ${it::class.simpleName}" }
+                        Logger.error(
+                            throwable,
+                            { "exception.something_is_not_right" },
+                            throwable.localizedMessage,
+                            throwable.stackTraceToString()
+                        )
+                    }
                 }
             }
         }
@@ -60,7 +70,15 @@ object EventBus {
 
             eventScope.launch {
                 it.isAccessible = true
-                it.call(event)
+                runCatching { it.call(event) }.getOrElse { throwable ->
+                    Logger.debug<EventBus> { "Call: $it ${it.name}" }
+                    Logger.error(
+                        throwable,
+                        { "exception.something_is_not_right" },
+                        throwable.localizedMessage,
+                        throwable.stackTraceToString()
+                    )
+                }
             }
         }
     }

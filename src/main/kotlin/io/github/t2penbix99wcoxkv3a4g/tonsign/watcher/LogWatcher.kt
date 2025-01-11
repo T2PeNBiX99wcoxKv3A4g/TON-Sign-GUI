@@ -56,8 +56,6 @@ class LogWatcher(logFile: File) {
         private const val SAVING_AVATAR_DATA_KEYWORD = "Saving Avatar Data:"
         private const val ROUND_TYPE_IS_KEYWORD = "round type is"
         private const val ROUND_OVER_KEYWORD = "RoundOver"
-        private const val ROUND_FAST_CHANGE = 6
-        private const val ROUND_NORMAL_CHANGE = 15
         private const val WORLD_JOIN_KEYWORD =
             "Memory Usage: after world loaded "
         private const val WORLD_TON_KEYWORD = "wrld_a61cdabe-1218-4287-9ffc-2a4d1414e5bd"
@@ -105,15 +103,6 @@ class LogWatcher(logFile: File) {
     init {
         EventBus.register(this)
     }
-
-    private val maxRoundChange: Int
-        get() {
-            return when (randomRound) {
-                RandomRoundType.FAST -> ROUND_FAST_CHANGE
-                RandomRoundType.NORMAL -> ROUND_NORMAL_CHANGE
-                else -> ROUND_NORMAL_CHANGE
-            }
-        }
 
     private fun isAlternatePattern(): Boolean {
         if (roundLog.size < 3) {
@@ -169,27 +158,26 @@ class LogWatcher(logFile: File) {
             }
         }
 
-        Logger.debug<LogWatcher> { "randomCount: $randomCount, randomRound: $randomRound, maxRoundChange: $maxRoundChange" }
+        Logger.debug<LogWatcher> { "randomCount: $randomCount, randomRound: $randomRound" }
 
         when (randomRound) {
             RandomRoundType.NORMAL -> {
                 when {
-                    last[1] == GuessRoundType.Classic && lastPrediction == GuessRoundType.Classic && RoundTypeConvert.isCorrectGuess(
-                        lastPrediction,
-                        round
-                    ) -> roundFlags.addSafe(RoundFlag.NotSure)
+                    last[0] == GuessRoundType.Special && last[1] == GuessRoundType.Classic -> roundFlags.addSafe(
+                        RoundFlag.NotSure
+                    )
 
-                    lastPrediction == GuessRoundType.Classic && !RoundTypeConvert.isCorrectGuess(
-                        lastPrediction,
-                        round
-                    ) -> roundFlags.removeSafe(RoundFlag.NotSure)
-
-                    lastPrediction == GuessRoundType.Special && RoundTypeConvert.isCorrectGuess(
+                    last[0] == GuessRoundType.Special && lastPrediction == GuessRoundType.Classic && !RoundTypeConvert.isCorrectGuess(
                         lastPrediction,
                         round
                     ) -> roundFlags.removeSafe(RoundFlag.NotSure)
 
-                    lastPrediction == GuessRoundType.Special && !RoundTypeConvert.isCorrectGuess(
+                    last[0] == GuessRoundType.Classic && lastPrediction == GuessRoundType.Special && !RoundTypeConvert.isCorrectGuess(
+                        lastPrediction,
+                        round
+                    ) -> roundFlags.removeSafe(RoundFlag.NotSure)
+
+                    last[1] == GuessRoundType.Special && RoundTypeConvert.isCorrectGuess(
                         lastPrediction,
                         round
                     ) -> roundFlags.removeSafe(RoundFlag.NotSure)
@@ -197,11 +185,27 @@ class LogWatcher(logFile: File) {
             }
 
             RandomRoundType.FAST -> {
-                // Too hard to guess
-                roundFlags.addSafe(RoundFlag.NotSure)
+                when {
+                    last[0] == GuessRoundType.Special && last[1] == GuessRoundType.Classic -> roundFlags.addSafe(
+                        RoundFlag.NotSure
+                    )
+
+                    last[0] == GuessRoundType.Classic && last[1] == GuessRoundType.Special -> roundFlags.removeSafe(
+                        RoundFlag.NotSure
+                    )
+                }
             }
 
             else -> {}
+        }
+
+        Logger.debug<LogWatcher> {
+            "last[0]: ${last[0]}, last[1]: ${last[1]} lastPrediction: $lastPrediction, isCorrectGuess: ${
+                RoundTypeConvert.isCorrectGuess(
+                    lastPrediction,
+                    round
+                )
+            }"
         }
 
         if (randomRound == RandomRoundType.FAST)
@@ -318,6 +322,8 @@ class LogWatcher(logFile: File) {
                 Logger.info { "log.saving_avatar_data" }
                 OSCSender.send(lastPredictionForOSC)
                 OSCSender.sendTabun(lastPredictionTabunForOSC)
+                if (ConfigManager.config.automaticTurnOnSign)
+                    OSCSender.sendOn(true)
                 EventBus.publish(OnSavingAvatarDataEvent())
             }
 
@@ -330,6 +336,8 @@ class LogWatcher(logFile: File) {
                     isTONLoaded = true
                     isInTON.value = true
                     Logger.info { "log.is_join_ton" }
+                    if (ConfigManager.config.automaticTurnOnSign)
+                        OSCSender.sendOn(true)
                     EventBus.publish(OnJoinTONEvent())
                 }
             }
@@ -339,6 +347,8 @@ class LogWatcher(logFile: File) {
                 if (isTONLoaded) {
                     isInTON.value = false
                     Logger.info { "log.is_left_ton" }
+                    if (ConfigManager.config.automaticTurnOnSign)
+                        OSCSender.sendOn(false)
                     EventBus.publish(OnLeftTONEvent())
                     clear()
                 }

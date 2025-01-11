@@ -56,6 +56,7 @@ object EventHandle {
             queries.setIsWon(currentTime, WonOrLost.UnKnown)
         queries.setRoundTime(currentTime, TimerManager.get(ROUND_TIMER_ID))
         queries.setPlayerTime(currentTime, TimerManager.get(ROUND_TIMER_ID))
+        TimerManager.set(ROUND_TIMER_ID)
     }
 
     @Subscribe(Events.OnExit)

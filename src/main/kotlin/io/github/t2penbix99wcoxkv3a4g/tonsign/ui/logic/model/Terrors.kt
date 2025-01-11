@@ -11,6 +11,8 @@ class Terrors {
 
     @Suppress("MemberVisibilityCanBePrivate")
     val terrors: List<Terror>
+    
+    // TODO: 8 pages T035 + T012 = slender
 
     constructor(ids: ArrayList<Int>, roundType: RoundType) {
         this.ids = ids

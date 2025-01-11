@@ -96,7 +96,7 @@ fun textBox(text: AnnotatedString) {
 fun switchWithText(text: String, checked: Boolean, onCheckedChange: ((Boolean) -> Unit)?) {
     Row(
         Modifier
-            .width(320.dp)
+            .width(520.dp)
             .padding(horizontal = 16.dp)
     ) {
         Text(

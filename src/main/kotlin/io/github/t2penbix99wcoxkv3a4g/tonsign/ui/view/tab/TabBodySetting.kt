@@ -33,6 +33,7 @@ class TabBodySetting : TabBodyBase() {
         Icon(Icons.Default.Settings, contentDescription = title.i18n())
     }
 
+    // TODO: Remake
     @Composable
     override fun view(navController: NavHostController, padding: PaddingValues) {
         var needRefresh by remember { needRefresh }
@@ -43,6 +44,7 @@ class TabBodySetting : TabBodyBase() {
         var playerLeftNotify by remember { mutableStateOf(ConfigManager.config.playerLeftNotify) }
         var autoScrollToDown by remember { mutableStateOf(ConfigManager.config.autoScrollToDown) }
         var onTop by remember { mutableStateOf(ConfigManager.config.onTop) }
+        var automaticTurnOnSign by remember { mutableStateOf(ConfigManager.config.automaticTurnOnSign) }
         val forceSendTrue by "gui.button.setting.force_send_true".i18nState()
         val forceSendFalse by "gui.button.setting.force_send_false".i18nState()
         val forceSendTabunTrue by "gui.button.setting.force_send_tabun_true".i18nState()
@@ -120,13 +122,11 @@ class TabBodySetting : TabBodyBase() {
             ) {
                 Text("Save secrets")
             }
-            // TODO: Can't click
             switchWithText("Send next round notification when round is over", roundNotify) {
                 roundNotify = it
                 ConfigManager.config.roundNotify = it
             }
             if (roundNotify) {
-                // TODO: Can't click
                 switchWithText("Only send notification when round is special", roundNotifyOnlySpecial) {
                     roundNotifyOnlySpecial = it
                     ConfigManager.config.roundNotifyOnlySpecial = it
@@ -143,6 +143,10 @@ class TabBodySetting : TabBodyBase() {
             switchWithText("Auto scroll to down in logs", autoScrollToDown) {
                 autoScrollToDown = it
                 ConfigManager.config.autoScrollToDown = it
+            }
+            switchWithText("Automatic Turn On Sign", automaticTurnOnSign) {
+                automaticTurnOnSign = it
+                ConfigManager.config.automaticTurnOnSign = it
             }
             switchWithText("Always On Top", onTop) {
                 onTop = it
