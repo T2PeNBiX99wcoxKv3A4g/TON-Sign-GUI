@@ -4,6 +4,7 @@ import io.github.t2penbix99wcoxkv3a4g.tonsign.coroutineScope.TimerScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
+// TODO: Timer class
 object TimerManager {
     private var mainTime = 0L
     private val times = mutableMapOf<String, Long>()
