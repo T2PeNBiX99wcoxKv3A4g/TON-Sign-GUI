@@ -322,7 +322,7 @@ class LogWatcher(logFile: File) {
                 Logger.info { "log.saving_avatar_data" }
                 OSCSender.send(lastPredictionForOSC)
                 OSCSender.sendTabun(lastPredictionTabunForOSC)
-                if (ConfigManager.config.automaticTurnOnSign)
+                if (ConfigManager.config.automaticTurnOnSign && isTONLoaded)
                     OSCSender.sendOn(true)
                 EventBus.publish(OnSavingAvatarDataEvent())
             }
