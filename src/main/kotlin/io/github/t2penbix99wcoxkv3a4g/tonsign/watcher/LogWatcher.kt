@@ -84,6 +84,8 @@ class LogWatcher(logFile: File) {
         private const val BEHAVIOUR_KEYWORD = "Behaviour"
         private const val HANDLE_APPLICATION_QUIT_KEYWORD = "HandleApplicationQuit"
         private const val RANDOM_COUNT_RESET = 3
+        private const val ATTEMPTING_TO_LOAD_STRING_FROM_URL_KEYWORD = "Attempting to load String from URL"
+        private const val STRING_DOWNLOAD_KEYWORD = "String Download"
     }
 
     private val roundLog = mutableListOf<GuessRoundType>()
@@ -95,6 +97,7 @@ class LogWatcher(logFile: File) {
     private var randomCount = 0
     private var wrongCount = 0
     private var isTONLoaded = false
+    private var hasFirstSend = false
     private var roundFlags = EnumSet.of(RoundFlag.WaitingFirstSpecial)
 
     private val logInterpreter = LogInterpreter(logFile)
@@ -322,9 +325,23 @@ class LogWatcher(logFile: File) {
                 Logger.info { "log.saving_avatar_data" }
                 OSCSender.send(lastPredictionForOSC)
                 OSCSender.sendTabun(lastPredictionTabunForOSC)
-                if (ConfigManager.config.automaticTurnOnSign && isTONLoaded)
-                    OSCSender.sendOn(true)
+
+                if (isTONLoaded) {
+                    if (ConfigManager.config.automaticTurnOnSign)
+                        OSCSender.sendOn(true)
+                    OSCSender.sendTabun(roundFlags.contains(RoundFlag.WaitingFirstSpecial))
+                }
+
                 EventBus.publish(OnSavingAvatarDataEvent())
+            }
+
+            log.name == STRING_DOWNLOAD_KEYWORD && ATTEMPTING_TO_LOAD_STRING_FROM_URL_KEYWORD in log.msg -> {
+                // TODO: Log info
+                if (!isTONLoaded || hasFirstSend) return
+                if (ConfigManager.config.automaticTurnOnSign)
+                    OSCSender.sendOn(true)
+                OSCSender.sendTabun(true)
+                hasFirstSend = true
             }
 
             WORLD_JOIN_KEYWORD in log.msg -> {
@@ -345,6 +362,8 @@ class LogWatcher(logFile: File) {
             WORLD_LEFT_KEYWORD in log.msg -> {
                 EventBus.publish(OnLeftRoomEvent())
                 if (isTONLoaded) {
+                    isTONLoaded = false
+                    hasFirstSend = false
                     isInTON.value = false
                     Logger.info { "log.is_left_ton" }
                     if (ConfigManager.config.automaticTurnOnSign)
