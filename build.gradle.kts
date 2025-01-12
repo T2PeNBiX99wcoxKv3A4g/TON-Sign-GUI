@@ -63,7 +63,7 @@ dependencies {
     
     implementation("org.codehaus.janino:janino:${property("janino.version")}")
     implementation("org.fusesource.jansi:jansi:${property("jansi.version")}")
-    implementation("javassist:javassist:${property("javassist.version")}")
+//    implementation("javassist:javassist:${property("javassist.version")}")
     
 //    implementation("io.github.kdroidfilter:composenativetray:${property("composenativetray.version")}")
     
@@ -165,7 +165,7 @@ compose.desktop {
         }
 
         buildTypes.release.proguard {
-            version.set("7.5.0")
+            version.set("7.6.1")
             configurationFiles.from("proguard.pro")
         }
     }
