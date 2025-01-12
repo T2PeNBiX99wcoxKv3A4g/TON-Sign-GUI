@@ -65,7 +65,7 @@ dependencies {
     implementation("org.fusesource.jansi:jansi:${property("jansi.version")}")
     implementation("javassist:javassist:${property("javassist.version")}")
     
-    implementation("io.github.kdroidfilter:composenativetray:${property("composenativetray.version")}")
+//    implementation("io.github.kdroidfilter:composenativetray:${property("composenativetray.version")}")
     
     implementation("com.github.vrchatapi:vrchatapi-java:${property("vrchatapi.version")}")
     // define a BOM and its version
