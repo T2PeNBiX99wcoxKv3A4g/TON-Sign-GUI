@@ -54,6 +54,7 @@ class LogWatcher(logFile: File) {
 
         private const val MASTER_CLIENT_SWITCHED_KEYWORD = "OnMasterClientSwitched"
         private const val SAVING_AVATAR_DATA_KEYWORD = "Saving Avatar Data:"
+        private const val FOUND_SDK3_AVATAR_DESCRIPTOR_KEYWORD = "Found SDK3 avatar descriptor"
         private const val ROUND_TYPE_IS_KEYWORD = "round type is"
         private const val ROUND_OVER_KEYWORD = "RoundOver"
         private const val WORLD_JOIN_KEYWORD =
@@ -263,7 +264,7 @@ class LogWatcher(logFile: File) {
                         RoundFlag.SolsticeFinish
                     )) -> {
                         roundFlags.removeSafe(RoundFlag.NotSure)
-                        classification = GuessRoundType.Special
+                        classification = GuessRoundType.Classic
                     }
 
                     else -> {
@@ -323,25 +324,35 @@ class LogWatcher(logFile: File) {
 
             SAVING_AVATAR_DATA_KEYWORD in log.msg -> {
                 Logger.info { "log.saving_avatar_data" }
-                OSCSender.send(lastPredictionForOSC)
-                OSCSender.sendTabun(lastPredictionTabunForOSC)
-
-                if (isTONLoaded) {
-                    if (ConfigManager.config.automaticTurnOnSign)
-                        OSCSender.sendOn(true)
-                    OSCSender.sendTabun(roundFlags.contains(RoundFlag.WaitingFirstSpecial))
-                }
-
                 EventBus.publish(OnSavingAvatarDataEvent())
             }
 
+            FOUND_SDK3_AVATAR_DESCRIPTOR_KEYWORD in log.msg -> {
+                Logger.info { "log.found_sdk3_avatar_descriptor" }
+                if (isTONLoaded) {
+                    OSCSender.send(lastPredictionForOSC)
+                    OSCSender.sendTabun(lastPredictionTabunForOSC)
+
+                    if (ConfigManager.config.automaticTurnOnSign)
+                        OSCSender.sendOn(true)
+                    if (roundFlags.contains(RoundFlag.WaitingFirstSpecial))
+                        OSCSender.sendTabun(true)
+                }
+                EventBus.publish(OnFoundSDK3AvatarDescriptorEvent())
+            }
+
             log.name == STRING_DOWNLOAD_KEYWORD && ATTEMPTING_TO_LOAD_STRING_FROM_URL_KEYWORD in log.msg -> {
-                // TODO: Log info
-                if (!isTONLoaded || hasFirstSend) return
-                if (ConfigManager.config.automaticTurnOnSign)
-                    OSCSender.sendOn(true)
-                OSCSender.sendTabun(true)
-                hasFirstSend = true
+                val url = log.msg.middlePath('\'', '\'').trim()
+                Logger.info({ "log.load_string" }, url)
+
+                if (isTONLoaded && !hasFirstSend) {
+                    hasFirstSend = true
+                    if (ConfigManager.config.automaticTurnOnSign)
+                        OSCSender.sendOn(true)
+                    OSCSender.sendTabun(true)
+                }
+
+                EventBus.publish(OnStringDownloadEvent(url))
             }
 
             WORLD_JOIN_KEYWORD in log.msg -> {
@@ -353,8 +364,6 @@ class LogWatcher(logFile: File) {
                     isTONLoaded = true
                     isInTON.value = true
                     Logger.info { "log.is_join_ton" }
-                    if (ConfigManager.config.automaticTurnOnSign)
-                        OSCSender.sendOn(true)
                     EventBus.publish(OnJoinTONEvent())
                 }
             }
