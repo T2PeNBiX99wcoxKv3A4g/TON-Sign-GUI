@@ -329,6 +329,7 @@ class LogWatcher(logFile: File) {
 
             FOUND_SDK3_AVATAR_DESCRIPTOR_KEYWORD in log.msg -> {
                 Logger.info { "log.found_sdk3_avatar_descriptor" }
+                
                 if (isTONLoaded) {
                     OSCSender.send(lastPredictionForOSC)
                     OSCSender.sendTabun(lastPredictionTabunForOSC)
@@ -338,6 +339,7 @@ class LogWatcher(logFile: File) {
                     if (roundFlags.contains(RoundFlag.WaitingFirstSpecial))
                         OSCSender.sendTabun(true)
                 }
+                
                 EventBus.publish(OnFoundSDK3AvatarDescriptorEvent())
             }
 
@@ -370,6 +372,7 @@ class LogWatcher(logFile: File) {
 
             WORLD_LEFT_KEYWORD in log.msg -> {
                 EventBus.publish(OnLeftRoomEvent())
+                
                 if (isTONLoaded) {
                     isTONLoaded = false
                     hasFirstSend = false
@@ -386,6 +389,7 @@ class LogWatcher(logFile: File) {
                 val player = log.msg.lastPath(WORLD_PLAYER_LEFT_KEYWORD).trim()
                 val name = player.firstPath('(').trim()
                 val id = player.middlePath('(', ')').trim()
+                
                 EventBus.publish(OnPlayerLeftRoomEvent(PlayerData(name, id, PlayerStatus.Left, null)))
             }
 
@@ -393,6 +397,7 @@ class LogWatcher(logFile: File) {
                 val player = log.msg.lastPath(WORLD_PLAYER_JOINED_KEYWORD).trim()
                 val name = player.firstPath('(').trim()
                 val id = player.middlePath('(', ')').trim()
+                
                 EventBus.publish(OnPlayerJoinedRoomEvent(PlayerData(name, id, PlayerStatus.Alive, null)))
             }
 
@@ -420,6 +425,7 @@ class LogWatcher(logFile: File) {
                 if (!isInTON.value) return
                 val name = log.msg.middlePath('[', ']').trim()
                 val msg = log.msg.lastPath(']').trim()
+                
                 EventBus.publish(OnPlayerDeathEvent(PlayerData(name, null, PlayerStatus.Death, msg)))
             }
 
