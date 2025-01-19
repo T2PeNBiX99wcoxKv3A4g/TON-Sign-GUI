@@ -5,7 +5,6 @@ import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.i18nWithEn
 import io.github.t2penbix99wcoxkv3a4g.tonsign.roundType.RoundFlags
 import io.github.t2penbix99wcoxkv3a4g.tonsign.roundType.RoundType
 
-// TODO: Unbound and Double Trouble, 8 pages terror
 class Terrors {
     @Suppress("MemberVisibilityCanBePrivate")
     val ids: ArrayList<Int>

@@ -364,6 +364,8 @@ class TabBodyRoundDatas : TabBodyBase() {
                             return@Column
                         }
 
+                        val recentRounds by logWatcher!!.getRecentRoundsLogState
+
                         Text(map)
                         Text(RoundTypeConvert.getTextOfRound(roundType))
 
@@ -379,6 +381,9 @@ class TabBodyRoundDatas : TabBodyBase() {
                             WonOrLost.Left -> Text(left)
                             WonOrLost.InProgress -> Text(roundIsStillInProgress)
                         }
+
+                        if (recentRounds.isNotBlank())
+                            Text("gui.text.main.recent_rounds".i18n(recentRounds))
 
                         if (playerTime > 0)
                             Text("$playerHoursText:$playerMinutesText:$playerSecondsText.$playerMilliSecondsText / $hoursText:$minutesText:$secondsText.$milliSecondsText")

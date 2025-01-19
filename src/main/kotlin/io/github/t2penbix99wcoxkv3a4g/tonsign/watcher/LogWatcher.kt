@@ -309,13 +309,13 @@ class LogWatcher(logFile: File) {
 
         when {
             WINTER_KEYWORD in log.msg -> {
-                // TODO: Log
+                Logger.info { "log.is_winter" }
                 if (!isTONLoaded) return
                 roundFlags.add(RoundFlag.Winter)
             }
 
             HANDLE_APPLICATION_QUIT_KEYWORD in log.msg -> {
-                // TODO: Log
+                Logger.info { "log.vrchat_quit" }
                 EventBus.publish(OnVRChatQuitEvent())
             }
 
@@ -352,7 +352,9 @@ class LogWatcher(logFile: File) {
             }
 
             log.name == STRING_DOWNLOAD_KEYWORD && ATTEMPTING_TO_LOAD_STRING_FROM_URL_KEYWORD in log.msg -> {
-                val url = log.msg.middlePath('\'', '\'').trim()
+                val urlStr = log.msg.lastPath(ATTEMPTING_TO_LOAD_STRING_FROM_URL_KEYWORD).trim()
+                val url = urlStr.substring(1, urlStr.length - 1)
+                Logger.debug<LogWatcher> { "url: $url, msg: ${log.msg}" }
                 Logger.info({ "log.load_string" }, url)
 
                 if (isTONLoaded && !hasFirstSend) {
@@ -368,7 +370,7 @@ class LogWatcher(logFile: File) {
             WORLD_JOIN_KEYWORD in log.msg -> {
                 val worldId = log.msg.lastPath(WORLD_JOIN_KEYWORD).middlePath('[', ']')
 
-                // TODO: Log
+                Logger.info({ "log.joined_instance" }, worldId)
                 EventBus.publish(OnJoinRoomEvent(worldId))
 
                 if (worldId == WORLD_TON_KEYWORD) {
@@ -380,7 +382,7 @@ class LogWatcher(logFile: File) {
             }
 
             WORLD_LEFT_KEYWORD in log.msg -> {
-                // TODO: Log
+                Logger.info { "log.left_instance" }
                 EventBus.publish(OnLeftRoomEvent())
 
                 if (isTONLoaded) {
@@ -400,7 +402,7 @@ class LogWatcher(logFile: File) {
                 val name = player.firstPath('(').trim()
                 val id = player.middlePath('(', ')').trim()
 
-                // TODO: Log
+                Logger.info({ "log.user_left_instance" }, name, id)
                 EventBus.publish(OnPlayerLeftRoomEvent(PlayerData(name, id, PlayerStatus.Left, null)))
             }
 
@@ -409,31 +411,31 @@ class LogWatcher(logFile: File) {
                 val name = player.firstPath('(').trim()
                 val id = player.middlePath('(', ')').trim()
 
-                // TODO: Log
+                Logger.info({ "log.user_joined_instance" }, name, id)
                 EventBus.publish(OnPlayerJoinedRoomEvent(PlayerData(name, id, PlayerStatus.Alive, null)))
             }
 
             ROUND_OVER_KEYWORD in log.msg -> {
                 if (!isTONLoaded) return
-                // TODO: Log
+                Logger.info { "log.round_over" }
                 EventBus.publish(OnRoundOverEvent(lastPrediction, roundFlags))
             }
 
             ROUND_WON_KEYWORD in log.msg -> {
                 if (!isTONLoaded) return
-                // TODO: Log
+                Logger.info { "log.round_won" }
                 EventBus.publish(OnRoundWonEvent())
             }
 
             ROUND_LOST_KEYWORD in log.msg -> {
                 if (!isTONLoaded) return
-                // TODO: Log
+                Logger.info { "log.round_lost" }
                 EventBus.publish(OnRoundLostEvent())
             }
 
             ROUND_DEATH_KEYWORD in log.msg -> {
                 if (!isTONLoaded) return
-                // TODO: Log
+                Logger.info { "log.round_death" }
                 EventBus.publish(OnRoundDeathEvent())
             }
 
@@ -441,8 +443,8 @@ class LogWatcher(logFile: File) {
                 if (!isTONLoaded) return
                 val name = log.msg.middlePath('[', ']').trim()
                 val msg = log.msg.lastPath(']').trim()
-
-                // TODO: Log
+                
+                Logger.info({ "log.player_death" }, name, msg)
                 EventBus.publish(OnPlayerDeathEvent(PlayerData(name, null, PlayerStatus.Death, msg)))
             }
 

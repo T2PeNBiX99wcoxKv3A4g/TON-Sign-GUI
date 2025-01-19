@@ -289,8 +289,7 @@ class Terror(val id: Int, val terrorId: Int, val roundType: RoundType, val round
                     if (newId >= hideUnbounds.size) return notFound
                     "gui.terror.name.hide.unbound.${hideUnbounds[newId]}".i18nWithEn()
                 }
-
-//                // TODO: Remove this, 8 page have own id system
+                
 //                RoundType.EightPages -> {
 //                    if (newId >= hide8Pages.size) return notFound
 //                    "gui.terror.name.8_pages.${hide8Pages[newId]}".i18nWithEn()
