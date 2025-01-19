@@ -443,7 +443,7 @@ class LogWatcher(logFile: File) {
                 if (!isTONLoaded) return
                 val name = log.msg.middlePath('[', ']').trim()
                 val msg = log.msg.lastPath(']').trim()
-                
+
                 Logger.info({ "log.player_death" }, name, msg)
                 EventBus.publish(OnPlayerDeathEvent(PlayerData(name, null, PlayerStatus.Death, msg)))
             }
@@ -519,7 +519,7 @@ class LogWatcher(logFile: File) {
                     }
                 }
 
-                // TODO: Log
+                Logger.info({ "log.killer_id_set" }, killerMatrix[0], killerMatrix[1], killerMatrix[2])
                 EventBus.publish(OnKillerSetEvent(killerMatrix))
             }
 
