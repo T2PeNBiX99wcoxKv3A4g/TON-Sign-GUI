@@ -5,10 +5,7 @@ import app.cash.sqldelight.db.QueryResult
 import app.cash.sqldelight.db.SqlCursor
 import app.cash.sqldelight.driver.jdbc.sqlite.JdbcSqliteDriver
 import io.github.t2penbix99wcoxkv3a4g.tonsign.Utils
-import io.github.t2penbix99wcoxkv3a4g.tonsign.data.ArrayIntListColumnAdapter
-import io.github.t2penbix99wcoxkv3a4g.tonsign.data.LongEnumColumnAdapter
-import io.github.t2penbix99wcoxkv3a4g.tonsign.data.PlayerDataListColumnAdapter
-import io.github.t2penbix99wcoxkv3a4g.tonsign.data.RoundData
+import io.github.t2penbix99wcoxkv3a4g.tonsign.data.*
 import io.github.t2penbix99wcoxkv3a4g.tonsign.data.Save as SqlSave
 
 // https://github.com/sqldelight/sqldelight/issues/1605
@@ -37,6 +34,7 @@ object SaveManager {
             driver,
             roundDataAdapter = RoundData.Adapter(
                 roundTypeAdapter = LongEnumColumnAdapter(),
+                roundFlagsAdapter = RoundFlagsColumnAdapter,
                 mapIdAdapter = IntColumnAdapter,
                 playersAdapter = PlayerDataListColumnAdapter,
                 terrorsAdapter = ArrayIntListColumnAdapter,

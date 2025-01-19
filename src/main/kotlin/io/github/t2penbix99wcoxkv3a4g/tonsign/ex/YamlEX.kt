@@ -12,79 +12,77 @@ inline fun <reified T> Yaml.safeDecodeFromFile(
     default: T,
     onError: (Throwable) -> Unit,
     onFailure: (Throwable) -> Unit
-): T {
-    return runCatching { decodeFromStream<T>(file.inputStream()) }.getOrElse {
-        onError(it)
+): T = runCatching { decodeFromStream<T>(file.inputStream()) }.getOrElse {
+    onError(it)
 
-        runCatching {
-            val data = parseToYamlNode(file.readText())
+    runCatching {
+        val data = parseToYamlNode(file.readText())
 
-            data.yamlMap.entries.filter { yaml ->
-                val prop = default!!::class.memberProperties.find { it.name == yaml.key.content }
-                prop != null
-            }.forEach { yaml ->
-                val prop =
-                    default!!::class.memberProperties.find { it.name == yaml.key.content } as KMutableProperty1<*, *>
-                when (val value = yaml.value) {
-                    is YamlScalar -> {
-                        val value2 = value.yamlScalar
-                        val returnType = prop.returnType
-                        val classifier = returnType.classifier!!
-                        val kClass = classifier as KClass<*>
+        data.yamlMap.entries.filter { yaml ->
+            val prop = default!!::class.memberProperties.find { it.name == yaml.key.content }
+            prop != null
+        }.forEach { yaml ->
+            val prop =
+                default!!::class.memberProperties.find { it.name == yaml.key.content } as KMutableProperty1<*, *>
+            when (val value = yaml.value) {
+                is YamlScalar -> {
+                    val value2 = value.yamlScalar
+                    val returnType = prop.returnType
+                    val classifier = returnType.classifier!!
+                    val kClass = classifier as KClass<*>
 
-                        runCatching {
-                            prop.setter.call(
-                                default, when (kClass.qualifiedName) {
-                                    "kotlin.String" -> value2.content
-                                    "kotlin.Int" -> value2.toInt()
-                                    "kotlin.Float" -> value2.toFloat()
-                                    "kotlin.Boolean" -> value2.toBoolean()
-                                    "kotlin.Long" -> value2.toLong()
-                                    "kotlin.Double" -> value2.toDouble()
-                                    "kotlin.Byte" -> value2.toByte()
-                                    "kotlin.Char" -> value2.toChar()
-                                    "kotlin.Short" -> value2.toShort()
-                                    else -> value2.content
-                                }
-                            )
-                        }.getOrElse {
-                            Utils.logger.debug(it) { "Yaml set failed: ${yaml.key.content}" }
-                        }
-
-                        Utils.logger.debug { "Yaml Value Type Qualified Name: ${yaml.key.content} | ${kClass.qualifiedName}" }
+                    runCatching {
+                        prop.setter.call(
+                            default, when (kClass.qualifiedName) {
+                                "kotlin.String" -> value2.content
+                                "kotlin.Int" -> value2.toInt()
+                                "kotlin.Float" -> value2.toFloat()
+                                "kotlin.Boolean" -> value2.toBoolean()
+                                "kotlin.Long" -> value2.toLong()
+                                "kotlin.Double" -> value2.toDouble()
+                                "kotlin.Byte" -> value2.toByte()
+                                "kotlin.Char" -> value2.toChar()
+                                "kotlin.Short" -> value2.toShort()
+                                else -> value2.content
+                            }
+                        )
+                    }.getOrElse {
+                        Utils.logger.debug(it) { "Yaml set failed: ${yaml.key.content}" }
                     }
 
-                    is YamlMap -> {
-                        val value2 = value.yamlMap
-                        val returnType = prop.returnType
-                        val classifier = returnType.classifier!!
-                        val kClass = classifier as KClass<*>
-
-                        value2.entries
-
-                        TODO("Not finish")
-                    }
-
-                    is YamlList -> {
-                        val value2 = value.yamlList
-                        val list = value2.items
-                        val returnType = prop.returnType
-                        val classifier = returnType.classifier!!
-                        val kClass = classifier as KClass<*>
-
-                        TODO("Not finish")
-                    }
-
-                    is YamlNull -> TODO("Not finish")
-                    is YamlTaggedNode -> TODO("Not finish")
+                    Utils.logger.debug { "Yaml Value Type Qualified Name: ${yaml.key.content} | ${kClass.qualifiedName}" }
                 }
-            }
 
-            default
-        }.getOrElse {
-            onFailure(it)
-            default
+                is YamlMap -> {
+                    val value2 = value.yamlMap
+                    val returnType = prop.returnType
+                    val classifier = returnType.classifier!!
+                    val kClass = classifier as KClass<*>
+
+                    value2.entries
+
+                    TODO("Not finish")
+                }
+
+                is YamlList -> {
+                    val value2 = value.yamlList
+                    val list = value2.items
+                    val returnType = prop.returnType
+                    val classifier = returnType.classifier!!
+                    val kClass = classifier as KClass<*>
+
+                    TODO("Not finish")
+                }
+
+                is YamlNull -> TODO("Not finish")
+                is YamlTaggedNode -> TODO("Not finish")
+            }
         }
+
+        default
+    }.getOrElse {
+        onFailure(it)
+        default
     }
 }
 

@@ -164,7 +164,7 @@ class TabBodyRoundDatas : TabBodyBase() {
             return
 
         val roundData = roundDataTry.value!!
-        val terrors = Terrors(roundData.terrors, roundData.roundType)
+        val terrors = Terrors(roundData.terrors, roundData.roundType, roundData.roundFlags)
         val scrollState = rememberScrollState()
         val youDeath by "gui.text.round_datas.you_death".i18nState()
         val youAlive by "gui.text.round_datas.you_alive".i18nState()
@@ -299,7 +299,8 @@ class TabBodyRoundDatas : TabBodyBase() {
                 terrorsList.swapList(roundData.terrors)
 
                 val roundType by mutableStateOf(roundData.roundType)
-                val terrors by mutableStateOf(Terrors(terrorsList, roundType))
+                val roundFlags by mutableStateOf(roundData.roundFlags)
+                val terrors by mutableStateOf(Terrors(terrorsList, roundType, roundFlags))
                 val scrollState = rememberScrollState()
                 val youDeath by "gui.text.round_datas.you_death".i18nState()
                 val youAlive by "gui.text.round_datas.you_alive".i18nState()

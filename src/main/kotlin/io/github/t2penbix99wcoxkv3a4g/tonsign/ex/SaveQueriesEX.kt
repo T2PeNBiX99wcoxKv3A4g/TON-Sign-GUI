@@ -3,6 +3,7 @@ package io.github.t2penbix99wcoxkv3a4g.tonsign.ex
 import io.github.t2penbix99wcoxkv3a4g.tonsign.coroutineScope.SaveDataUpdateScope
 import io.github.t2penbix99wcoxkv3a4g.tonsign.data.RoundData
 import io.github.t2penbix99wcoxkv3a4g.tonsign.data.SaveQueries
+import io.github.t2penbix99wcoxkv3a4g.tonsign.roundType.RoundFlags
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.logic.model.PlayerData
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.logic.model.WonOrLost
 import kotlinx.coroutines.runBlocking
@@ -87,6 +88,15 @@ fun SaveQueries.setTerrors(time: Long, terrors: ArrayList<Int>) = runBlocking(Sa
     mutex.lock()
     try {
         updateTerrors(terrors, time)
+    } finally {
+        mutex.unlock()
+    }
+}
+
+fun SaveQueries.setRoundFlags(time: Long, roundFlags: RoundFlags) = runBlocking(SaveDataUpdateScope.coroutineContext) {
+    mutex.lock()
+    try {
+        updateRoundFlags(roundFlags, time)
     } finally {
         mutex.unlock()
     }

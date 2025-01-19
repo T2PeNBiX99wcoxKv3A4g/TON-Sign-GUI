@@ -87,9 +87,12 @@ class LogWatcher(logFile: File) {
         private const val RANDOM_COUNT_RESET = 3
         private const val ATTEMPTING_TO_LOAD_STRING_FROM_URL_KEYWORD = "Attempting to load String from URL"
         private const val STRING_DOWNLOAD_KEYWORD = "String Download"
+        private const val WINTER_KEYWORD = "winter!"
     }
 
     private val roundLog = mutableListOf<GuessRoundType>()
+    private val roundFlags = EnumSet.of(RoundFlag.WaitingFirstSpecial)
+    private val logInterpreter = LogInterpreter(logFile)
     private var lastPredictionForOSC = false
     private var lastPredictionTabunForOSC = false
     private var lastPrediction = GuessRoundType.NIL
@@ -99,9 +102,6 @@ class LogWatcher(logFile: File) {
     private var wrongCount = 0
     private var isTONLoaded = false
     private var hasFirstSend = false
-    private var roundFlags = EnumSet.of(RoundFlag.WaitingFirstSpecial)
-
-    private val logInterpreter = LogInterpreter(logFile)
     val isInTON = mutableStateOf(false)
 
     init {
@@ -248,7 +248,7 @@ class LogWatcher(logFile: File) {
         lastPrediction = GuessRoundType.NIL
         randomRound = RandomRoundType.Unknown
         randomCount = 0
-        roundFlags.removeAll { true }
+        roundFlags.removeAll { it != RoundFlag.Winter }
         roundFlags.add(RoundFlag.WaitingFirstSpecial)
     }
 
@@ -308,11 +308,19 @@ class LogWatcher(logFile: File) {
         val log = event.logEvent
 
         when {
+            WINTER_KEYWORD in log.msg -> {
+                // TODO: Log
+                if (!isTONLoaded) return
+                roundFlags.add(RoundFlag.Winter)
+            }
+
             HANDLE_APPLICATION_QUIT_KEYWORD in log.msg -> {
+                // TODO: Log
                 EventBus.publish(OnVRChatQuitEvent())
             }
 
             MASTER_CLIENT_SWITCHED_KEYWORD in log.msg -> {
+                if (!isTONLoaded) return
                 Logger.info { "log.host_just_left" }
                 clear()
                 OSCSender.send(true)
@@ -329,7 +337,7 @@ class LogWatcher(logFile: File) {
 
             FOUND_SDK3_AVATAR_DESCRIPTOR_KEYWORD in log.msg -> {
                 Logger.info { "log.found_sdk3_avatar_descriptor" }
-                
+
                 if (isTONLoaded) {
                     OSCSender.send(lastPredictionForOSC)
                     OSCSender.sendTabun(lastPredictionTabunForOSC)
@@ -339,7 +347,7 @@ class LogWatcher(logFile: File) {
                     if (roundFlags.contains(RoundFlag.WaitingFirstSpecial))
                         OSCSender.sendTabun(true)
                 }
-                
+
                 EventBus.publish(OnFoundSDK3AvatarDescriptorEvent())
             }
 
@@ -360,6 +368,7 @@ class LogWatcher(logFile: File) {
             WORLD_JOIN_KEYWORD in log.msg -> {
                 val worldId = log.msg.lastPath(WORLD_JOIN_KEYWORD).middlePath('[', ']')
 
+                // TODO: Log
                 EventBus.publish(OnJoinRoomEvent(worldId))
 
                 if (worldId == WORLD_TON_KEYWORD) {
@@ -371,8 +380,9 @@ class LogWatcher(logFile: File) {
             }
 
             WORLD_LEFT_KEYWORD in log.msg -> {
+                // TODO: Log
                 EventBus.publish(OnLeftRoomEvent())
-                
+
                 if (isTONLoaded) {
                     isTONLoaded = false
                     hasFirstSend = false
@@ -389,7 +399,8 @@ class LogWatcher(logFile: File) {
                 val player = log.msg.lastPath(WORLD_PLAYER_LEFT_KEYWORD).trim()
                 val name = player.firstPath('(').trim()
                 val id = player.middlePath('(', ')').trim()
-                
+
+                // TODO: Log
                 EventBus.publish(OnPlayerLeftRoomEvent(PlayerData(name, id, PlayerStatus.Left, null)))
             }
 
@@ -397,86 +408,101 @@ class LogWatcher(logFile: File) {
                 val player = log.msg.lastPath(WORLD_PLAYER_JOINED_KEYWORD).trim()
                 val name = player.firstPath('(').trim()
                 val id = player.middlePath('(', ')').trim()
-                
+
+                // TODO: Log
                 EventBus.publish(OnPlayerJoinedRoomEvent(PlayerData(name, id, PlayerStatus.Alive, null)))
             }
 
             ROUND_OVER_KEYWORD in log.msg -> {
-                if (!isInTON.value) return
-                EventBus.publish(OnRoundOverEvent(lastPrediction))
+                if (!isTONLoaded) return
+                // TODO: Log
+                EventBus.publish(OnRoundOverEvent(lastPrediction, roundFlags))
             }
 
             ROUND_WON_KEYWORD in log.msg -> {
-                if (!isInTON.value) return
+                if (!isTONLoaded) return
+                // TODO: Log
                 EventBus.publish(OnRoundWonEvent())
             }
 
             ROUND_LOST_KEYWORD in log.msg -> {
-                if (!isInTON.value) return
+                if (!isTONLoaded) return
+                // TODO: Log
                 EventBus.publish(OnRoundLostEvent())
             }
 
             ROUND_DEATH_KEYWORD in log.msg -> {
-                if (!isInTON.value) return
+                if (!isTONLoaded) return
+                // TODO: Log
                 EventBus.publish(OnRoundDeathEvent())
             }
 
             log.name == PLAYER_DEATH_KEYWORD -> {
-                if (!isInTON.value) return
+                if (!isTONLoaded) return
                 val name = log.msg.middlePath('[', ']').trim()
                 val msg = log.msg.lastPath(']').trim()
-                
+
+                // TODO: Log
                 EventBus.publish(OnPlayerDeathEvent(PlayerData(name, null, PlayerStatus.Death, msg)))
             }
 
             TERROR_HUNGRY_HOME_INVADER_KEYWORD in log.msg -> {
-                if (!isInTON.value || lastRoundType != RoundType.Classic) return
+                if (!isTONLoaded || lastRoundType != RoundType.Classic) return
+                // TODO: Log
                 EventBus.publish(OnHideTerrorShowUpEvent(Terror.HIDE))
             }
 
             TERROR_ATRACHED_KEYWORD in log.msg -> {
-                if (!isInTON.value || lastRoundType != RoundType.Classic) return
+                if (!isTONLoaded || lastRoundType != RoundType.Classic) return
+                // TODO: Log
                 EventBus.publish(OnHideTerrorShowUpEvent(Terror.HIDE + 1))
             }
 
             TERROR_WILD_YET_BLOODTHIRSTY_CREATURE_KEYWORD in log.msg -> {
-                if (!isInTON.value || lastRoundType != RoundType.Classic) return
+                if (!isTONLoaded || lastRoundType != RoundType.Classic) return
+                // TODO: Log
                 EventBus.publish(OnHideTerrorShowUpEvent(Terror.HIDE + 2))
             }
 
             TERROR_TRANSPORTATION_TRIO_THE_DRIFTER_KEYWORD in log.msg -> {
-                if (!isInTON.value || lastRoundType != RoundType.Unbound) return
+                if (!isTONLoaded || lastRoundType != RoundType.Unbound) return
+                // TODO: Log
                 EventBus.publish(OnHideTerrorShowUpEvent(Terror.HIDE))
             }
 
             TERROR_RED_MIST_APPARITION_KEYWORD in log.msg -> {
-                if (!isInTON.value || lastRoundType != RoundType.EightPages) return
+                if (!isTONLoaded || lastRoundType != RoundType.EightPages) return
+                // TODO: Log
                 EventBus.publish(OnHideTerrorShowUpEvent(Terror.HIDE))
             }
 
             TERROR_BALDI_KEYWORD in log.msg -> {
-                if (!isInTON.value || lastRoundType != RoundType.EightPages) return
+                if (!isTONLoaded || lastRoundType != RoundType.EightPages) return
+                // TODO: Log
                 EventBus.publish(OnHideTerrorShowUpEvent(Terror.HIDE + 1))
             }
 
             TERROR_SHADOW_FREDDY_KEYWORD in log.msg -> {
-                if (!isInTON.value || lastRoundType != RoundType.EightPages) return
+                if (!isTONLoaded || lastRoundType != RoundType.EightPages) return
+                // TODO: Log
                 EventBus.publish(OnHideTerrorShowUpEvent(Terror.HIDE + 2))
             }
 
             TERROR_SEARCHLIGHTS_KEYWORD in log.msg -> {
-                if (!isInTON.value || lastRoundType != RoundType.EightPages) return
+                if (!isTONLoaded || lastRoundType != RoundType.EightPages) return
+                // TODO: Log
                 EventBus.publish(OnHideTerrorShowUpEvent(Terror.HIDE + 3))
             }
 
             TERROR_ALTERNATES_KEYWORD in log.msg -> {
-                if (!isInTON.value || lastRoundType != RoundType.EightPages) return
+                if (!isTONLoaded || lastRoundType != RoundType.EightPages) return
+                // TODO: Log
                 EventBus.publish(OnHideTerrorShowUpEvent(Terror.HIDE + 4))
             }
 
             // https://github.com/ChrisFeline/ToNSaveManager/blob/main/Windows/MainWindow.cs
             KILLER_MATRIX_KEYWORD in log.msg || KILLER_MATRIX_UNKNOWN in log.msg || KILLER_MATRIX_REVEAL in log.msg -> {
-                if (!isInTON.value) return
+                if (!isTONLoaded) return
                 val isUnknown = KILLER_MATRIX_UNKNOWN in log.msg
                 val isRevealed = KILLER_MATRIX_REVEAL in log.msg
                 val killerMatrix = arrayListOf(Terror.UNKNOWN, Terror.UNKNOWN, Terror.UNKNOWN)
@@ -491,11 +517,12 @@ class LogWatcher(logFile: File) {
                     }
                 }
 
+                // TODO: Log
                 EventBus.publish(OnKillerSetEvent(killerMatrix))
             }
 
             ROUND_TYPE_IS_KEYWORD in log.msg -> {
-                if (!isInTON.value) return
+                if (!isTONLoaded) return
                 var possibleRoundType = log.msg.lastPath(ROUND_TYPE_IS_KEYWORD).trim()
                 val possibleRoundTypeForPrint = possibleRoundType
 
@@ -548,7 +575,7 @@ class LogWatcher(logFile: File) {
                 val recentRoundsLog = getRecentRoundsLog(ConfigManager.config.maxRecentRounds)
 
                 lastPrediction = prediction
-                EventBus.publish(OnNextPredictionEvent(prediction))
+                EventBus.publish(OnNextPredictionEvent(prediction, roundFlags))
 
                 Logger.info(
                     { "log.next_round_should_be" },

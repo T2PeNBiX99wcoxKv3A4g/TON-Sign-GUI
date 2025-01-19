@@ -1,9 +1,11 @@
 package io.github.t2penbix99wcoxkv3a4g.tonsign.ui.logic.model
 
 import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.i18nWithEn
+import io.github.t2penbix99wcoxkv3a4g.tonsign.roundType.RoundFlag
+import io.github.t2penbix99wcoxkv3a4g.tonsign.roundType.RoundFlags
 import io.github.t2penbix99wcoxkv3a4g.tonsign.roundType.RoundType
 
-class Terror(val id: Int, val terrorId: Int, val roundType: RoundType) {
+class Terror(val id: Int, val terrorId: Int, val roundType: RoundType, val roundFlags: RoundFlags) {
     companion object {
         const val UNKNOWN = 999
         const val HIDE = 500
@@ -202,6 +204,14 @@ class Terror(val id: Int, val terrorId: Int, val roundType: RoundType) {
             "searchlights",
             "alternates"
         )
+
+        private val winterVariantNormals = mapOf(
+            "fox_squad" to "jolly_squad"
+        )
+
+        private val winterVariantAlternates = mapOf(
+            "fusion_pilot" to "neo_pilot"
+        )
     }
 
     val name: String
@@ -237,6 +247,7 @@ class Terror(val id: Int, val terrorId: Int, val roundType: RoundType) {
         }
     }
 
+    @Suppress("MemberVisibilityCanBePrivate")
     fun isHideTerror(): Boolean {
         return terrorId >= HIDE
     }
@@ -252,7 +263,7 @@ class Terror(val id: Int, val terrorId: Int, val roundType: RoundType) {
         return "${terrorType()}${idStr.padStart(3, '0')}"
     }
 
-    private fun normalOralternate(): String {
+    private fun normalOrAlternate(): String {
         val notFound = "gui.terror.name.not_found".i18nWithEn()
         if (terrorId >= normals.size) return notFound
 
@@ -276,17 +287,18 @@ class Terror(val id: Int, val terrorId: Int, val roundType: RoundType) {
             return when (roundType) {
                 RoundType.Unbound -> {
                     if (newId >= hideUnbounds.size) return notFound
-                    return "gui.terror.name.hide_unbound.${hideUnbounds[newId]}".i18nWithEn()
+                    "gui.terror.name.hide.unbound.${hideUnbounds[newId]}".i18nWithEn()
                 }
 
-                RoundType.EightPages -> {
-                    if (newId >= hide8Pages.size) return notFound
-                    return "gui.terror.name.hide_8_pages.${hide8Pages[newId]}".i18nWithEn()
-                }
+//                // TODO: Remove this, 8 page have own id system
+//                RoundType.EightPages -> {
+//                    if (newId >= hide8Pages.size) return notFound
+//                    "gui.terror.name.8_pages.${hide8Pages[newId]}".i18nWithEn()
+//                }
 
                 else -> {
                     if (newId >= hideNormals.size) return notFound
-                    return "gui.terror.name.hide_normal.${hideNormals[newId]}".i18nWithEn()
+                    "gui.terror.name.hide.normal.${hideNormals[newId]}".i18nWithEn()
                 }
             }
         }
@@ -298,10 +310,30 @@ class Terror(val id: Int, val terrorId: Int, val roundType: RoundType) {
             }
         }
 
+        if (roundFlags.contains(RoundFlag.Winter)) {
+            when (roundType) {
+                RoundType.Alternate -> {
+                    if (terrorId <= alternates.size) {
+                        val id = alternates[terrorId]
+                        if (winterVariantAlternates.containsKey(id))
+                            return "gui.terror.name.winter.alternate.${winterVariantAlternates[id]}".i18nWithEn()
+                    }
+                }
+
+                else -> {
+                    if (terrorId <= normals.size) {
+                        val id = normals[terrorId]
+                        if (winterVariantNormals.containsKey(id))
+                            return "gui.terror.name.winter.normal.${winterVariantNormals[id]}".i18nWithEn()
+                    }
+                }
+            }
+        }
+
         return when (roundType) {
             RoundType.Alternate -> {
                 if (terrorId >= alternates.size) return notFound
-                return "gui.terror.name.alternate.${alternates[terrorId]}".i18nWithEn()
+                "gui.terror.name.alternate.${alternates[terrorId]}".i18nWithEn()
             }
 
             RoundType.MysticMoon -> "gui.terror.name.mystic_moon.psychosis".i18nWithEn()
@@ -309,13 +341,13 @@ class Terror(val id: Int, val terrorId: Int, val roundType: RoundType) {
             RoundType.Twilight -> "gui.terror.name.twilight.apocalypse_bird".i18nWithEn()
             RoundType.Solstice -> "gui.terror.name.solstice.pandora".i18nWithEn()
             RoundType.Run -> "gui.terror.name.run.the_meat_ball_man".i18nWithEn()
-            RoundType.Fog -> normalOralternate()
-            RoundType.Ghost -> normalOralternate()
-            RoundType.ColdNight -> "gui.terror.name.hide_cold_night.rift_monsters".i18nWithEn()
+            RoundType.Fog -> normalOrAlternate()
+            RoundType.Ghost -> normalOrAlternate()
+            RoundType.ColdNight -> "gui.terror.name.cold_night.rift_monsters".i18nWithEn()
 
             else -> {
                 if (terrorId >= normals.size) return notFound
-                return "gui.terror.name.normal.${normals[terrorId]}".i18nWithEn()
+                "gui.terror.name.normal.${normals[terrorId]}".i18nWithEn()
             }
         }
     }

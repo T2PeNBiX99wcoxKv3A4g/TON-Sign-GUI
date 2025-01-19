@@ -1,4 +1,5 @@
 import io.github.t2penbix99wcoxkv3a4g.tonsign.roundType.RoundType;
+import io.github.t2penbix99wcoxkv3a4g.tonsign.roundType.RoundFlags;
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.logic.model.PlayerData;
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.logic.model.WonOrLost;
 import kotlin.Boolean;
@@ -9,6 +10,7 @@ import kotlin.collections.MutableList;
 CREATE TABLE roundData (
     time INTEGER PRIMARY KEY NOT NULL,
     roundType INTEGER AS RoundType NOT NULL,
+    roundFlags INTEGER AS RoundFlags NOT NULL,
     map TEXT NOT NULL,
     mapId INTEGER AS Int NOT NULL,
     roundTime INTEGER NOT NULL,
@@ -36,6 +38,11 @@ selectOfRoundType:
 SELECT *
 FROM roundData
 WHERE roundType == (?);
+
+selectOfRoundFlags:
+SELECT *
+FROM roundData
+WHERE roundFlags == (?);
 
 selectOfMap:
 SELECT *
@@ -95,6 +102,11 @@ UPDATE roundData
 SET terrors = (?)
 WHERE time == (?);
 
+updateRoundFlags:
+UPDATE roundData
+SET roundFlags = (?)
+WHERE time == (?);
+
 insert:
-INSERT OR REPLACE INTO roundData(time, roundType, map, mapId, roundTime, playerTime, players, terrors, isDeath, isWon)
+INSERT OR REPLACE INTO roundData(time, roundType, roundFlags, map, mapId, roundTime, playerTime, players, terrors, isDeath, isWon)
 VALUES ?;

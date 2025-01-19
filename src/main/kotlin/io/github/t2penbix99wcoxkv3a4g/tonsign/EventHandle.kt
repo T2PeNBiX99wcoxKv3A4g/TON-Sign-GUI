@@ -20,6 +20,8 @@ import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.SaveManager
 import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.TimerManager
 import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.i18n
 import io.github.t2penbix99wcoxkv3a4g.tonsign.roundType.GuessRoundType
+import io.github.t2penbix99wcoxkv3a4g.tonsign.roundType.RoundFlag
+import io.github.t2penbix99wcoxkv3a4g.tonsign.roundType.RoundFlags
 import io.github.t2penbix99wcoxkv3a4g.tonsign.roundType.RoundType
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.logic.model.PlayerData
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.logic.model.PlayerStatus
@@ -27,6 +29,7 @@ import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.logic.model.Terror
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.logic.model.WonOrLost
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.nextPrediction
 import java.time.format.DateTimeFormatter
+import java.util.*
 
 object EventHandle {
     internal const val ROUND_TIMER_ID = "RoundTimer"
@@ -71,8 +74,11 @@ object EventHandle {
 
     @Subscribe(Events.OnNextPrediction)
     private fun onNextPrediction(event: OnNextPredictionEvent) {
+        val currentTime by currentTime
         val guessRound = event.nextPrediction
+        val roundFlags = event.roundFlags
         nextPrediction.value = guessRound
+        queries.setRoundFlags(currentTime, roundFlags)
     }
 
     @Subscribe(Events.OnJoinRoom)
@@ -110,16 +116,17 @@ object EventHandle {
         currentTime = time.toInstant().epochSecond
         val newRoundData = queries.timeOf(currentTime)
         var newTerrors = tempTerrors ?: arrayListOf(-1, -1, -1)
-        
+
         // For some reason not unknown id
         if (round == RoundType.Fog)
-            newTerrors = arrayListOf(Terror.UNKNOWN,Terror.UNKNOWN,Terror.UNKNOWN)
+            newTerrors = arrayListOf(Terror.UNKNOWN, Terror.UNKNOWN, Terror.UNKNOWN)
 
         if (newRoundData == null)
             queries.add(
                 RoundData(
                     time = currentTime,
                     roundType = round,
+                    roundFlags = EnumSet.noneOf(RoundFlag::class.java),
                     map = map,
                     mapId = mapId,
                     roundTime = -1L,
@@ -152,7 +159,7 @@ object EventHandle {
         trayState.sendNotification(nextPredictionNotification)
     }
 
-    private fun setRoundDataOnRoundOver() {
+    private fun setRoundDataOnRoundOver(flags: RoundFlags) {
         if (!isRoundStart) return
         isRoundStart = false
 
@@ -161,13 +168,15 @@ object EventHandle {
         if (roundData.isWon == WonOrLost.InProgress)
             queries.setIsWon(currentTime, WonOrLost.UnKnown)
         queries.setRoundTime(currentTime, TimerManager.get(ROUND_TIMER_ID))
+        queries.setRoundFlags(currentTime, flags)
     }
 
     @Subscribe(Events.OnRoundOver)
     private fun onRoundOver(event: OnRoundOverEvent) {
         val guessRound = event.lastPrediction
+        val roundFlags = event.roundFlags
         sendNotificationOnRoundOver(guessRound)
-        setRoundDataOnRoundOver()
+        setRoundDataOnRoundOver(roundFlags)
         roundSkip = false
         isTimerSet = false
     }
