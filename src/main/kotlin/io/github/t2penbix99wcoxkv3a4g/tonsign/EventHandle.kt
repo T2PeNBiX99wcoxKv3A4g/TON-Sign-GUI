@@ -20,7 +20,6 @@ import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.SaveManager
 import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.TimerManager
 import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.i18n
 import io.github.t2penbix99wcoxkv3a4g.tonsign.roundType.GuessRoundType
-import io.github.t2penbix99wcoxkv3a4g.tonsign.roundType.RoundFlag
 import io.github.t2penbix99wcoxkv3a4g.tonsign.roundType.RoundFlags
 import io.github.t2penbix99wcoxkv3a4g.tonsign.roundType.RoundType
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.logic.model.PlayerData
@@ -29,7 +28,6 @@ import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.logic.model.Terror
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.logic.model.WonOrLost
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.nextPrediction
 import java.time.format.DateTimeFormatter
-import java.util.*
 
 object EventHandle {
     internal const val ROUND_TIMER_ID = "RoundTimer"
@@ -106,6 +104,7 @@ object EventHandle {
     private fun onRoundStart(event: OnRoundStartEvent) {
         val time = event.time
         val round = event.roundType
+        val roundFlags = event.roundFlags
         val map = event.map
         val mapId = event.mapId
         var currentTime by currentTime
@@ -126,7 +125,7 @@ object EventHandle {
                 RoundData(
                     time = currentTime,
                     roundType = round,
-                    roundFlags = EnumSet.noneOf(RoundFlag::class.java),
+                    roundFlags = roundFlags,
                     map = map,
                     mapId = mapId,
                     roundTime = -1L,

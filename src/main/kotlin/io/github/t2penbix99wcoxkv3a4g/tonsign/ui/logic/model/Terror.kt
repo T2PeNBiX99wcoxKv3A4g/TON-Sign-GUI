@@ -206,11 +206,11 @@ class Terror(val id: Int, val terrorId: Int, val roundType: RoundType, val round
         )
 
         private val winterVariantNormals = mapOf(
-            "fox_squad" to "jolly_squad"
+            114 to "jolly_squad"
         )
 
         private val winterVariantAlternates = mapOf(
-            "fusion_pilot" to "neo_pilot"
+            29 to "neo_pilot"
         )
     }
 
@@ -289,7 +289,8 @@ class Terror(val id: Int, val terrorId: Int, val roundType: RoundType, val round
                     if (newId >= hideUnbounds.size) return notFound
                     "gui.terror.name.hide.unbound.${hideUnbounds[newId]}".i18nWithEn()
                 }
-                
+
+                // Temp disable this code
 //                RoundType.EightPages -> {
 //                    if (newId >= hide8Pages.size) return notFound
 //                    "gui.terror.name.8_pages.${hide8Pages[newId]}".i18nWithEn()
@@ -312,18 +313,14 @@ class Terror(val id: Int, val terrorId: Int, val roundType: RoundType, val round
         if (roundFlags.contains(RoundFlag.Winter)) {
             when (roundType) {
                 RoundType.Alternate -> {
-                    if (terrorId <= alternates.size) {
-                        val id = alternates[terrorId]
-                        if (winterVariantAlternates.containsKey(id))
-                            return "gui.terror.name.winter.alternate.${winterVariantAlternates[id]}".i18nWithEn()
+                    if (terrorId <= alternates.size && winterVariantAlternates.containsKey(terrorId)) {
+                        return "gui.terror.name.winter.alternate.${winterVariantAlternates[terrorId]}".i18nWithEn()
                     }
                 }
 
                 else -> {
-                    if (terrorId <= normals.size) {
-                        val id = normals[terrorId]
-                        if (winterVariantNormals.containsKey(id))
-                            return "gui.terror.name.winter.normal.${winterVariantNormals[id]}".i18nWithEn()
+                    if (terrorId <= normals.size && winterVariantNormals.containsKey(terrorId)) {
+                        return "gui.terror.name.winter.normal.${winterVariantNormals[terrorId]}".i18nWithEn()
                     }
                 }
             }

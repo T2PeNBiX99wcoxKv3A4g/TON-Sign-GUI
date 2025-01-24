@@ -36,6 +36,8 @@ class Terrors {
     }
 
     private companion object {
+        private const val LEVEL_TWE = "Lvl 2"
+        
         private val onlyOneRounds = listOf(
             RoundType.MysticMoon,
             RoundType.BloodMoon,
@@ -340,21 +342,21 @@ class Terrors {
                     RoundType.DoubleTrouble -> {
                         return when {
                             ids[0] == ids[1] -> {
-                                val name = "${terrors[0].name} LV.2"
+                                val name = "${terrors[0].name} $LEVEL_TWE"
                                 list.add(name)
                                 list.add(terrors[2].name)
                                 list.toList()
                             }
 
                             ids[1] == ids[2] -> {
-                                val name = "${terrors[1].name} LV.2"
+                                val name = "${terrors[1].name} $LEVEL_TWE"
                                 list.add(terrors[0].name)
                                 list.add(name)
                                 list.toList()
                             }
 
                             ids[0] == ids[2] -> {
-                                val name = "${terrors[0].name} LV.2"
+                                val name = "${terrors[0].name} $LEVEL_TWE"
                                 list.add(name)
                                 list.add(terrors[1].name)
                                 list.toList()

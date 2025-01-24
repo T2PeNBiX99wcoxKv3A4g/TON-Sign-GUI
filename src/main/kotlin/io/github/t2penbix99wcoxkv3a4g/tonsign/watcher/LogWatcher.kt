@@ -550,7 +550,7 @@ class LogWatcher(logFile: File) {
                 val map = idAndMap[0].trim()
                 val id = idAndMap[1].filter { it.isDigit() }.trim()
 
-                EventBus.publish(OnRoundStartEvent(log.time, roundType, map, id.toInt()))
+                EventBus.publish(OnRoundStartEvent(log.time, roundType, roundFlags, map, id.toInt()))
 
                 updateRoundLog(roundType)
                 Logger.info(
