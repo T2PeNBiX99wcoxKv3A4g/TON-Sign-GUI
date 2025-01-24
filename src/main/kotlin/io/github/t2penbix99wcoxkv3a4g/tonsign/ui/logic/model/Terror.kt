@@ -212,6 +212,17 @@ class Terror(val id: Int, val terrorId: Int, val roundType: RoundType, val round
         private val winterVariantAlternates = mapOf(
             29 to "neo_pilot"
         )
+
+        private val midnightVariantNormals = mapOf(
+            87 to "nameless",
+            32 to "search_and_destroy",
+            53 to "scrapyard_machine"
+        )
+
+        private val midnightVariantAlternates = mapOf(
+            6 to "knight_of_toren",
+            28 to "inverted_roblander"
+        )
     }
 
     val name: String
@@ -221,7 +232,12 @@ class Terror(val id: Int, val terrorId: Int, val roundType: RoundType, val round
 
     private fun terrorType(): String {
         when {
-            roundType == RoundType.Midnight && id == 3 -> return "A"
+            roundType == RoundType.Midnight -> {
+                if (midnightVariantNormals.containsKey(terrorId) || midnightVariantAlternates.containsKey(terrorId))
+                    return "M"
+                if (id == 3)
+                    return "A"
+            }
         }
 
         if (isHideTerror()) {
@@ -304,9 +320,15 @@ class Terror(val id: Int, val terrorId: Int, val roundType: RoundType, val round
         }
 
         when {
-            roundType == RoundType.Midnight && id == 3 -> {
-                if (terrorId >= alternates.size) return notFound
-                return "gui.terror.name.alternate.${alternates[terrorId]}".i18nWithEn()
+            roundType == RoundType.Midnight -> {
+                if (id == 3) {
+                    if (terrorId >= alternates.size) return notFound
+                    if (midnightVariantAlternates.containsKey(terrorId))
+                        return "gui.terror.name.midnight.${midnightVariantAlternates[terrorId]}".i18nWithEn()
+                    return "gui.terror.name.alternate.${alternates[terrorId]}".i18nWithEn()
+                } else if (midnightVariantNormals.containsKey(terrorId)) {
+                    return "gui.terror.name.midnight.${midnightVariantAlternates[terrorId]}".i18nWithEn()
+                }
             }
         }
 
