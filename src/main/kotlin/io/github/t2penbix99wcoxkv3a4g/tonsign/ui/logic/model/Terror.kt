@@ -96,7 +96,7 @@ class Terror(val id: Int, val terrorId: Int, val roundType: RoundType, val round
             "all-around－helper",// 83
             "lain",// 84
             "sakuya_izayoi",// 85
-            "arrival",// 86 TODO: Not sure
+            "arrival",// 86
             "miros_birds",// 87
             "bff",// 88
             "scavenger",// 89
@@ -335,13 +335,13 @@ class Terror(val id: Int, val terrorId: Int, val roundType: RoundType, val round
         if (roundFlags.contains(RoundFlag.Winter)) {
             when (roundType) {
                 RoundType.Alternate -> {
-                    if (terrorId <= alternates.size && winterVariantAlternates.containsKey(terrorId)) {
+                    if (terrorId < alternates.size && winterVariantAlternates.containsKey(terrorId)) {
                         return "gui.terror.name.winter.alternate.${winterVariantAlternates[terrorId]}".i18nWithEn()
                     }
                 }
 
                 else -> {
-                    if (terrorId <= normals.size && winterVariantNormals.containsKey(terrorId)) {
+                    if (terrorId < normals.size && winterVariantNormals.containsKey(terrorId)) {
                         return "gui.terror.name.winter.normal.${winterVariantNormals[terrorId]}".i18nWithEn()
                     }
                 }

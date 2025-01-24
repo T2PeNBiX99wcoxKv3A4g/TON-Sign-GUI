@@ -37,7 +37,7 @@ class Terrors {
 
     private companion object {
         private const val LEVEL_TWE = "Lvl 2"
-        
+
         private val onlyOneRounds = listOf(
             RoundType.MysticMoon,
             RoundType.BloodMoon,
@@ -136,7 +136,7 @@ class Terrors {
                 )
             ),// 9
             UnBoundData(
-                name =  "garden_rejects",
+                name = "garden_rejects",
                 infos = listOf(
                     UnBoundInfo("alternate.convict_squad"),
                     UnBoundInfo("midnight.kimera"),
@@ -302,7 +302,7 @@ class Terrors {
                         val id = arrayListOf(ids[0], ids[1])
                         val idStr = "${id[0] + 1}"
                         val idStr2 = "${id[1] + 1}"
-                        val idString = "8PAGE${idStr.padStart(3, '0')}+${idStr2.padStart(3, '0')}"
+                        val idString = "8PAGE ${idStr.padStart(3, '0')}+${idStr2.padStart(3, '0')}"
 
                         if (eightPages.containsKey(id)) {
                             val terrorName = "gui.terror.name.8_pages.${eightPages[id]}".i18nWithEn()
@@ -317,22 +317,30 @@ class Terrors {
                     RoundType.Unbound -> {
                         val id = ids[0]
                         val idStr = "${id + 1}"
-                        val idString = "UNBOUND${idStr.padStart(3, '0')}"
+                        val idString = "U${idStr.padStart(3, '0')}"
 
-                        if (id < unBounds.size) {
-                            val unBoundData = unBounds[id]
-                            val unBoundName = "gui.terror.name.unbound.${unBoundData.name}".i18nWithEn()
-
-                            list.add("$idString $unBoundName".trim())
-
-                            unBoundData.infos.forEach {
-                                var name = "gui.terror.name.${it.name}".i18nWithEn()
-                                if (it.amount > 1)
-                                    name += " (x${it.amount})"
-                                list.add(name.trim())
+                        when {
+                            id < 0 -> {
+                                val loading = "gui.terror.name.still_in_loading".i18nWithEn()
+                                list.add("$idString $loading".trim())
+                                return list.toList()
                             }
 
-                            return list.toList()
+                            id > 0 && id < unBounds.size -> {
+                                val unBoundData = unBounds[id]
+                                val unBoundName = "gui.terror.name.unbound.${unBoundData.name}".i18nWithEn()
+
+                                list.add("$idString $unBoundName".trim())
+
+                                unBoundData.infos.forEach {
+                                    var name = "gui.terror.name.${it.name}".i18nWithEn()
+                                    if (it.amount > 1)
+                                        name += " (x${it.amount})"
+                                    list.add(name.trim())
+                                }
+
+                                return list.toList()
+                            }
                         }
 
                         list.add("$idString $notFound".trim())
