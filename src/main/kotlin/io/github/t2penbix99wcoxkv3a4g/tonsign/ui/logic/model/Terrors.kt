@@ -59,7 +59,8 @@ class Terrors {
 
         // TODO:
         private val eightPages = mapOf(
-            arrayListOf(34, 11) to "slendy"
+            arrayListOf(34, 11) to "slendy",
+            arrayListOf(44, 8) to "dog_mimic"
         )
 
         private val unBounds = listOf(
