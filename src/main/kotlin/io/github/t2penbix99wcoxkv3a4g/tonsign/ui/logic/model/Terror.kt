@@ -327,7 +327,7 @@ class Terror(val id: Int, val terrorId: Int, val roundType: RoundType, val round
                         return "gui.terror.name.midnight.${midnightVariantAlternates[terrorId]}".i18nWithEn()
                     return "gui.terror.name.alternate.${alternates[terrorId]}".i18nWithEn()
                 } else if (midnightVariantNormals.containsKey(terrorId)) {
-                    return "gui.terror.name.midnight.${midnightVariantAlternates[terrorId]}".i18nWithEn()
+                    return "gui.terror.name.midnight.${midnightVariantNormals[terrorId]}".i18nWithEn()
                 }
             }
         }
