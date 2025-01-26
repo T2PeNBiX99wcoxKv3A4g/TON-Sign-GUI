@@ -12,7 +12,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.*
 import androidx.compose.ui.window.WindowPosition.Aligned
 import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.ConfigManager
-import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.i18nByLang
+import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.l10nByLang
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.app
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.showConfirmExitWindow
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.showErrorWindows
@@ -63,9 +63,9 @@ fun main() = application {
                     val gui = it.gui
                     if (!gui.enabled) return@forEach
                     if (gui.trays.isNotEmpty()) {
-                        Menu(gui.title.i18nByLang("en")) {
+                        Menu(gui.title.l10nByLang("en")) {
                             gui.trays.forEach { item ->
-                                Item(item.label.i18nByLang("en"), enabled = item.isEnabled) {
+                                Item(item.label.l10nByLang("en"), enabled = item.isEnabled) {
                                     item.onClick(gui)
                                 }
                             }
@@ -73,7 +73,7 @@ fun main() = application {
                     }
                 }
                 Separator()
-                Item("gui.tray.exit".i18nByLang("en")) {
+                Item("gui.tray.exit".l10nByLang("en")) {
                     isAskingToClose = true
                 }
             }

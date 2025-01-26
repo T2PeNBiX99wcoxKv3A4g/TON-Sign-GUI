@@ -51,6 +51,6 @@ bin/
 *.bak
 /config.yml
 /save.yml
-/src/test/resources/language/
+/src/test/resources/localization/
 /secrets
 /*.db

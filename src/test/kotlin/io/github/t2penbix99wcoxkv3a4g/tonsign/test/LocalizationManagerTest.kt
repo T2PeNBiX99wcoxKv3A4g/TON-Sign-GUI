@@ -5,14 +5,14 @@ import io.github.t2penbix99wcoxkv3a4g.tonsign.Utils
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ex.asResourceFile
 
 fun main() {
-    val dir = "/language".asResourceFile()
+    val dir = "/localization".asResourceFile()
 
     Utils.logger.debug { "File: $dir" }
 
     if (dir == null) return
 
     Utils.logger.debug { dir.exists() }
-    dir.listFiles { file, filename -> filename.endsWith(".yml") }.forEach {
+    dir.listFiles { file, filename -> filename.endsWith(".yml") }?.forEach {
         val data = Yaml.default.parseToYamlNode(it.readText())
         val langID = it.name.split('.')[0]
 

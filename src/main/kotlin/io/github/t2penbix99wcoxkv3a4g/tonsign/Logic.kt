@@ -8,7 +8,7 @@ import io.github.t2penbix99wcoxkv3a4g.tonsign.coroutineScope.LogicScope
 import io.github.t2penbix99wcoxkv3a4g.tonsign.event.EventBus
 import io.github.t2penbix99wcoxkv3a4g.tonsign.event.OnLogWatcherInitEvent
 import io.github.t2penbix99wcoxkv3a4g.tonsign.logger.Logger
-import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.i18n
+import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.l10n
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.logWatcher
 import io.github.t2penbix99wcoxkv3a4g.tonsign.watcher.LogWatcher
 import io.github.t2penbix99wcoxkv3a4g.tonsign.watcher.VRChatWatcher
@@ -70,8 +70,8 @@ internal fun startWatcher() {
                 Logger.error(it, { "exception.something_is_not_right" }, it.localizedMessage, it.stackTraceToString())
                 
                 val errorNotification = Notification(
-                    "gui.notification.error_title".i18n(),
-                    "gui.notification.error_message".i18n()
+                    "gui.notification.error_title".l10n(),
+                    "gui.notification.error_message".l10n()
                 )
 
                 trayState.sendNotification(errorNotification)

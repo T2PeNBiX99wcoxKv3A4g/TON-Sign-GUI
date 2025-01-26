@@ -1,7 +1,7 @@
 package io.github.t2penbix99wcoxkv3a4g.tonsign.ui.logic.model
 
 import androidx.compose.runtime.snapshots.SnapshotStateList
-import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.i18nWithEn
+import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.l10nWithEn
 import io.github.t2penbix99wcoxkv3a4g.tonsign.roundType.RoundFlags
 import io.github.t2penbix99wcoxkv3a4g.tonsign.roundType.RoundType
 
@@ -290,11 +290,11 @@ class Terrors {
             val list = mutableListOf<String>()
 
             if (roundType in nonStandardRounds) {
-                val notFound = "gui.terror.name.not_found".i18nWithEn()
+                val notFound = "gui.terror.name.not_found".l10nWithEn()
 
                 if (ids[0] == Terror.UNKNOWN) {
                     val idString = "???"
-                    val name = "gui.terror.name.unknown".i18nWithEn()
+                    val name = "gui.terror.name.unknown".l10nWithEn()
                     list.add("$idString $name")
                     return list.toList()
                 }
@@ -307,7 +307,7 @@ class Terrors {
                         val idString = "8PAGE ${idStr.padStart(3, '0')}+${idStr2.padStart(3, '0')}"
 
                         if (eightPages.containsKey(id)) {
-                            val terrorName = "gui.terror.name.8_pages.${eightPages[id]}".i18nWithEn()
+                            val terrorName = "gui.terror.name.8_pages.${eightPages[id]}".l10nWithEn()
                             list.add("$idString $terrorName".trim())
                             return list.toList()
                         }
@@ -323,19 +323,19 @@ class Terrors {
 
                         when {
                             id < 0 -> {
-                                val loading = "gui.terror.name.still_in_loading".i18nWithEn()
+                                val loading = "gui.terror.name.still_in_loading".l10nWithEn()
                                 list.add("$idString $loading".trim())
                                 return list.toList()
                             }
 
                             id > 0 && id < unBounds.size -> {
                                 val unBoundData = unBounds[id]
-                                val unBoundName = "gui.terror.name.unbound.${unBoundData.name}".i18nWithEn()
+                                val unBoundName = "gui.terror.name.unbound.${unBoundData.name}".l10nWithEn()
 
                                 list.add("$idString $unBoundName".trim())
 
                                 unBoundData.infos.forEach {
-                                    var name = "gui.terror.name.${it.name}".i18nWithEn()
+                                    var name = "gui.terror.name.${it.name}".l10nWithEn()
                                     if (it.amount > 1)
                                         name += " (x${it.amount})"
                                     list.add(name.trim())

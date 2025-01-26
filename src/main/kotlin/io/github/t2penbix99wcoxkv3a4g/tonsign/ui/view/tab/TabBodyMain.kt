@@ -16,8 +16,8 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import io.github.t2penbix99wcoxkv3a4g.tonsign.EventHandle
 import io.github.t2penbix99wcoxkv3a4g.tonsign.delayToLoadingLog
-import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.i18n
-import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.i18nState
+import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.l10n
+import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.l10nState
 import io.github.t2penbix99wcoxkv3a4g.tonsign.roundType.GuessRoundType
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.logWatcher
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.nextPrediction
@@ -36,7 +36,7 @@ class TabBodyMain : TabBodyBase() {
 
     @Composable
     override fun icon() {
-        Icon(Icons.Default.Home, contentDescription = title.i18n())
+        Icon(Icons.Default.Home, contentDescription = title.l10n())
     }
 
     @Composable
@@ -44,12 +44,12 @@ class TabBodyMain : TabBodyBase() {
         val isWaitingVRChat by VRChatWatcher.isWaitingVRChat
         val nextPredictionGet by nextPrediction
         val delayToLoadingLog by delayToLoadingLog
-        val isNotRunning by "gui.text.main.vrchat_is_not_running".i18nState()
-        val roundSpecial by "gui.text.main.round_special".i18nState()
-        val roundClassic by "gui.text.main.round_classic".i18nState()
-        val waitingJoinTon by "gui.text.main.waiting_join_ton".i18nState()
-        val theIsNothingHere by "gui.text.main.the_is_nothing_here".i18nState()
-        val waitUntilJoin by "log.wait_until_join_game".i18nState()
+        val isNotRunning by "gui.text.main.vrchat_is_not_running".l10nState()
+        val roundSpecial by "gui.text.main.round_special".l10nState()
+        val roundClassic by "gui.text.main.round_classic".l10nState()
+        val waitingJoinTon by "gui.text.main.waiting_join_ton".l10nState()
+        val theIsNothingHere by "gui.text.main.the_is_nothing_here".l10nState()
+        val waitUntilJoin by "log.wait_until_join_game".l10nState()
         val nowWorldId by EventHandle.nowWorldID
         val isInWorld by EventHandle.isInWorld
         val scrollState = rememberScrollState()
@@ -71,14 +71,14 @@ class TabBodyMain : TabBodyBase() {
                             val classic = roundClassic
 
                             if (nextPredictionGet == GuessRoundType.Special || nextPredictionGet == GuessRoundType.Classic) {
-                                val nextPrediction by "gui.text.main.next_prediction".i18nState(if (nextPredictionGet == GuessRoundType.Special) special else classic)
+                                val nextPrediction by "gui.text.main.next_prediction".l10nState(if (nextPredictionGet == GuessRoundType.Special) special else classic)
                                 textBox(nextPrediction)
                             }
 
                             val recentRounds by logWatcher.getRecentRoundsLogState
 
                             if (recentRounds.isNotBlank()) {
-                                textBox("gui.text.main.recent_rounds".i18n(recentRounds))
+                                textBox("gui.text.main.recent_rounds".l10n(recentRounds))
                             } else {
                                 textBox(theIsNothingHere)
                             }
@@ -86,9 +86,9 @@ class TabBodyMain : TabBodyBase() {
                             textBox(waitingJoinTon)
                         }
                         if (isInWorld && nowWorldId.isNotEmpty())
-                            textBoxWithLink("gui.text.main.current_world".i18n(nowWorldId), worldUrl(nowWorldId))
+                            textBoxWithLink("gui.text.main.current_world".l10n(nowWorldId), worldUrl(nowWorldId))
                         if (EventHandle.players.isNotEmpty())
-                            textBox("gui.text.main.players".i18n(EventHandle.players.size))
+                            textBox("gui.text.main.players".l10n(EventHandle.players.size))
                         Column(Modifier.padding(10.dp)) {
                             EventHandle.players.forEach {
                                 textBoxWithLink(it.name, playerUrl(it))

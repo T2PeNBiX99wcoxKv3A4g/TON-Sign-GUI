@@ -1,6 +1,6 @@
 package io.github.t2penbix99wcoxkv3a4g.tonsign.ui.logic.model
 
-import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.i18nWithEn
+import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.l10nWithEn
 import io.github.t2penbix99wcoxkv3a4g.tonsign.roundType.RoundFlag
 import io.github.t2penbix99wcoxkv3a4g.tonsign.roundType.RoundFlags
 import io.github.t2penbix99wcoxkv3a4g.tonsign.roundType.RoundType
@@ -280,22 +280,22 @@ class Terror(val id: Int, val terrorId: Int, val roundType: RoundType, val round
     }
 
     private fun normalOrAlternate(): String {
-        val notFound = "gui.terror.name.not_found".i18nWithEn()
+        val notFound = "gui.terror.name.not_found".l10nWithEn()
         if (terrorId >= normals.size) return notFound
 
         var orName = ""
 
         if (terrorId < alternates.size)
-            orName = "gui.terror.name.alternate.${alternates[terrorId]}".i18nWithEn()
+            orName = "gui.terror.name.alternate.${alternates[terrorId]}".l10nWithEn()
 
-        return "${"gui.terror.name.normal.${normals[terrorId]}".i18nWithEn()} ${if (terrorId < alternates.size) "|" else ""} $orName".trim()
+        return "${"gui.terror.name.normal.${normals[terrorId]}".l10nWithEn()} ${if (terrorId < alternates.size) "|" else ""} $orName".trim()
     }
 
     private fun nameFromID(): String {
-        val notFound = "gui.terror.name.not_found".i18nWithEn()
+        val notFound = "gui.terror.name.not_found".l10nWithEn()
 
-        if (terrorId < 0 && roundType != RoundType.Run) return "gui.terror.name.still_in_loading".i18nWithEn()
-        if (terrorId == UNKNOWN) return "gui.terror.name.unknown".i18nWithEn()
+        if (terrorId < 0 && roundType != RoundType.Run) return "gui.terror.name.still_in_loading".l10nWithEn()
+        if (terrorId == UNKNOWN) return "gui.terror.name.unknown".l10nWithEn()
 
         if (isHideTerror()) {
             val newId = terrorId - HIDE
@@ -303,7 +303,7 @@ class Terror(val id: Int, val terrorId: Int, val roundType: RoundType, val round
             return when (roundType) {
                 RoundType.Unbound -> {
                     if (newId >= hideUnbounds.size) return notFound
-                    "gui.terror.name.hide.unbound.${hideUnbounds[newId]}".i18nWithEn()
+                    "gui.terror.name.hide.unbound.${hideUnbounds[newId]}".l10nWithEn()
                 }
 
                 // Temp disable this code
@@ -314,7 +314,7 @@ class Terror(val id: Int, val terrorId: Int, val roundType: RoundType, val round
 
                 else -> {
                     if (newId >= hideNormals.size) return notFound
-                    "gui.terror.name.hide.normal.${hideNormals[newId]}".i18nWithEn()
+                    "gui.terror.name.hide.normal.${hideNormals[newId]}".l10nWithEn()
                 }
             }
         }
@@ -324,10 +324,10 @@ class Terror(val id: Int, val terrorId: Int, val roundType: RoundType, val round
                 if (id == 3) {
                     if (terrorId >= alternates.size) return notFound
                     if (midnightVariantAlternates.containsKey(terrorId))
-                        return "gui.terror.name.midnight.${midnightVariantAlternates[terrorId]}".i18nWithEn()
-                    return "gui.terror.name.alternate.${alternates[terrorId]}".i18nWithEn()
+                        return "gui.terror.name.midnight.${midnightVariantAlternates[terrorId]}".l10nWithEn()
+                    return "gui.terror.name.alternate.${alternates[terrorId]}".l10nWithEn()
                 } else if (midnightVariantNormals.containsKey(terrorId)) {
-                    return "gui.terror.name.midnight.${midnightVariantNormals[terrorId]}".i18nWithEn()
+                    return "gui.terror.name.midnight.${midnightVariantNormals[terrorId]}".l10nWithEn()
                 }
             }
         }
@@ -336,13 +336,13 @@ class Terror(val id: Int, val terrorId: Int, val roundType: RoundType, val round
             when (roundType) {
                 RoundType.Alternate -> {
                     if (terrorId < alternates.size && winterVariantAlternates.containsKey(terrorId)) {
-                        return "gui.terror.name.winter.alternate.${winterVariantAlternates[terrorId]}".i18nWithEn()
+                        return "gui.terror.name.winter.alternate.${winterVariantAlternates[terrorId]}".l10nWithEn()
                     }
                 }
 
                 else -> {
                     if (terrorId < normals.size && winterVariantNormals.containsKey(terrorId)) {
-                        return "gui.terror.name.winter.normal.${winterVariantNormals[terrorId]}".i18nWithEn()
+                        return "gui.terror.name.winter.normal.${winterVariantNormals[terrorId]}".l10nWithEn()
                     }
                 }
             }
@@ -351,21 +351,21 @@ class Terror(val id: Int, val terrorId: Int, val roundType: RoundType, val round
         return when (roundType) {
             RoundType.Alternate -> {
                 if (terrorId >= alternates.size) return notFound
-                "gui.terror.name.alternate.${alternates[terrorId]}".i18nWithEn()
+                "gui.terror.name.alternate.${alternates[terrorId]}".l10nWithEn()
             }
 
-            RoundType.MysticMoon -> "gui.terror.name.mystic_moon.psychosis".i18nWithEn()
-            RoundType.BloodMoon -> "gui.terror.name.blood_moon.virus".i18nWithEn()
-            RoundType.Twilight -> "gui.terror.name.twilight.apocalypse_bird".i18nWithEn()
-            RoundType.Solstice -> "gui.terror.name.solstice.pandora".i18nWithEn()
-            RoundType.Run -> "gui.terror.name.run.the_meat_ball_man".i18nWithEn()
+            RoundType.MysticMoon -> "gui.terror.name.mystic_moon.psychosis".l10nWithEn()
+            RoundType.BloodMoon -> "gui.terror.name.blood_moon.virus".l10nWithEn()
+            RoundType.Twilight -> "gui.terror.name.twilight.apocalypse_bird".l10nWithEn()
+            RoundType.Solstice -> "gui.terror.name.solstice.pandora".l10nWithEn()
+            RoundType.Run -> "gui.terror.name.run.the_meat_ball_man".l10nWithEn()
             RoundType.Fog -> normalOrAlternate()
             RoundType.Ghost -> normalOrAlternate()
-            RoundType.ColdNight -> "gui.terror.name.cold_night.rift_monsters".i18nWithEn()
+            RoundType.ColdNight -> "gui.terror.name.cold_night.rift_monsters".l10nWithEn()
 
             else -> {
                 if (terrorId >= normals.size) return notFound
-                "gui.terror.name.normal.${normals[terrorId]}".i18nWithEn()
+                "gui.terror.name.normal.${normals[terrorId]}".l10nWithEn()
             }
         }
     }

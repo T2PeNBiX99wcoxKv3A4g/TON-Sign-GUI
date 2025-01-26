@@ -18,7 +18,7 @@ import io.github.t2penbix99wcoxkv3a4g.tonsign.interpreter.LogLevel.*
 import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.ConfigManager
 import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.SaveManager
 import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.TimerManager
-import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.i18n
+import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.l10n
 import io.github.t2penbix99wcoxkv3a4g.tonsign.roundType.GuessRoundType
 import io.github.t2penbix99wcoxkv3a4g.tonsign.roundType.RoundFlags
 import io.github.t2penbix99wcoxkv3a4g.tonsign.roundType.RoundType
@@ -147,12 +147,12 @@ object EventHandle {
         if (guessRound == GuessRoundType.NIL || guessRound == GuessRoundType.Exempt) return
         if (ConfigManager.config.roundNotifyOnlySpecial && guessRound != GuessRoundType.Special) return
 
-        val special = "gui.text.main.round_special".i18n()
-        val classic = "gui.text.main.round_classic".i18n()
+        val special = "gui.text.main.round_special".l10n()
+        val classic = "gui.text.main.round_classic".l10n()
 
         val nextPredictionNotification = Notification(
-            "gui.notification.next_prediction_title".i18n(),
-            "gui.notification.next_prediction_message".i18n(if (guessRound == GuessRoundType.Special) special else classic)
+            "gui.notification.next_prediction_title".l10n(),
+            "gui.notification.next_prediction_message".l10n(if (guessRound == GuessRoundType.Special) special else classic)
         )
 
         trayState.sendNotification(nextPredictionNotification)
@@ -184,8 +184,8 @@ object EventHandle {
         if (!isInWorld.value || roundSkip || !ConfigManager.config.playerJoinedNotify) return
 
         val newPlayerNotification = Notification(
-            "gui.notification.player_join_world_title".i18n(),
-            "gui.notification.player_join_world_message".i18n(player.name)
+            "gui.notification.player_join_world_title".l10n(),
+            "gui.notification.player_join_world_message".l10n(player.name)
         )
 
         trayState.sendNotification(newPlayerNotification)
@@ -202,8 +202,8 @@ object EventHandle {
         if (!isInWorld.value || roundSkip || !ConfigManager.config.playerLeftNotify) return
 
         val playerLeftNotification = Notification(
-            "gui.notification.player_left_world_title".i18n(),
-            "gui.notification.player_left_world_message".i18n(player.name)
+            "gui.notification.player_left_world_title".l10n(),
+            "gui.notification.player_left_world_message".l10n(player.name)
         )
 
         trayState.sendNotification(playerLeftNotification)

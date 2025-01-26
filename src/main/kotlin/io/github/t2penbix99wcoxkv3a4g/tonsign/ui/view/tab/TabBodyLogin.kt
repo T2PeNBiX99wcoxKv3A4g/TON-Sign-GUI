@@ -27,8 +27,8 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import io.github.t2penbix99wcoxkv3a4g.tonsign.Utils
 import io.github.t2penbix99wcoxkv3a4g.tonsign.api.ApiClient
-import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.i18n
-import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.i18nState
+import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.l10n
+import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.l10nState
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.view.labeledCheckbox
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.view.loginField
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.view.passwordField
@@ -43,7 +43,7 @@ class TabBodyLogin : TabBodyBase() {
 
     @Composable
     override fun icon() {
-        Icon(Icons.Default.AccountCircle, contentDescription = title.i18n())
+        Icon(Icons.Default.AccountCircle, contentDescription = title.l10n())
     }
     
     private val apiClient = ApiClient()
@@ -55,12 +55,12 @@ class TabBodyLogin : TabBodyBase() {
         var password by remember { mutableStateOf("") }
         var rememberMe by remember { mutableStateOf(false) }
 
-        val usernameText by "gui.text.login.username".i18nState()
-        val enterUserNameText by "gui.text.login.enter_username".i18nState()
-        val passwordText by "gui.text.login.password".i18nState()
-        val enterPasswordText by "gui.text.login.enter_password".i18nState()
-        val rememberMeText by "gui.text.login.remember_me".i18nState()
-        val loginText by "gui.text.login.login".i18nState()
+        val usernameText by "gui.text.login.username".l10nState()
+        val enterUserNameText by "gui.text.login.enter_username".l10nState()
+        val passwordText by "gui.text.login.password".l10nState()
+        val enterPasswordText by "gui.text.login.enter_password".l10nState()
+        val rememberMeText by "gui.text.login.remember_me".l10nState()
+        val loginText by "gui.text.login.login".l10nState()
 
         Column(
             modifier = Modifier.fillMaxSize()

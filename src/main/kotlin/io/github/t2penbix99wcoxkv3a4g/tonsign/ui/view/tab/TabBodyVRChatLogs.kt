@@ -24,7 +24,7 @@ import androidx.navigation.NavHostController
 import io.github.t2penbix99wcoxkv3a4g.tonsign.EventHandle
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ex.swapList
 import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.ConfigManager
-import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.i18n
+import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.l10n
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.theme.CupcakeEXTheme
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.view.SearchButton
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.view.searchField
@@ -49,7 +49,7 @@ class TabBodyVRChatLogs : TabBodyBase() {
 
     @Composable
     override fun icon() {
-        Icon(Icons.AutoMirrored.Filled.Notes, contentDescription = title.i18n())
+        Icon(Icons.AutoMirrored.Filled.Notes, contentDescription = title.l10n())
     }
 
     @Suppress("unused")
@@ -140,7 +140,7 @@ class TabBodyVRChatLogs : TabBodyBase() {
         Window(
             onCloseRequest = { isOnTop = false },
             visible = true,
-            title = "gui.title.window.vrchat_log_viewer".i18n(),
+            title = "gui.title.window.vrchat_log_viewer".l10n(),
             state = windowState,
             alwaysOnTop = true
         ) {

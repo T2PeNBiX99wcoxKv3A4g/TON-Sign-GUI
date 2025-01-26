@@ -15,7 +15,7 @@ import io.github.t2penbix99wcoxkv3a4g.tonsign.logger.Logger
 import io.github.t2penbix99wcoxkv3a4g.tonsign.logger.debug
 import io.github.t2penbix99wcoxkv3a4g.tonsign.logger.error
 import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.ConfigManager
-import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.i18n
+import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.l10n
 import io.github.t2penbix99wcoxkv3a4g.tonsign.roundType.*
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.logic.model.PlayerData
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.logic.model.PlayerStatus
@@ -38,7 +38,7 @@ class LogWatcher(logFile: File) {
             requireNotNull(files)
 
             if (files.isEmpty())
-                throw FileNotFoundException("exception.no_log_file".i18n())
+                throw FileNotFoundException("exception.no_log_file".l10n())
 
             files.sortWith { f1, f2 ->
                 val compare = f1.lastModified() > f2.lastModified()
@@ -224,10 +224,10 @@ class LogWatcher(logFile: File) {
     fun getRecentRoundsLog(maxRecent: Int): String {
         return roundLog.takeLast(maxRecent).joinToString {
             when (it) {
-                GuessRoundType.Classic -> "log.recent_rounds_log_classic".i18n()
-                GuessRoundType.Special -> "log.recent_rounds_log_special".i18n()
+                GuessRoundType.Classic -> "log.recent_rounds_log_classic".l10n()
+                GuessRoundType.Special -> "log.recent_rounds_log_special".l10n()
 
-                else -> throw WrongRecentRoundException("exception.wrong_recent_round".i18n(it))
+                else -> throw WrongRecentRoundException("exception.wrong_recent_round".l10n(it))
             }
         }
     }
@@ -563,7 +563,7 @@ class LogWatcher(logFile: File) {
                                     { "exception.unknown_round_type" },
                                     possibleRoundTypeForPrint
                                 )
-                                "exception.unknown_round_type_simple".i18n(possibleRoundTypeForPrint)
+                                "exception.unknown_round_type_simple".l10n(possibleRoundTypeForPrint)
                             }
 
                             else -> throw it
@@ -571,8 +571,8 @@ class LogWatcher(logFile: File) {
                     }
                 )
 
-                val classic = "log.predict_next_round_classic".i18n()
-                val special = "log.predict_next_round_special".i18n()
+                val classic = "log.predict_next_round_classic".l10n()
+                val special = "log.predict_next_round_special".l10n()
                 val prediction = predictNextRound(roundType)
                 val recentRoundsLog = getRecentRoundsLog(ConfigManager.config.maxRecentRounds)
 

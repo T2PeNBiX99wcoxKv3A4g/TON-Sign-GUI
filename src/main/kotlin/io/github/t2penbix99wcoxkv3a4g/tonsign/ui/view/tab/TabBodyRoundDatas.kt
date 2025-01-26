@@ -31,8 +31,8 @@ import io.github.t2penbix99wcoxkv3a4g.tonsign.ex.swapList
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ex.timeOf
 import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.SaveManager
 import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.TimerManager
-import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.i18n
-import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.i18nState
+import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.l10n
+import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.l10nState
 import io.github.t2penbix99wcoxkv3a4g.tonsign.roundType.RoundTypeConvert
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.logWatcher
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.logic.model.PlayerData
@@ -70,7 +70,7 @@ class TabBodyRoundDatas : TabBodyBase() {
 
     @Composable
     override fun icon() {
-        Icon(Icons.Default.History, contentDescription = title.i18n())
+        Icon(Icons.Default.History, contentDescription = title.l10n())
     }
 
     init {
@@ -144,10 +144,10 @@ class TabBodyRoundDatas : TabBodyBase() {
     }
 
     private fun playerStatus(status: PlayerStatus): String {
-        val unknown by "gui.text.round_datas.unknown".i18nState()
-        val alive by "gui.text.round_datas.alive".i18nState()
-        val death by "gui.text.round_datas.death".i18nState()
-        val left by "gui.text.round_datas.left".i18nState()
+        val unknown by "gui.text.round_datas.unknown".l10nState()
+        val alive by "gui.text.round_datas.alive".l10nState()
+        val death by "gui.text.round_datas.death".l10nState()
+        val left by "gui.text.round_datas.left".l10nState()
 
         return when (status) {
             PlayerStatus.Unknown -> unknown
@@ -166,8 +166,8 @@ class TabBodyRoundDatas : TabBodyBase() {
         val roundData = roundDataTry.value!!
         val terrors = Terrors(roundData.terrors, roundData.roundType, roundData.roundFlags)
         val scrollState = rememberScrollState()
-        val youDeath by "gui.text.round_datas.you_death".i18nState()
-        val youAlive by "gui.text.round_datas.you_alive".i18nState()
+        val youDeath by "gui.text.round_datas.you_death".l10nState()
+        val youAlive by "gui.text.round_datas.you_alive".l10nState()
 
         val textTime by mutableStateOf(roundData.roundTime)
         val realTime by mutableStateOf(TimerManager.get(EventHandle.ROUND_TIMER_ID))
@@ -213,11 +213,11 @@ class TabBodyRoundDatas : TabBodyBase() {
                     Text(youAlive)
 
                 when (roundData.isWon) {
-                    WonOrLost.UnKnown -> Text("gui.text.round_datas.unknown".i18n())
-                    WonOrLost.Won -> Text("gui.text.round_datas.player_won".i18n())
-                    WonOrLost.Lost -> Text("gui.text.round_datas.player_lost".i18n())
-                    WonOrLost.Left -> Text("gui.text.round_datas.left".i18n())
-                    WonOrLost.InProgress -> Text("gui.text.round_datas.round_is_still_in_progress".i18n())
+                    WonOrLost.UnKnown -> Text("gui.text.round_datas.unknown".l10n())
+                    WonOrLost.Won -> Text("gui.text.round_datas.player_won".l10n())
+                    WonOrLost.Lost -> Text("gui.text.round_datas.player_lost".l10n())
+                    WonOrLost.Left -> Text("gui.text.round_datas.left".l10n())
+                    WonOrLost.InProgress -> Text("gui.text.round_datas.round_is_still_in_progress".l10n())
                 }
 
                 if (playerTime > 0)
@@ -226,7 +226,7 @@ class TabBodyRoundDatas : TabBodyBase() {
                     Text("$hoursText:$minutesText:$secondsText.$milliSecondsText")
 
                 if (terrors.names.isNotEmpty())
-                    Text("gui.text.round_datas.terrors".i18n(terrors.names.size))
+                    Text("gui.text.round_datas.terrors".l10n(terrors.names.size))
                 Column(Modifier.padding(10.dp)) {
                     terrors.names.forEach {
                         Box(
@@ -241,7 +241,7 @@ class TabBodyRoundDatas : TabBodyBase() {
 
                 if (roundData.players.isNotEmpty())
                     Text(
-                        "gui.text.round_datas.players".i18n(
+                        "gui.text.round_datas.players".l10n(
                             roundData.players.filter { it.status == PlayerStatus.Alive }.size,
                             roundData.players.size
                         )
@@ -280,7 +280,7 @@ class TabBodyRoundDatas : TabBodyBase() {
         Window(
             onCloseRequest = { isOnTop = false },
             visible = true,
-            title = "gui.title.window.round_viewer".i18n(),
+            title = "gui.title.window.round_viewer".l10n(),
             state = windowState,
             alwaysOnTop = true
         ) {
@@ -302,8 +302,8 @@ class TabBodyRoundDatas : TabBodyBase() {
                 val roundFlags by mutableStateOf(roundData.roundFlags)
                 val terrors by mutableStateOf(Terrors(terrorsList, roundType, roundFlags))
                 val scrollState = rememberScrollState()
-                val youDeath by "gui.text.round_datas.you_death".i18nState()
-                val youAlive by "gui.text.round_datas.you_alive".i18nState()
+                val youDeath by "gui.text.round_datas.you_death".l10nState()
+                val youAlive by "gui.text.round_datas.you_alive".l10nState()
                 val map by mutableStateOf(roundData.map)
                 val isDeath by mutableStateOf(roundData.isDeath)
                 val isWon by mutableStateOf(roundData.isWon)
@@ -311,17 +311,17 @@ class TabBodyRoundDatas : TabBodyBase() {
 
                 terrorsNames.swapList(terrors.names)
 
-                val unknown by "gui.text.round_datas.unknown".i18nState()
-                val playerWon by "gui.text.round_datas.player_won".i18nState()
-                val playerLost by "gui.text.round_datas.player_lost".i18nState()
-                val left by "gui.text.round_datas.left".i18nState()
-                val roundIsStillInProgress by "gui.text.round_datas.round_is_still_in_progress".i18nState()
-                val playersText by "gui.text.round_datas.players".i18nState(
+                val unknown by "gui.text.round_datas.unknown".l10nState()
+                val playerWon by "gui.text.round_datas.player_won".l10nState()
+                val playerLost by "gui.text.round_datas.player_lost".l10nState()
+                val left by "gui.text.round_datas.left".l10nState()
+                val roundIsStillInProgress by "gui.text.round_datas.round_is_still_in_progress".l10nState()
+                val playersText by "gui.text.round_datas.players".l10nState(
                     players.filter { it.status == PlayerStatus.Alive }.size,
                     players.size
                 )
-                val terrorsText by "gui.text.round_datas.terrors".i18nState(terrorsNames.size)
-                val notInTon by "gui.text.round_datas.not_in_ton".i18nState(terrorsNames.size)
+                val terrorsText by "gui.text.round_datas.terrors".l10nState(terrorsNames.size)
+                val notInTon by "gui.text.round_datas.not_in_ton".l10nState(terrorsNames.size)
 
                 val textTime by mutableStateOf(roundData.roundTime)
                 val realTime by mutableStateOf(TimerManager.get(EventHandle.ROUND_TIMER_ID))
@@ -383,7 +383,7 @@ class TabBodyRoundDatas : TabBodyBase() {
                         }
 
                         if (recentRounds.isNotBlank())
-                            Text("gui.text.main.recent_rounds".i18n(recentRounds))
+                            Text("gui.text.main.recent_rounds".l10n(recentRounds))
 
                         if (playerTime > 0)
                             Text("$playerHoursText:$playerMinutesText:$playerSecondsText.$playerMilliSecondsText / $hoursText:$minutesText:$secondsText.$milliSecondsText")

@@ -16,7 +16,7 @@ group = "io.github.t2penbix99wcoxkv3a4g.tonsign"
 version = property("ton-sign.version")!!
 
 val generatedVersionDir = "${layout.buildDirectory.asFile.get()}/generated-version"
-val generatedLanguageDir = "${layout.buildDirectory.asFile.get()}/generated-language"
+val generatedLocalizationDir = "${layout.buildDirectory.asFile.get()}/generated-localization"
 
 fun String.sha256() = hashString(this, "SHA-256")
 
@@ -83,7 +83,7 @@ sourceSets {
     main {
         kotlin {
             output.dir(generatedVersionDir)
-            output.dir(generatedLanguageDir)
+            output.dir(generatedLocalizationDir)
         }
     }
 }
@@ -100,32 +100,32 @@ tasks.register("generateVersionProperties") {
     }
 }
 
-val languageDir = "language"
+val localizationDir = "localization"
 
-tasks.register("generateLanguageFolder") {
+tasks.register("generateLocalizationFolder") {
     doLast {
-        val language = file("./$languageDir")
-        val languageCopyTo = file("$generatedLanguageDir/$languageDir")
+        val localization = file("./$localizationDir")
+        val localizationCopyTo = file("$generatedLocalizationDir/$localizationDir")
 
-        if (languageCopyTo.exists()) {
+        if (localizationCopyTo.exists()) {
             when {
-                languageCopyTo.isFile -> languageCopyTo.delete()
-                languageCopyTo.isDirectory -> {
-                    languageCopyTo.listFiles()?.forEach {
+                localizationCopyTo.isFile -> localizationCopyTo.delete()
+                localizationCopyTo.isDirectory -> {
+                    localizationCopyTo.listFiles()?.forEach {
                         it.delete()
                     }
                 }
             }
-            languageCopyTo.delete()
+            localizationCopyTo.delete()
         }
 
-        languageCopyTo.parentFile.mkdirs()
-        language.copyTo(languageCopyTo, true)
+        localizationCopyTo.parentFile.mkdirs()
+        localization.copyTo(localizationCopyTo, true)
 
-        language.listFiles { _, filename -> filename.endsWith(".yml") }?.forEach {
-            it.copyTo(file("${languageCopyTo.path}/${it.name}"), true)
+        localization.listFiles { _, filename -> filename.endsWith(".yml") }?.forEach {
+            it.copyTo(file("${localizationCopyTo.path}/${it.name}"), true)
 
-            val shaFile = file("${languageCopyTo.path}/${it.name}.sha256")
+            val shaFile = file("${localizationCopyTo.path}/${it.name}.sha256")
             val sha256Text = it.readText().sha256()
             shaFile.createNewFile()
             shaFile.writeText("$sha256Text ${it.name}")
@@ -165,7 +165,7 @@ compose.desktop {
         }
 
         buildTypes.release.proguard {
-            version.set("7.6.1")
+            version.set(property("proguard.version") as String)
             configurationFiles.from("proguard.pro")
         }
     }

@@ -21,7 +21,7 @@ class LogInterpreter(private val logFile: File) {
         private const val ERROR_KEYWORD = "Error"
         private const val EXCEPTION_KEYWORD = "Exception"
     }
-    
+
     private var lastPosition = 0L
     private val logs = mutableListOf<LogEvent>()
     private val lastLog: LogEvent?
@@ -62,7 +62,9 @@ class LogInterpreter(private val logFile: File) {
                 if (logs.size > 1)
                     EventBus.publish(OnReadLogEvent(lastLog!!))
 
-                if (msgPath[0] == '[') {
+                val msgPathOne = if (msgPath.isNotEmpty()) msgPath[0] else ""
+
+                if (msgPathOne == '[') {
                     val name = line.middlePath('[', ']').trim()
                     val msg = line.lastPath(']').trim()
 

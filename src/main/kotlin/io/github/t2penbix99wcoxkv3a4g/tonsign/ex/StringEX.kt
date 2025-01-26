@@ -3,7 +3,7 @@
 package io.github.t2penbix99wcoxkv3a4g.tonsign.ex
 
 import io.github.t2penbix99wcoxkv3a4g.tonsign.Utils
-import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.i18n
+import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.l10n
 import java.io.File
 import java.net.URL
 import java.security.MessageDigest
@@ -14,7 +14,7 @@ fun String.safeFormat(vararg args: Any?): String {
     if (Utils.logger.isDebugEnabled())
         return format(*args)
     return runCatching { format(*args) }.getOrElse {
-        Utils.logger.error(it) { "exception.string_format_error".i18n(it.localizedMessage) }
+        Utils.logger.error(it) { "exception.string_format_error".l10n(it.localizedMessage) }
         this
     }
 }

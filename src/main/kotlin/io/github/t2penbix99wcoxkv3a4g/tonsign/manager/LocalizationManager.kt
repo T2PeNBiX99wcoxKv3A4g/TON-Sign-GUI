@@ -19,8 +19,8 @@ import io.github.t2penbix99wcoxkv3a4g.tonsign.logger.error
 import java.io.File
 import kotlin.io.path.Path
 
-object LanguageManager {
-    private const val DIR = "language"
+object LocalizationManager {
+    private const val DIR = "localization"
     private const val YML = ".yml"
     private const val SHA256 = ".sha256"
     private val dataBase = mutableMapOf<String, YamlMap>()
@@ -81,7 +81,7 @@ object LanguageManager {
     private fun load() {
         runCatching {
             if (!dir.exists()) {
-                Logger.error<LanguageManager>(FolderNotFoundException("'${dir.path}' is not exists!")) { "Can't found 'language' folder! Language is not working anymore." }
+                Logger.error<LocalizationManager>(FolderNotFoundException("'${dir.path}' is not exists!")) { "Can't found 'localization' folder! Localization is not working anymore." }
                 return
             }
             dir.listFiles { _, filename -> filename.endsWith(YML) }?.forEach {
@@ -91,7 +91,7 @@ object LanguageManager {
                 dataBase[langID] = data.yamlMap
             }
         }.getOrElse {
-            Logger.error<LanguageManager>(it, { "Initialization Failure: %s" }, it.message ?: "Unknown")
+            Logger.error<LocalizationManager>(it, { "Initialization Failure: %s" }, it.message ?: "Unknown")
         }
     }
 

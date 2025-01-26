@@ -1,7 +1,7 @@
 package io.github.t2penbix99wcoxkv3a4g.tonsign.roundType
 
 import io.github.t2penbix99wcoxkv3a4g.tonsign.exception.UnknownRoundTypeException
-import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.i18n
+import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.l10n
 
 object RoundTypeConvert {
     val ENRoundTypes: List<String> = listOf(
@@ -110,7 +110,7 @@ object RoundTypeConvert {
         if (langText == "ru_n")
             langText = "run"
 
-        return "log.round_$langText".i18n()
+        return "log.round_$langText".l10n()
     }
 
     fun classifyRound(round: RoundType): GuessRoundType {

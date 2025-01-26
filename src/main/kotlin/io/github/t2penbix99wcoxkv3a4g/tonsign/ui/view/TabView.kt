@@ -25,7 +25,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import io.github.t2penbix99wcoxkv3a4g.tonsign.Utils
-import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.i18n
+import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.l10n
 
 // https://github.com/olk90/compose-tableView/blob/main/src/main/kotlin/de/olk90/tableview/view/TabView.kt
 
@@ -102,7 +102,7 @@ fun bottomNav(navController: NavHostController) {
                     navController.navigate(it.gui.id)
                 },
                 label = {
-                    Text(it.gui.title.i18n())
+                    Text(it.gui.title.l10n())
                 }
             )
         }

@@ -23,7 +23,7 @@ import androidx.compose.ui.window.DialogWindow
 import androidx.compose.ui.window.WindowPosition.Aligned
 import androidx.compose.ui.window.rememberDialogState
 import io.github.t2penbix99wcoxkv3a4g.tonsign.*
-import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.i18nState
+import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.l10nState
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.theme.CupcakeEXTheme
 
 private val dialogSize = DpSize(280.dp, 180.dp)
@@ -78,8 +78,8 @@ fun openDialogWindow(
 
 @Composable
 fun openDialogWindow(title: String, msg: String, yesDo: () -> Unit, noDo: () -> Unit) {
-    val yes by "gui.button.dialog.yes".i18nState()
-    val no by "gui.button.dialog.no".i18nState()
+    val yes by "gui.button.dialog.yes".l10nState()
+    val no by "gui.button.dialog.no".l10nState()
 
     openDialogWindow(
         title,
@@ -95,8 +95,8 @@ fun openDialogWindow(title: String, msg: String, yesDo: () -> Unit, noDo: () -> 
 fun showConfirmExitWindow() {
     var isAskingToClose by remember { isAskingToClose }
     var isOpen by remember { isOpen }
-    val confirmExitTitle by "gui.title.dialog.confirm_exit".i18nState()
-    val confirmExitText by "gui.text.dialog.confirm_exit".i18nState()
+    val confirmExitTitle by "gui.title.dialog.confirm_exit".l10nState()
+    val confirmExitText by "gui.text.dialog.confirm_exit".l10nState()
 
     openDialogWindow(
         title = confirmExitTitle,
@@ -115,8 +115,8 @@ fun showConfirmExitWindow() {
 fun showNeedRestartWindows() {
     var needRestart by remember { needRestart }
     var isOpen by remember { isOpen }
-    val needRestartTitle by "gui.title.dialog.need_restart".i18nState()
-    val needRestartText by "gui.text.dialog.need_restart".i18nState()
+    val needRestartTitle by "gui.title.dialog.need_restart".l10nState()
+    val needRestartText by "gui.text.dialog.need_restart".l10nState()
 
     openDialogWindow(
         title = needRestartTitle,
@@ -133,9 +133,9 @@ fun showNeedRestartWindows() {
 
 @Composable
 fun showErrorWindows() {
-    val title by "gui.title.dialog.error".i18nState()
-    val text by "gui.text.dialog.error".i18nState()
-    val yes by "gui.button.dialog.yes".i18nState()
+    val title by "gui.title.dialog.error".l10nState()
+    val text by "gui.text.dialog.error".l10nState()
+    val yes by "gui.button.dialog.yes".l10nState()
     val logicError by remember { logicError }
     var logicHasError by remember { logicHasError }
     val state = rememberDialogState(position = Aligned(alignment = Alignment.Center), size = dialogSize2)

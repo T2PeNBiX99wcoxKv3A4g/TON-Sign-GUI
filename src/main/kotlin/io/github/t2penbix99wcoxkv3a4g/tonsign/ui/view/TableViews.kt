@@ -20,7 +20,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ex.swapList
-import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.i18nState
+import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.l10nState
 import io.github.t2penbix99wcoxkv3a4g.tonsign.roundType.RoundType
 import io.github.t2penbix99wcoxkv3a4g.tonsign.roundType.getTextOfRound
 import java.time.Instant
@@ -265,7 +265,7 @@ fun searchField(
     search: String,
     onContentUpdate: (String) -> Unit
 ) {
-    val searchText by "gui.text.search".i18nState()
+    val searchText by "gui.text.search".l10nState()
 
     OutlinedTextField(
         value = search,
@@ -294,7 +294,7 @@ fun searchField(
     onContentUpdate: (String) -> Unit,
     onBottomDo: () -> Unit
 ) {
-    val searchText by "gui.text.search".i18nState()
+    val searchText by "gui.text.search".l10nState()
 
     OutlinedTextField(
         value = search,
@@ -336,7 +336,7 @@ fun searchField(
     onBottomDo: () -> Unit,
     searchButtons: List<SearchButton>
 ) {
-    val searchText by "gui.text.search".i18nState()
+    val searchText by "gui.text.search".l10nState()
 
     OutlinedTextField(
         value = search,
@@ -378,7 +378,7 @@ fun searchField(
     onContentUpdate: (String) -> Unit,
     searchButtons: List<SearchButton>
 ) {
-    val searchText by "gui.text.search".i18nState()
+    val searchText by "gui.text.search".l10nState()
 
     OutlinedTextField(
         value = search,
@@ -445,7 +445,7 @@ fun tableValue(
                     horizontalArrangement = Arrangement.SpaceEvenly,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    val headerText by it.headerText.i18nState()
+                    val headerText by it.headerText.l10nState()
 
                     Text(
                         text = headerText,
@@ -520,7 +520,7 @@ fun tableHeader(
                     horizontalArrangement = Arrangement.SpaceEvenly,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    val headerText by it.headerText.i18nState()
+                    val headerText by it.headerText.l10nState()
 
                     Text(
                         text = headerText,

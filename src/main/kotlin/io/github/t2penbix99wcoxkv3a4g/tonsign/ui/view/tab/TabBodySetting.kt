@@ -30,7 +30,7 @@ class TabBodySetting : TabBodyBase() {
 
     @Composable
     override fun icon() {
-        Icon(Icons.Default.Settings, contentDescription = title.i18n())
+        Icon(Icons.Default.Settings, contentDescription = title.l10n())
     }
 
     // TODO: Remake
@@ -45,11 +45,11 @@ class TabBodySetting : TabBodyBase() {
         var autoScrollToDown by remember { mutableStateOf(ConfigManager.config.autoScrollToDown) }
         var onTop by remember { mutableStateOf(ConfigManager.config.onTop) }
         var automaticTurnOnSign by remember { mutableStateOf(ConfigManager.config.automaticTurnOnSign) }
-        val forceSendTrue by "gui.button.setting.force_send_true".i18nState()
-        val forceSendFalse by "gui.button.setting.force_send_false".i18nState()
-        val forceSendTabunTrue by "gui.button.setting.force_send_tabun_true".i18nState()
-        val forceSendTabunFalse by "gui.button.setting.force_send_tabun_false".i18nState()
-        val refresh by "gui.button.setting.refresh".i18nState()
+        val forceSendTrue by "gui.button.setting.force_send_true".l10nState()
+        val forceSendFalse by "gui.button.setting.force_send_false".l10nState()
+        val forceSendTabunTrue by "gui.button.setting.force_send_tabun_true".l10nState()
+        val forceSendTabunFalse by "gui.button.setting.force_send_tabun_false".l10nState()
+        val refresh by "gui.button.setting.refresh".l10nState()
         val scrollState = rememberScrollState()
 
         Column(
@@ -87,7 +87,7 @@ class TabBodySetting : TabBodyBase() {
             }
             Button(
                 onClick = {
-                    LanguageManager.setLanguage("jp")
+                    LocalizationManager.setLanguage("jp")
                     needRefresh = true
                 }
             ) {
@@ -95,7 +95,7 @@ class TabBodySetting : TabBodyBase() {
             }
             Button(
                 onClick = {
-                    LanguageManager.setLanguage("en")
+                    LocalizationManager.setLanguage("en")
                     needRefresh = true
                 }
             ) {
