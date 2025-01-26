@@ -135,7 +135,7 @@ tasks.register("generateLocalizationFolder") {
 
 tasks.named("processResources") {
     dependsOn("generateVersionProperties")
-    dependsOn("generateLanguageFolder")
+    dependsOn("generateLocalizationFolder")
 }
 
 compose.resources {
