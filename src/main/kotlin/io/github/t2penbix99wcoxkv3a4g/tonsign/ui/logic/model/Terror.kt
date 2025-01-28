@@ -123,7 +123,7 @@ class Terror(val id: Int, val terrorId: Int, val roundType: RoundType, val round
             "ghost_girl",// 110
             "cubor_s_revenge",// 111
             "poly",// 112
-            "dog_mimic",// 113 TODO: Not sure
+            "dog_mimic",// 113
             "warden",// 114
             "fox_squad",// 115
             "express_train_to_hell",// 116
