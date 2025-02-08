@@ -57,12 +57,13 @@ class Terrors {
             RoundType.DoubleTrouble
         )
 
-        // TODO:
+        // TODO: 8 pages terror ids
         private val eightPages = mapOf(
             arrayListOf(34, 11) to "slendy",
             arrayListOf(44, 8) to "dog_mimic",
             arrayListOf(10, 8) to "mx",
-            arrayListOf(26, 4) to "miros_birds"
+            arrayListOf(26, 4) to "miros_birds",
+            arrayListOf(16, 13) to "demented_spongebob"
         )
 
         private val unBounds = listOf(
