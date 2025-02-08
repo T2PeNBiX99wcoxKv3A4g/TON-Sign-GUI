@@ -197,15 +197,16 @@ class Terror(val id: Int, val terrorId: Int, val roundType: RoundType, val round
             "transportation_trio&the_drifter"
         )
 
-        private val hide8Pages = listOf(
-            "red_mist_apparition",
-            "baldi",
-            "shadow_freddy",
-            "searchlights",
-            "alternates"
-        )
+//        private val hide8Pages = listOf(
+//            "red_mist_apparition",
+//            "baldi",
+//            "shadow_freddy",
+//            "searchlights",
+//            "alternates"
+//        )
 
         private val winterVariantNormals = mapOf(
+            101 to "scary_santa_hat",
             114 to "jolly_squad"
         )
 
