@@ -59,6 +59,7 @@ class LogWatcher(logFile: File) {
         private const val ROUND_OVER_KEYWORD = "RoundOver"
         private const val WORLD_JOIN_KEYWORD =
             "Memory Usage: after world loaded "
+        @Suppress("SpellCheckingInspection")
         private const val WORLD_TON_KEYWORD = "wrld_a61cdabe-1218-4287-9ffc-2a4d1414e5bd"
         private const val WORLD_LEFT_KEYWORD = "OnLeftRoom"
         private const val WORLD_PLAYER_LEFT_KEYWORD = "OnPlayerLeft "
@@ -74,12 +75,6 @@ class LogWatcher(logFile: File) {
         private const val TERROR_HUNGRY_HOME_INVADER_KEYWORD = "HungryHomeInvader"
         private const val TERROR_ATRACHED_KEYWORD = "Atrached"
         private const val TERROR_WILD_YET_BLOODTHIRSTY_CREATURE_KEYWORD = "Wild Yet Bloodthirsty Creature"
-        private const val TERROR_TRANSPORTATION_TRIO_THE_DRIFTER_KEYWORD = "Transportation Trio & The Drifter"
-        private const val TERROR_RED_MIST_APPARITION_KEYWORD = "Red Mist Apparition"
-        private const val TERROR_BALDI_KEYWORD = "Baldi"
-        private const val TERROR_SHADOW_FREDDY_KEYWORD = "Shadow Freddy"
-        private const val TERROR_SEARCHLIGHTS_KEYWORD = "Searchlights"
-        private const val TERROR_ALTERNATES_KEYWORD = "Alternates"
         private const val AND_THE_ROUND_TYPE_IS_KEYWORD = " and the round type is "
         private const val ROUND_MAP_LOCATION_KEYWORD = "This round is taking place at "
         private const val BEHAVIOUR_KEYWORD = "Behaviour"
@@ -450,56 +445,20 @@ class LogWatcher(logFile: File) {
 
             TERROR_HUNGRY_HOME_INVADER_KEYWORD in log.msg -> {
                 if (!isTONLoaded || lastRoundType != RoundType.Classic) return
-                // TODO: Log
+                Logger.info({ "log.hide_terror_is_found" }, TERROR_HUNGRY_HOME_INVADER_KEYWORD)
                 EventBus.publish(OnHideTerrorShowUpEvent(Terror.HIDE))
             }
 
             TERROR_ATRACHED_KEYWORD in log.msg -> {
                 if (!isTONLoaded || lastRoundType != RoundType.Classic) return
-                // TODO: Log
+                Logger.info({ "log.hide_terror_is_found" }, TERROR_ATRACHED_KEYWORD)
                 EventBus.publish(OnHideTerrorShowUpEvent(Terror.HIDE + 1))
             }
 
             TERROR_WILD_YET_BLOODTHIRSTY_CREATURE_KEYWORD in log.msg -> {
                 if (!isTONLoaded || lastRoundType != RoundType.Classic) return
-                // TODO: Log
+                Logger.info({ "log.hide_terror_is_found" }, TERROR_WILD_YET_BLOODTHIRSTY_CREATURE_KEYWORD)
                 EventBus.publish(OnHideTerrorShowUpEvent(Terror.HIDE + 2))
-            }
-
-            TERROR_TRANSPORTATION_TRIO_THE_DRIFTER_KEYWORD in log.msg -> {
-                if (!isTONLoaded || lastRoundType != RoundType.Unbound) return
-                // TODO: Log
-                EventBus.publish(OnHideTerrorShowUpEvent(Terror.HIDE))
-            }
-
-            TERROR_RED_MIST_APPARITION_KEYWORD in log.msg -> {
-                if (!isTONLoaded || lastRoundType != RoundType.EightPages) return
-                // TODO: Log
-                EventBus.publish(OnHideTerrorShowUpEvent(Terror.HIDE))
-            }
-
-            TERROR_BALDI_KEYWORD in log.msg -> {
-                if (!isTONLoaded || lastRoundType != RoundType.EightPages) return
-                // TODO: Log
-                EventBus.publish(OnHideTerrorShowUpEvent(Terror.HIDE + 1))
-            }
-
-            TERROR_SHADOW_FREDDY_KEYWORD in log.msg -> {
-                if (!isTONLoaded || lastRoundType != RoundType.EightPages) return
-                // TODO: Log
-                EventBus.publish(OnHideTerrorShowUpEvent(Terror.HIDE + 2))
-            }
-
-            TERROR_SEARCHLIGHTS_KEYWORD in log.msg -> {
-                if (!isTONLoaded || lastRoundType != RoundType.EightPages) return
-                // TODO: Log
-                EventBus.publish(OnHideTerrorShowUpEvent(Terror.HIDE + 3))
-            }
-
-            TERROR_ALTERNATES_KEYWORD in log.msg -> {
-                if (!isTONLoaded || lastRoundType != RoundType.EightPages) return
-                // TODO: Log
-                EventBus.publish(OnHideTerrorShowUpEvent(Terror.HIDE + 4))
             }
 
             // https://github.com/ChrisFeline/ToNSaveManager/blob/main/Windows/MainWindow.cs
