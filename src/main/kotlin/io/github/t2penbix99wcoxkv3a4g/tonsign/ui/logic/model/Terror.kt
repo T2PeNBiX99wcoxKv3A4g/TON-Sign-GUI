@@ -6,6 +6,7 @@ import io.github.t2penbix99wcoxkv3a4g.tonsign.roundType.RoundFlags
 import io.github.t2penbix99wcoxkv3a4g.tonsign.roundType.RoundType
 
 class Terror(val id: Int, val terrorId: Int, val roundType: RoundType, val roundFlags: RoundFlags) {
+    // TODO: Json or Yaml
     companion object {
         const val UNKNOWN = 999
         const val HIDE = 500
@@ -213,15 +214,16 @@ class Terror(val id: Int, val terrorId: Int, val roundType: RoundType, val round
         private val winterVariantAlternates = mapOf(
             29 to "neo_pilot"
         )
-
+        
         private val midnightVariantNormals = mapOf(
-            87 to "nameless",
             32 to "search_and_destroy",
-            53 to "scrapyard_machine"
+            53 to "scrapyard_machine",
+            87 to "nameless"
         )
 
         private val midnightVariantAlternates = mapOf(
             6 to "knight_of_toren",
+            19 to "monarch", // TODO: Only one
             28 to "inverted_roblander"
         )
     }
