@@ -59,6 +59,7 @@ class LogWatcher(logFile: File) {
         private const val ROUND_OVER_KEYWORD = "RoundOver"
         private const val WORLD_JOIN_KEYWORD =
             "Memory Usage: after world loaded "
+
         @Suppress("SpellCheckingInspection")
         private const val WORLD_TON_KEYWORD = "wrld_a61cdabe-1218-4287-9ffc-2a4d1414e5bd"
         private const val WORLD_LEFT_KEYWORD = "OnLeftRoom"
@@ -83,6 +84,9 @@ class LogWatcher(logFile: File) {
         private const val ATTEMPTING_TO_LOAD_STRING_FROM_URL_KEYWORD = "Attempting to load String from URL"
         private const val STRING_DOWNLOAD_KEYWORD = "String Download"
         private const val WINTER_KEYWORD = "winter!"
+
+        // TODO: Sus player Sus player = 12 ユキトキ
+        private const val SUS_PLAYER_KEYWORD = "Sus player ="
     }
 
     private val roundLog = mutableListOf<GuessRoundType>()
@@ -259,7 +263,7 @@ class LogWatcher(logFile: File) {
                         RoundFlag.SolsticeFinish
                     )) -> {
                         roundFlags.removeSafe(RoundFlag.NotSure)
-                        classification = GuessRoundType.Classic
+                        classification = GuessRoundType.Special
                     }
 
                     else -> {
