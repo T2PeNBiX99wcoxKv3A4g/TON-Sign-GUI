@@ -6,7 +6,7 @@ import io.github.t2penbix99wcoxkv3a4g.tonsign.roundType.RoundFlags
 import io.github.t2penbix99wcoxkv3a4g.tonsign.roundType.RoundType
 
 class Terror(val id: Int, val terrorId: Int, val roundType: RoundType, val roundFlags: RoundFlags) {
-    // TODO: Json or Yaml
+    // TODO: Json or Yaml and network download
     companion object {
         const val UNKNOWN = 999
         const val HIDE = 500
