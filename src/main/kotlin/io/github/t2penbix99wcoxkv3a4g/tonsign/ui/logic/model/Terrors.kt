@@ -59,7 +59,7 @@ class Terrors {
 
         // TODO: 8 pages terror ids
         private val eightPages = mapOf(
-            arrayListOf(6,2) to "tbh",
+            arrayListOf(6, 2) to "tbh",
             arrayListOf(34, 11) to "slendy",
             arrayListOf(44, 8) to "dog_mimic",
             arrayListOf(10, 8) to "mx",
@@ -67,7 +67,10 @@ class Terrors {
             arrayListOf(16, 13) to "demented_spongebob",
             arrayListOf(50, 5) to "searchlights",
             arrayListOf(29, 15) to "this_killer_does_not_exist",
-            arrayListOf(46, 17) to "baldi"
+            arrayListOf(46, 17) to "baldi",
+            arrayListOf(17, 0) to "her",
+            arrayListOf(25, 1) to "akumii-kari",
+            arrayListOf(49, 17) to "sm64_z64"
         )
 
         private val unBounds = listOf(
