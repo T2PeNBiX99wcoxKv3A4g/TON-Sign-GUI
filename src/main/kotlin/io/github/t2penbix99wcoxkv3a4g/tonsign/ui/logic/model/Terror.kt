@@ -214,7 +214,7 @@ class Terror(val id: Int, val terrorId: Int, val roundType: RoundType, val round
         private val winterVariantAlternates = mapOf(
             29 to "neo_pilot"
         )
-        
+
         private val midnightVariantNormals = mapOf(
             32 to "search_and_destroy",
             53 to "scrapyard_machine",
@@ -222,7 +222,7 @@ class Terror(val id: Int, val terrorId: Int, val roundType: RoundType, val round
         )
 
         private val midnightVariantAlternates = mapOf(
-            6 to "knight_of_toren",
+            6 to "kimera",
             19 to "monarch", // TODO: Only one
             28 to "inverted_roblander"
         )

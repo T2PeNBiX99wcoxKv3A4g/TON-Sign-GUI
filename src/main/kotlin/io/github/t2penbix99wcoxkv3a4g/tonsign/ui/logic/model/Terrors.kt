@@ -65,12 +65,16 @@ class Terrors {
             arrayListOf(10, 8) to "mx",
             arrayListOf(26, 4) to "miros_birds",
             arrayListOf(16, 13) to "demented_spongebob",
+            arrayListOf(16, 16) to "demented_spongebob",
             arrayListOf(50, 5) to "searchlights",
             arrayListOf(29, 15) to "this_killer_does_not_exist",
             arrayListOf(46, 17) to "baldi",
+            arrayListOf(46, 13) to "baldi",
             arrayListOf(17, 0) to "her",
             arrayListOf(25, 1) to "akumii-kari",
-            arrayListOf(49, 17) to "sm64_z64"
+            arrayListOf(49, 17) to "sm64_z64",
+            arrayListOf(19, 0) to "sawrunner",
+            arrayListOf(3, 2) to "sturm"
         )
 
         private val unBounds = listOf(
