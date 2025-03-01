@@ -166,21 +166,33 @@ class LogWatcher(logFile: File) {
         when (randomRound) {
             RandomRoundType.NORMAL -> {
                 when {
+                    // -1? S C C?<-
                     last[0] == GuessRoundType.Special && last[1] == GuessRoundType.Classic -> roundFlags.addSafe(
                         RoundFlag.NotSure
                     )
 
+                    // -1? S S C<-
                     last[0] == GuessRoundType.Special && lastPrediction == GuessRoundType.Classic && !RoundTypeConvert.isCorrectGuess(
                         lastPrediction,
                         round
                     ) -> roundFlags.removeSafe(RoundFlag.NotSure)
 
+                    // -1? C C S<-
                     last[0] == GuessRoundType.Classic && lastPrediction == GuessRoundType.Special && !RoundTypeConvert.isCorrectGuess(
                         lastPrediction,
                         round
                     ) -> roundFlags.removeSafe(RoundFlag.NotSure)
 
+                    // -1? ? S C<-
                     last[1] == GuessRoundType.Special && RoundTypeConvert.isCorrectGuess(
+                        lastPrediction,
+                        round
+                    ) -> roundFlags.removeSafe(RoundFlag.NotSure)
+
+                    // -1? C C? S<-
+                    last[0] == GuessRoundType.Classic && last[1] == GuessRoundType.Classic && roundFlags.contains(
+                        RoundFlag.NotSure
+                    ) && RoundTypeConvert.isCorrectGuess(
                         lastPrediction,
                         round
                     ) -> roundFlags.removeSafe(RoundFlag.NotSure)
@@ -189,10 +201,12 @@ class LogWatcher(logFile: File) {
 
             RandomRoundType.FAST -> {
                 when {
+                    // -1? S C S?
                     last[0] == GuessRoundType.Special && last[1] == GuessRoundType.Classic -> roundFlags.addSafe(
                         RoundFlag.NotSure
                     )
 
+                    // -1? C S C
                     last[0] == GuessRoundType.Classic && last[1] == GuessRoundType.Special -> roundFlags.removeSafe(
                         RoundFlag.NotSure
                     )
@@ -288,7 +302,7 @@ class LogWatcher(logFile: File) {
                                     if (isAlternatePattern()) GuessRoundType.Special else GuessRoundType.Classic
                             }
                         } else
-                            classification = GuessRoundType.Classic
+                            classification = GuessRoundType.Special
                         roundFlags.addSafe(RoundFlag.NotSure)
                     }
                 }
