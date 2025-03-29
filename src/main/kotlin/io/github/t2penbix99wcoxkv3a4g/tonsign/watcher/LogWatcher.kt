@@ -312,6 +312,9 @@ class LogWatcher(logFile: File) {
 
             else -> {}
         }
+        
+        if (classification == GuessRoundType.NIL)
+            throw WrongRecentRoundException("exception.wrong_recent_round".l10n(classification))
 
         roundLog.add(classification)
     }
