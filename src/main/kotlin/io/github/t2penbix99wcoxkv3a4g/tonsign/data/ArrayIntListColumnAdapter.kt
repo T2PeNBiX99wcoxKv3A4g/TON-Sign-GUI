@@ -1,7 +1,6 @@
 package io.github.t2penbix99wcoxkv3a4g.tonsign.data
 
 import app.cash.sqldelight.ColumnAdapter
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
 object ArrayIntListColumnAdapter : ColumnAdapter<ArrayList<Int>, String> {

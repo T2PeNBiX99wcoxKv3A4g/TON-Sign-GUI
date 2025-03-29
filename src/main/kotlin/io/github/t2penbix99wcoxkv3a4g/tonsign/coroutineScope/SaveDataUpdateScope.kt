@@ -7,7 +7,7 @@ import kotlinx.coroutines.asCoroutineDispatcher
 import java.util.concurrent.Executors
 import kotlin.coroutines.CoroutineContext
 
-object SaveDataUpdateScope : CoroutineScope {
+internal object SaveDataUpdateScope : CoroutineScope {
     override val coroutineContext: CoroutineContext
         get() = Job() + Executors.newSingleThreadExecutor().asCoroutineDispatcher() + CoroutineName("SaveDataUpdate")
 }
