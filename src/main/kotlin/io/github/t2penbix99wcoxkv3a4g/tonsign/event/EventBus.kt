@@ -26,6 +26,7 @@ object EventBus {
     private val classFunctions = ConcurrentHashMap<Any, List<KFunction<*>>>()
     private val functions = CopyOnWriteArrayList<KFunction<*>>()
     private val _events = MutableSharedFlow<Event>()
+    private const val CLASS_NAME_LAST_PATH = "Event"
     val events = _events.asSharedFlow()
 
     init {
@@ -45,7 +46,7 @@ object EventBus {
     }
 
     private fun <T : Event> call(event: T) {
-        val name = event::class.simpleName!!.firstPath("Event")
+        val name = event::class.simpleName!!.firstPath(CLASS_NAME_LAST_PATH)
 
         classFunctions.forEach {
             val eventScope = EventCollectScope(it.key::class.simpleName!!)
