@@ -85,7 +85,7 @@ class LogWatcher(logFile: File) {
         private const val STRING_DOWNLOAD_KEYWORD = "String Download"
         private const val WINTER_KEYWORD = "winter!"
 
-        // TODO: Sus player Sus player = 12 ユキトキ
+        // TODO: Sus player Sus player = 12 playerName
         private const val SUS_PLAYER_KEYWORD = "Sus player ="
     }
 
@@ -313,7 +313,7 @@ class LogWatcher(logFile: File) {
             else -> {}
         }
         
-        if (classification == GuessRoundType.NIL)
+        if (classification != GuessRoundType.Special && classification != GuessRoundType.Classic)
             throw WrongRecentRoundException("exception.wrong_recent_round".l10n(classification))
 
         roundLog.add(classification)
