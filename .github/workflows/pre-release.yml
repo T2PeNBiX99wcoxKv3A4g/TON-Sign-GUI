@@ -130,7 +130,7 @@ jobs:
       - name: Create Release
         uses: ncipollo/release-action@v1
         with:
-          artifacts: "Artifacts/*,Artifacts-Asset/*"
+          artifacts: "Artifacts/app/TON-Sign/*,Artifacts/msi/*,Artifacts-Asset/*"
           token: ${{ secrets.GITHUB_TOKEN }}
           tag: ${{ needs.build.outputs.new_tag }}
           name: Pre Release ${{ needs.build.outputs.new_tag }}
