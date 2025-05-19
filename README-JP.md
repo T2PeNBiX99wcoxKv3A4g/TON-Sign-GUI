@@ -22,9 +22,9 @@
 
 ## セットアップ手順
 
-1. [Modular Avatar](https://modular-avatar.nadena.dev/)または[VRCFury](https://vrcfury.com)をダウンロードしています
+1. [Modular Avatar](https://modular-avatar.nadena.dev/)または[VRCFury](https://vrcfury.com)をダウンロードしてください。
 2. `TON Constraint MA JP`または`TON Constraint VRCFury`プリファブをアバタのルートにドラッグとしてください。
-    - これは、`Body`や`Armature`などのオブジェクトと同じ階層レベルでなければならない。
+    - これは、`Body`や`Armature`などのオブジェクトと同じ階層レベルです。
 3. 絶対に必要はないけどもし右手で看板を持ってたいならば`Hand`トランスフォームをアバターの右手トランスフォームに変更してください。
 
 ### 使用上の注意
@@ -41,8 +41,8 @@
 
 ### アプリの実行
 
-1. `TON-Sign-version.exe`を起動してください  
-   もしシステムにインストールするしたいの場合は`TON-Sign-version.msi`を起動してください
+1. `TON-Sign-(version).exe`を起動してください  
+   もしシステムにインストールするしたいの場合は`TON-Sign-(version).msi`を起動してください
 2. TONのインスタンスにジョインして、ソフトが自動的に処理するはずです
 
 ---

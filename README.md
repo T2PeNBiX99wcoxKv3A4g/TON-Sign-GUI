@@ -44,7 +44,7 @@ round type besides the start button, meaning you should never miss another Alter
 
 ### Running the App
 
-1. Launch `TON-Sign-version.exe` or `TON-Sign-version.msi` if you want to install to your system!
+1. Launch `TON-Sign-(version).exe` or `TON-Sign-(version).msi` if you want to install to your system!
 2. Start some rounds in Terrors of Nowhere.
     - The app will handle the rest!
 
