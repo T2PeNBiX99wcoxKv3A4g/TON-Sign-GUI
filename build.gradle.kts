@@ -1,8 +1,13 @@
-
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import java.io.FileOutputStream
 import java.security.MessageDigest
 import java.util.*
+
+buildscript {
+    dependencies {
+        classpath("com.guardsquare:proguard-gradle:${property("proguard.version")}")
+    }
+}
 
 plugins {
     kotlin("jvm")
@@ -48,25 +53,25 @@ dependencies {
     implementation("org.jetbrains.androidx.navigation:navigation-compose:${property("navigation-compose.version")}")
     implementation(kotlin("reflect"))
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:${property("kotlinx-coroutines.version")}")
-    
+
     implementation("com.illposed.osc:javaosc-core:${property("javaosc.version")}")
     // No type handler registered for serializing class java.lang.String
 //    implementation("com.illposed.osc:javaosc-java-se-addons:${property("javaosc.version")}")
-    
+
     implementation("com.charleskorn.kaml:kaml:${property("kaml.version")}")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:${property("kotlinx-serialization-json.version")}")
-    
+
     implementation("org.slf4j:slf4j-api:${property("slf4j.version")}")
     implementation("ch.qos.logback:logback-core:${property("logback.version")}")
     implementation("ch.qos.logback:logback-classic:${property("logback.version")}")
     implementation("io.github.oshai:kotlin-logging-jvm:${property("kotlin-logging.version")}")
-    
+
     implementation("org.codehaus.janino:janino:${property("janino.version")}")
     implementation("org.fusesource.jansi:jansi:${property("jansi.version")}")
 //    implementation("javassist:javassist:${property("javassist.version")}")
-    
+
 //    implementation("io.github.kdroidfilter:composenativetray:${property("composenativetray.version")}")
-    
+
     implementation("com.github.vrchatapi:vrchatapi-java:${property("vrchatapi.version")}")
     // define a BOM and its version
     implementation(platform("com.squareup.okhttp3:okhttp-bom:${property("okhttp.version")}"))
@@ -152,6 +157,11 @@ sqldelight {
     }
 }
 
+val obfuscate by tasks.registering(proguard.gradle.ProGuardTask::class)
+
+fun mapObfuscatedJarFile(file: File) =
+    File("${getLayout().buildDirectory}/tmp/obfuscated/${file.nameWithoutExtension}.min.jar")
+
 compose.desktop {
     application {
         mainClass = "io.github.t2penbix99wcoxkv3a4g.tonsign.MainKt"
@@ -164,9 +174,37 @@ compose.desktop {
             packageVersion = "1.0.0"
         }
 
+//        disableDefaultConfiguration()
+//        fromFiles(obfuscate.get().outputs.files.asFileTree)
+//        mainJar.set(tasks.jar.map { RegularFile { mapObfuscatedJarFile(it.archiveFile.get().asFile) } })
+
         buildTypes.release.proguard {
+            // Disable this shit, maybe will be slower, but I don't care.
+            // The rule set just fucking kill me, maybe sometime fix this problem for now I don't want to do anything.
+            isEnabled.set(false)
+            obfuscate.set(false)
             version.set(property("proguard.version") as String)
             configurationFiles.from("proguard.pro")
         }
     }
+}
+
+// https://gist.github.com/mcpiroman/cf511c5f9312a59e8f821706738eeab3
+
+obfuscate.configure {
+    dependsOn(tasks.jar.get())
+
+    val allJars =
+        tasks.jar.get().outputs.files + sourceSets.main.get().runtimeClasspath.filter { it.path.endsWith(".jar") }
+            .filterNot { it.name.startsWith("skiko-awt-") && !it.name.startsWith("skiko-awt-runtime-") } // walkaround https://github.com/JetBrains/compose-jb/issues/1971
+
+    for (file in allJars) {
+        injars(file)
+        outjars(mapObfuscatedJarFile(file))
+    }
+    injars(sourceSets.main.get().compileClasspath)
+
+    libraryjars("${compose.desktop.application.javaHome}/jmods")
+
+    configuration("proguard.pro")
 }
