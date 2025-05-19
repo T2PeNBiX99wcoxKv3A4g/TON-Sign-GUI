@@ -6,7 +6,7 @@
 
 ## 元ネタは[\~Emerald~](https://github.com/Emmyvee/TON-Sign)さんです
 
-**TON Sign GUI**は[**TON Sign**](https://github.com/Emmyvee/TON-Sign)の最初から作ってたのGUIバージョンです  
+**TON Sign GUI**は[**TON Sign**](https://github.com/Emmyvee/TON-Sign)を参照して最初から作ってたのGUIバージョンです  
 このソフトはOSCを使って次のラウンドを表示するので次のラウンドをミスしたのことは絶対ない！
 
 <div style="display: flex; justify-content: space-around;">
