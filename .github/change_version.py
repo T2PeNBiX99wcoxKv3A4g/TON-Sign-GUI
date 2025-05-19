@@ -4,7 +4,7 @@ import argparse
 
 propertieName = 'ton-sign.version'
 
-if __name__ == "main":
+if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('version', help="New version", type=str)
     args = parser.parse_args()
