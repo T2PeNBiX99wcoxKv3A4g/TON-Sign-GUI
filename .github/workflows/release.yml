@@ -7,7 +7,7 @@ on:
 
 jobs:
   build:
-    name: Ubuntu Latest Build
+    name: Windows Latest Build
     permissions:
       contents: write
     strategy:
@@ -15,7 +15,7 @@ jobs:
         java: [
           23,
         ]
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     outputs:
       new_tag: ${{ steps.tag_version.outputs.new_tag }}
       changelog: ${{ steps.tag_version.outputs.changelog }}
@@ -89,7 +89,7 @@ jobs:
       - name: Rename file
         run: |
           cd build/compose/binaries/main-release/msi/
-          mv TON-Sign-*.msi TON-Sign-${{ steps.tag_version.outputs.new_tag }}.msi
+          Move-Item -Path TON-Sign-*.msi -Destination TON-Sign-${{ steps.tag_version.outputs.new_tag }}.msi
 
       - name: capture build artifacts
         uses: actions/upload-artifact@v4
