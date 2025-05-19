@@ -171,7 +171,7 @@ compose.desktop {
             modules("java.naming")
             modules("java.sql")
             packageName = "TON-Sign"
-            packageVersion = "1.0.0"
+            packageVersion = "1.0.0" // version can't be low then 1, which is stupid
         }
 
 //        disableDefaultConfiguration()

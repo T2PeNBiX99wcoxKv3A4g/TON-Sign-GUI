@@ -1,0 +1,136 @@
+name: Release
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build:
+    name: Ubuntu Latest Build
+    permissions:
+      contents: write
+    strategy:
+      matrix:
+        java: [
+          23,
+        ]
+    runs-on: ubuntu-latest
+    outputs:
+      new_tag: ${{ steps.tag_version.outputs.new_tag }}
+      changelog: ${{ steps.tag_version.outputs.changelog }}
+    steps:
+      - name: checkout repository
+        uses: actions/checkout@v4
+
+      - name: validate gradle wrapper
+        uses: gradle/wrapper-validation-action@v2
+
+      - name: setup jdk ${{ matrix.java }}
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ matrix.java }}
+          distribution: 'oracle'
+
+      - name: Bump version and push tag
+        id: tag_version
+        uses: mathieudutour/github-tag-action@v6.2
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          pre_release_branches: "fast"
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12.6'
+          cache: 'pip'
+
+      - name: Install Dependencies
+        run: pip install -r requirements.txt
+
+      - name: Change version in `gradle.properties`
+        run: python .github/change_version.py ${{ steps.tag_version.outputs.new_tag }}
+
+      - name: Set git user
+        uses: fregante/setup-git-user@v2
+
+      - name: Check for changes
+        run: git status
+
+      - name: Stage changed files
+        run: git add .
+
+      - name: Commit changed files
+        run: "git commit -m 'Action: Update version in `gradle.properties`'"
+
+      - name: Fetch from master
+        run: git fetch origin master
+
+      - name: Push code to master
+        run: git push origin master
+
+      - name: make gradle wrapper executable
+        run: chmod +x ./gradlew
+
+      - name: build
+        run: ./gradlew createReleaseDistributable
+
+      - name: Package Release Msi
+        run: ./gradlew packageReleaseMsi
+
+      - name: Create Archive
+        uses: thedoctor0/zip-release@0.7.6
+        with:
+          type: 'zip'
+          filename: 'TON-Sign-${{ steps.tag_version.outputs.new_tag }}.zip'
+          exclusions: '*.git* /*node_modules/* .editorconfig'
+          directory: build/compose/binaries/main-release/app/TON-Sign
+
+      - name: Rename file
+        run: |
+          cd build/compose/binaries/main-release/msi/
+          mv TON-Sign-*.msi TON-Sign-${{ steps.tag_version.outputs.new_tag }}.msi
+
+      - name: capture build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: Artifacts
+          path: |
+            build/compose/binaries/main-release/app/TON-Sign/TON-Sign-${{ steps.tag_version.outputs.new_tag }}.zip
+            build/compose/binaries/main-release/msi/
+  
+  asset-download:
+    name: Asset Download
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout repository
+        uses: actions/checkout@v4
+
+      - name: download asset form other github repository
+        run: |
+          wget https://github.com/T2PeNBiX99wcoxKv3A4g/TON-Sign-GUI-Unity-Asset/raw/refs/heads/main/TonSignGUIAsset.unitypackage
+
+      - name: capture build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: Artifacts-Asset
+          path: TonSignGUIAsset.unitypackage
+  
+  upload:
+    name: Create Release
+    permissions:
+      contents: write
+    needs: [ build, asset-download ]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download Build Artifacts
+        uses: actions/download-artifact@v4
+
+      - name: Create Release
+        uses: ncipollo/release-action@v1
+        with:
+          artifacts: "Artifacts/*,Artifacts-Asset/*"
+          token: ${{ secrets.GITHUB_TOKEN }}
+          tag: ${{ needs.build.outputs.new_tag }}
+          name: Release ${{ needs.build.outputs.new_tag }}
+          body: ${{ needs.build.outputs.changelog }}
