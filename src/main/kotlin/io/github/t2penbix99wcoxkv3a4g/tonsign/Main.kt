@@ -1,8 +1,6 @@
 package io.github.t2penbix99wcoxkv3a4g.tonsign
 
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
@@ -62,7 +60,7 @@ fun main() = application {
         Tray(
             iconContent = {
                 Icon(
-                    Icons.Default.Favorite,
+                    TrayIcon,
                     contentDescription = "",
                     tint = Color.Unspecified,
                     modifier = Modifier.fillMaxSize()
