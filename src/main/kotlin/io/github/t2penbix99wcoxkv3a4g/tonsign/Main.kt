@@ -1,18 +1,27 @@
 package io.github.t2penbix99wcoxkv3a4g.tonsign
 
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.*
+import androidx.compose.ui.window.TrayState
+import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.WindowPosition.Aligned
+import androidx.compose.ui.window.application
+import androidx.compose.ui.window.rememberWindowState
+import com.kdroid.composetray.tray.api.Tray
 import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.ConfigManager
-import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.l10nByLang
+import io.github.t2penbix99wcoxkv3a4g.tonsign.manager.l10n
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.app
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.showConfirmExitWindow
 import io.github.t2penbix99wcoxkv3a4g.tonsign.ui.showErrorWindows
@@ -51,33 +60,40 @@ fun main() = application {
 
     if (isOpen) {
         Tray(
-            state = trayState,
-            icon = TrayIcon,
+            iconContent = {
+                Icon(
+                    Icons.Default.Favorite,
+                    contentDescription = "",
+                    tint = Color.Unspecified,
+                    modifier = Modifier.fillMaxSize()
+                )
+            },
             tooltip = Utils.TITLE,
-            onAction = {
+            primaryAction = {
                 if (!isVisible)
                     isVisible = true
             },
-            menu = {
-                SelectionState.entries.forEach {
-                    val gui = it.gui
-                    if (!gui.enabled) return@forEach
-                    if (gui.trays.isNotEmpty()) {
-                        Menu(gui.title.l10nByLang("en")) {
-                            gui.trays.forEach { item ->
-                                Item(item.label.l10nByLang("en"), enabled = item.isEnabled) {
-                                    item.onClick(gui)
-                                }
+            primaryActionLinuxLabel = "Open"
+        ) {
+            SelectionState.entries.forEach {
+                val gui = it.gui
+                if (!gui.enabled) return@forEach
+                if (gui.trays.isNotEmpty()) {
+                    SubMenu(gui.title.l10n()) {
+                        gui.trays.forEach { item ->
+                            Item(item.label.l10n(), isEnabled = item.isEnabled) {
+                                item.onClick(gui)
                             }
                         }
                     }
                 }
-                Separator()
-                Item("gui.tray.exit".l10nByLang("en")) {
-                    isAskingToClose = true
-                }
             }
-        )
+            Divider()
+            Item("中文測試") {}
+            Item("gui.tray.exit".l10n()) {
+                isAskingToClose = true
+            }
+        }
 
         if (!needRefresh) {
             Window(
@@ -94,7 +110,7 @@ fun main() = application {
 
                 if (needRestart)
                     showNeedRestartWindows()
-                
+
                 if (logicHasError)
                     showErrorWindows()
             }
