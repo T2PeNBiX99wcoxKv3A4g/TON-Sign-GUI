@@ -87,7 +87,6 @@ fun main() = application {
                 }
             }
             Divider()
-            Item("中文測試") {}
             Item("gui.tray.exit".l10n()) {
                 isAskingToClose = true
             }
