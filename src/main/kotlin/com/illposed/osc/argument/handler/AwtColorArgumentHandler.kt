@@ -14,7 +14,6 @@ import com.illposed.osc.argument.ArgumentHandler
 import com.illposed.osc.argument.OSCColor
 import java.awt.Color
 import java.nio.ByteBuffer
-import kotlin.jvm.Throws
 
 /**
  * Parses and serializes an OSC 1.1 optional <i>32bit RGBA color</i> type.
@@ -32,7 +31,8 @@ import kotlin.jvm.Throws
  * in javaosc-core.
  */
 
-open class AwtColorArgumentHandler : ArgumentHandler<Color>, Cloneable {
+@Suppress("unused")
+open class AwtColorArgumentHandler protected constructor() : ArgumentHandler<Color>, Cloneable {
     companion object {
         @Suppress("unused")
         @JvmField
@@ -59,12 +59,6 @@ open class AwtColorArgumentHandler : ArgumentHandler<Color>, Cloneable {
         }
     }
 
-    // Public API
-    /** Allow overriding, but somewhat enforce the ugly singleton. */
-    protected constructor() {
-        // declared only for setting the access level
-    }
-
     override fun getDefaultIdentifier(): Char {
         return 'r'
     }
@@ -83,6 +77,7 @@ open class AwtColorArgumentHandler : ArgumentHandler<Color>, Cloneable {
 
     @Throws(CloneNotSupportedException::class)
     override fun clone(): ArgumentHandler<Color> {
+        @Suppress("RemoveExplicitSuperQualifier")
         return super<Cloneable>.clone() as AwtColorArgumentHandler
     }
 

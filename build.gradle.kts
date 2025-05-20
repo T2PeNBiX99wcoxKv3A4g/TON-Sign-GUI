@@ -70,13 +70,13 @@ dependencies {
     implementation("org.fusesource.jansi:jansi:${property("jansi.version")}")
 //    implementation("javassist:javassist:${property("javassist.version")}")
 
-//    implementation("io.github.kdroidfilter:composenativetray:${property("composenativetray.version")}")
+    implementation("io.github.kdroidfilter:composenativetray:${property("composenativetray.version")}")
 
     implementation("com.github.vrchatapi:vrchatapi-java:${property("vrchatapi.version")}")
     // define a BOM and its version
     implementation(platform("com.squareup.okhttp3:okhttp-bom:${property("okhttp.version")}"))
 
-    // define any required OkHttp artifacts without version
+    // define any required OkHttp artifacts without a version
     implementation("com.squareup.okhttp3:okhttp")
     implementation("com.squareup.okhttp3:logging-interceptor")
 
