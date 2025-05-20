@@ -4,6 +4,7 @@ import typer
 
 propertieName = 'ton-sign.version'
 
+
 def main(new_version: str):
     typer.echo(f"New version: {new_version}")
 
@@ -30,6 +31,7 @@ def main(new_version: str):
         file.truncate(0)
         file.write(new_text)
         file.close()
+
 
 if __name__ == "__main__":
     typer.run(main)
