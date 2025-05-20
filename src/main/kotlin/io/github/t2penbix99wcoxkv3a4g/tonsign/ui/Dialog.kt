@@ -36,13 +36,15 @@ fun openDialogWindow(
     yesText: String,
     noText: String,
     yesDo: () -> Unit,
-    noDo: () -> Unit
+    noDo: () -> Unit,
+    alwaysOnTop: Boolean = false
 ) {
     val state = rememberDialogState(position = Aligned(alignment = Alignment.Center), size = dialogSize)
     DialogWindow(
         onCloseRequest = { noDo() },
         title = title,
-        state = state
+        state = state,
+        alwaysOnTop = alwaysOnTop
     ) {
         CupcakeEXTheme {
             Column(
@@ -77,7 +79,7 @@ fun openDialogWindow(
 }
 
 @Composable
-fun openDialogWindow(title: String, msg: String, yesDo: () -> Unit, noDo: () -> Unit) {
+fun openDialogWindow(title: String, msg: String, yesDo: () -> Unit, noDo: () -> Unit, alwaysOnTop: Boolean = false) {
     val yes by "gui.button.dialog.yes".l10nState()
     val no by "gui.button.dialog.no".l10nState()
 
@@ -87,7 +89,8 @@ fun openDialogWindow(title: String, msg: String, yesDo: () -> Unit, noDo: () -> 
         yes,
         no,
         yesDo,
-        noDo
+        noDo,
+        alwaysOnTop
     )
 }
 
@@ -107,7 +110,8 @@ fun showConfirmExitWindow() {
         },
         noDo = {
             isAskingToClose = false
-        }
+        },
+        alwaysOnTop = true
     )
 }
 
@@ -127,7 +131,8 @@ fun showNeedRestartWindows() {
         },
         noDo = {
             needRestart = false
-        }
+        },
+        alwaysOnTop = true
     )
 }
 
