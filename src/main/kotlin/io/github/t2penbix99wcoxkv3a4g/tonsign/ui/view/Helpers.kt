@@ -36,7 +36,8 @@ enum class SelectionState(val gui: TabBodyBase) {
     Logs(TabBodyLogs()),
     VRChatLogs(TabBodyVRChatLogs()),
     Setting(TabBodySetting()),
-    Login(TabBodyLogin())
+    Login(TabBodyLogin()),
+    WebViewTest(TabBodyWebViewTest())
 }
 
 enum class SortingState {
