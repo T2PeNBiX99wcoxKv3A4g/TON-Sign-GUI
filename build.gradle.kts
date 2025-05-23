@@ -37,6 +37,7 @@ repositories {
     mavenCentral()
     maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
     maven("https://jitpack.io")
+    maven("https://jogamp.org/deployment/maven")
     google()
 }
 
@@ -82,6 +83,9 @@ dependencies {
 
     implementation("app.cash.sqldelight:sqlite-driver:${property("sqldelight.version")}")
     implementation("app.cash.sqldelight:primitive-adapters:${property("sqldelight.version")}")
+    
+    implementation("io.github.kevinnzou:compose-webview-multiplatform:${property("compose-webview-multiplatform.version")}")
+    implementation("me.friwi:jcefmaven:${property("jcef.version")}")
 }
 
 sourceSets {
