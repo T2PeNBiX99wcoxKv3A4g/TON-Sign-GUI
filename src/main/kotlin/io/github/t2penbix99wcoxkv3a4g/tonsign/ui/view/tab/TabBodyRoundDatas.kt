@@ -99,7 +99,7 @@ class TabBodyRoundDatas : TabBodyBase() {
     private fun onRoundWon(event: OnRoundWonEvent) = refresh()
 
     @Subscribe(Events.OnKillerSet)
-    private fun onKillterSet(event: OnKillerSetEvent) = refresh()
+    private fun onKillerSet(event: OnKillerSetEvent) = refresh()
 
     @Subscribe(Events.OnHideTerrorShowUp)
     private fun onHideTerrorShowUp(event: OnHideTerrorShowUpEvent) = refresh()

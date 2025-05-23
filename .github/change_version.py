@@ -1,23 +1,19 @@
 # coding: utf-8
 
-import argparse
+import typer
 
 propertieName = 'ton-sign.version'
 
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument('version', help="New version", type=str)
-    args = parser.parse_args()
+
+def main(new_version: str):
+    typer.echo(f"New version: {new_version}")
 
     with open('./gradle.properties', 'r+') as file:
         old_text = ""
-        new_text = ""
-        new_version: str = args.version
         new_version = new_version.replace('"', '')
         new_version = new_version[1:]
         old_version: str = ""
 
-        # Bad
         for line in file.readlines():
             start = line.find(propertieName)
 
@@ -26,7 +22,7 @@ if __name__ == "__main__":
                 continue
 
             old_version = line[start + (len(propertieName) + 1):-1]
-            print(f'Old version: {old_version}, New version: {new_version}')
+            typer.echo(f'Old version: {old_version}, New version: {new_version}')
             old_text += line
 
         new_text = old_text.replace(old_version, new_version)
@@ -35,3 +31,7 @@ if __name__ == "__main__":
         file.truncate(0)
         file.write(new_text)
         file.close()
+
+
+if __name__ == "__main__":
+    typer.run(main)
