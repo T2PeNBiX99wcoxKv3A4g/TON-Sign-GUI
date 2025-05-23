@@ -52,4 +52,6 @@ round type besides the start button, meaning you should never miss another Alter
 
 ### Credits
 
-[\~Emerald\~](https://github.com/Emmyvee/TON-Sign) - First creator
+- [\~Emerald\~](https://github.com/Emmyvee/TON-Sign) - First creator
+- [hoijui](https://github.com/hoijui/JavaOSC) - JavaOSC
+- [olk90](https://github.com/olk90/compose-tableView) - Table View
