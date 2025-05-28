@@ -55,3 +55,4 @@ bin/
 /secrets
 /*.db
 /jcef-bundle/
+/.scrips/
