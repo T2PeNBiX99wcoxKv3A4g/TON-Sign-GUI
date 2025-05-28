@@ -45,12 +45,15 @@ jobs:
         with:
           python-version: '3.12.6'
           cache: 'pip'
+          
+      - name: Clone Python script
+        run: git clone https://github.com/T2PeNBiX99wcoxKv3A4g/Gradle-Workflow-Scripts.git .scrips
 
       - name: Install Dependencies
-        run: pip install -r requirements.txt
+        run: pip install -r .scrips/requirements.txt
 
       - name: Change version in `gradle.properties`
-        run: python .github/change_version.py ${{ steps.tag_version.outputs.new_tag }}
+        run: python .scrips/change_version.py ${{ steps.tag_version.outputs.new_tag }}
 
       - name: Set git user
         uses: fregante/setup-git-user@v2
